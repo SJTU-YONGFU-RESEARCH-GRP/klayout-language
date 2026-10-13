@@ -16,7 +16,7 @@ KLayout DRC / LVS / PEX language notes and runnable demos.
 |------|----------------|
 | [`drc/`](drc/) | M1 / Contact **width, space, enclosure** — GOOD pass / BAD fail (KLayout + Calibre) |
 | [`lvs/`](lvs/) | Single **NMOS** transistor LVS — GOOD pass / BAD (S–D short) fail |
-| [`pex/`](pex/) | **R** + overlap **C** (KLayout) + sidewall **CC** ([kpex](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) 2.5D) — GOOD pass / BAD fail |
+| [`pex/`](pex/) | **R** + overlap **C** (KLayout **or** Calibre) + sidewall **CC** ([kpex](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) 2.5D) — GOOD pass / BAD fail |
 
 ![DRC test layout](screenshots/drc_m1_contact_layout.png)
 
@@ -35,8 +35,11 @@ cd drc && ./run_klayout_drc.sh && ./view_klayout_drc.sh
 # LVS
 cd lvs && ./run_lvs.sh && ./view_lvs.sh
 
-# PEX (built-in R + C)
+# PEX (KLayout R + C)
 cd pex && ./run_pex.sh && ./view_pex.sh
+
+# PEX (Calibre xRC R + DEVICE CAP C) — needs calibre.env like drc/
+./run_calibre_pex.sh
 
 # PEX coupling (kpex 2.5D, sky130A)
 ../scripts/install_kpex.sh    # once, Python >= 3.12

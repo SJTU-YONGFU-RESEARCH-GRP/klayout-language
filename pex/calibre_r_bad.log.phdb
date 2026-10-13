@@ -1,0 +1,425 @@
+//  Calibre v2019.2_26.18    Tue May 7 10:57:04 PDT 2019
+//  Calibre Utility Library   v0-10_13-2017-1    Sun Feb 24 23:17:33 PST 2019
+//  Litho Libraries v2019.2_26.18  Tue May 7 10:57:04 PDT 2019
+//
+//        Copyright Mentor Graphics Corporation 1996-2019
+//                       All Rights Reserved.
+//   THIS WORK CONTAINS TRADE SECRET AND PROPRIETARY INFORMATION
+//      WHICH IS THE PROPERTY OF MENTOR GRAPHICS CORPORATION
+//        OR ITS LICENSORS AND IS SUBJECT TO LICENSE TERMS.
+//
+//  The registered trademark Linux is used pursuant to a sublicense from LMI, the
+//  exclusive licensee of Linus Torvalds, owner of the mark on a world-wide basis.
+//
+//  Mentor Graphics software executing under x86-64 Linux
+//
+//  Running on Linux hurricane 5.14.0-611.26.1.el9_7.x86_64 #1 SMP PREEMPT_DYNAMIC Sat Jan 17 05:14:35 EST 2026 x86_64 glibc 2.34/NPTL 2.34
+//  OS: Red Hat Enterprise Linux release 9.7 (Plow)[5.14.0-611.26.1.el9_7.x86_64]
+//  nf_conntrack_max: 262144
+//
+//  Processor Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz [06632] (4th generation)
+//  64 bit virtual addressing enabled
+//  Running aoi_cal_2019.2_26.18/pkgs/icv/pvt/calibre -xrc -phdb -nowait /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/run.svrf
+//  Process ID: 3704448
+//
+//  Starting time: Tue Oct 13 17:33:03 2026
+//
+
+--- CALIBRE_* ENVIRONMENT VARIABLES:
+
+CALIBRE_ATOMIC_LVHEAP=0
+CALIBRE_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv/pvt/calibre  -xrc -phdb -nowait /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/run.svrf'
+CALIBRE_HOME=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18
+CALIBRE_INITIAL_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/bin/calibre -xrc -phdb -nowait /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/run.svrf'
+CALIBRE_READDB_LD_LIBRARY_PATH=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/shared/pkgs/icv/tools/calibre_client/lib/64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/calibre_base/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_lib/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel68_gcc44x_64/opt:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel61_gcc44x_64/opt:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs
+CALIBRE_SKIP_OS_CHECKS=
+CALIBRE_SSE3_SUPPORTED=1
+
+//  Command line arguments used:   -xrc -phdb -nowait /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/run.svrf
+//
+//  Running on 2 CPUs (pending licensing) 
+//
+
+//  Applying licensing policy...
+//  mgc_s license acquired (calibrexrc requested).
+
+//  Licensed Products
+//  -----------------
+//  Base products running on 2 cores:
+//  - xRC PHDB
+
+--- CALIBRE xRC::PHDB GENERATOR ---Tue Oct 13 17:33:04 2026
+//  Created Core System logfile = /data1/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/CalibreRRLog.hurricane.3704448.2026_1013_1733
+
+--- CALIBRE_* ENVIRONMENT VARIABLES:
+
+CALIBRE_ATOMIC_LVHEAP=0
+CALIBRE_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv/pvt/calibre  -xrc -phdb -nowait /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/run.svrf'
+CALIBRE_HOME=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18
+CALIBRE_INITIAL_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/bin/calibre -xrc -phdb -nowait /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/run.svrf'
+CALIBRE_READDB_LD_LIBRARY_PATH=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/shared/pkgs/icv/tools/calibre_client/lib/64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/calibre_base/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_lib/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel68_gcc44x_64/opt:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel61_gcc44x_64/opt:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs:/home/yongfu/local/lib/calibre-stubs
+CALIBRE_SKIP_OS_CHECKS=
+CALIBRE_SSE3_SUPPORTED=1
+
+--- CALIBRE::HIERARCHICAL CIRCUIT EXTRACTOR - Tue Oct 13 17:33:04 2026
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----                   CALIBRE LAYOUT DATA INPUT MODULE                   -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--- LAYOUT SYSTEM = GDS
+--- LAYOUT MAGNIFICATION = 1
+
+--------------------------------------------------------------------------------
+-----                     GDS FILE SUMMARY INFORMATION                     -----
+--------------------------------------------------------------------------------
+
+GDS FILENAME:        /home/yongfu/proj/klayout-language/pex/pex_demo.gds
+GDS VERSION:         600
+LIBRARY NAME:        LIB
+LAST MODIFIED:       ON 2026/10/13 AT 17:32:59
+LAST ACCESSED:       ON 2026/10/13 AT 17:32:59
+DATABASE PRECISION:  0.001 user units per database unit
+PHYSICAL PRECISION:  1e-09 meters per database unit
+MAGNIFICATION:       1
+
+--------------------------------------------------------------------------------
+-----                 GDS INPUT DATA FOR INDIVIDUAL CELLS                  -----
+--------------------------------------------------------------------------------
+     CELL NAME                  PLACEMENTS   ARRAYS   POLYGONS    PATHS    TEXTS
+--------------------------------------------------------------------------------
+C_BAD                                    0        0          2        0        6
+C_GOOD                                   0        0          2        0        6
+R_BAD                                    0        0          3        0        4
+R_GOOD                                   0        0          3        0        4
+C_DEMO                                   2        0          0        0        4
+R_DEMO                                   2        0          0        0        2
+PEX_DEMO                                 2        0          0        0        1
+
+NOTE: UNUSED geometric data is present on the following layer/datatype pairs:
+    LAYER = 32 DATATYPE = 0
+
+NOTE: USED geometric data is present on the following layer/datatype pairs:
+    SIMPLE LAYER = 31
+        LAYER = 31 DATATYPE = 0
+
+NOTE: The following required simple layers are EMPTY:
+
+--- LAYOUT DATABASE CONSTRUCTOR COMPLETED.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 3/4/67
+
+CONSTRUCTING HIERARCHICAL DATABASE
+    COPYING LAYOUT DATABASE
+    COPY COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/67
+    (P=0 A=0(0) AX=0(0) AY=0(0) D=0)
+    LITHO HEURISTICS OFF
+    MDP HEURISTICS OFF
+    CLONE STATE: LCTP(Y/N/U) = U LCRP(Y/N/U) = U LITHO(0/1/2) = 0 DFM(0/1/2) = 0
+    PROCESSING TEXT
+    ELIMINATING DUPLICATE TEXT
+    DUPLICATE TEXT ELIMINATION COMPLETE (4 -> 4 = 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    ELIMINATING EMPTY CELLS
+    EMPTY CELL ELIMINATION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    COMPUTING RECTANGULAR EXTENTS
+    RECTANGULAR EXTENTS COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    IDENTIFYING TOP LAYER CELLS
+    TOP LAYER CELL IDENTIFICATION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    IDENTIFYING VERY SMALL CELLS
+    VERY SMALL CELL IDENTIFICATION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    CHECKING ACUTE/SKEW/ANGLED/OFFGRID
+    ELIMINATING DUPLICATE PLACEMENTS
+    DUPLICATE PLACEMENT ELIMINATION COMPLETE (0 -> 0 = 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    FLATTENING VERY SMALL CELL PLACEMENTS
+    FLATTENING SELECTED TOP LAYER CELL PLACEMENTS
+    PACKING PLACEMENTS
+    PACKING COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    FLATTENING SELECTED LAYERS
+    EXPANDING UNIQUE ICV PLACEMENTS
+    COMPUTING RECTILINEAR EXTENTS
+    RECTILINEAR EXTENTS COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    SORTING PLACEMENTS VERTICALLY
+    SORT COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    ELIMINATING DUPLICATE PLACEMENTS
+    DUPLICATE PLACEMENT ELIMINATION COMPLETE (0 -> 0 = 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    EXPANDING UNIQUE TRANSPARENT CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    EXPANDING TRIVIAL CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    EXPANDING VERY SPARSE ARRAY PLACEMENTS
+    EXPANDING LARGE CELL ARRAY PLACEMENTS
+    EXPANDING VERY SPARSE CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    ELIMINATING DUPLICATE SUPER-HIERARCHICAL PLACEMENTS
+    DUPLICATE SUPER-HIERARCHICAL PLACEMENT ELIMINATION COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    PROCESSING LAYOUT BLOAT LAYERS (auto-detected)
+    PROCESSING COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    PROCESSING LARGE CELL EXTENT-BLOATING LAYERS
+    PROCESSING COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    EXPANDING DENSE OVERLAPS
+    EXPANDING UNIQUE META-CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    EXPANDING DENSE OVERLAPS
+    IDENTIFYING MULTI-CORE CELLS
+    INJECTING HIERARCHY
+      INJECTION PREP COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+      PRIORITY INJECTION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+      INJECTION POST COMPLETE (0 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    INJECTION COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    COMPUTING RECTANGULAR EXTENTS
+    RECTANGULAR EXTENTS COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    SORTING PLACEMENTS VERTICALLY
+    SORT COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    PUSHING VERY SMALL CELL PLACEMENTS
+    PUSHING TOP LAYER CELL PLACEMENTS
+    FLATTENING VERY SMALL CELL PLACEMENTS
+    FLATTENING SMALL TOP LAYER CELL PLACEMENTS
+    COMPUTING CELL-TO-WORLD TRANSFORMS
+    COMPUTE COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    SORTING PLACEMENTS BY CELL
+    SORT COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    PACKING HIERARCHY. (C=1 CN=1 P1=0 P2=0 XF=0) LVHEAP = 2/3/67
+    PACKING COMPLETE. (C=1 CN=1 P=0 XF=0) CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/3/67
+    COMPUTING PLACEMENT OVERLAPS
+    COMPUTE COMPLETE (OC=0 V1=0 V2=0 SC=0 FC=0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 4/5/67
+    COMPUTING CELL OVERLAP AREAS
+    COMPUTE COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/67
+    COMPUTING PLACEMENT / OVERLAP AREA INTERSECTIONS
+    COMPUTE COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/67
+HIERARCHICAL DATABASE CONSTRUCTOR COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/67
+(C=1 CN=1 P=0 G=2 GH=1 D=0 TXT=2 XF=0 PO=0)
+
+--------------------------------------------------------------------------------
+-----                           VPC REQUIREMENTS                           -----
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-----               TEXT OBJECTS FOR CONNECTIVITY EXTRACTION               -----
+--------------------------------------------------------------------------------
+
+A (0.1,0.18) 91 R_BAD                   B (16.5,0.18) 91 R_BAD
+
+--------------------------------------------------------------------------------
+-----                TEXT OBJECTS FOR WITH TEXT OPERATIONS                 -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----               TEXT OBJECTS FOR EXPAND TEXT OPERATIONS                -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----                  TEXT OBJECTS FOR CAPI OPERATIONS                    -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----                                PORTS                                 -----
+--------------------------------------------------------------------------------
+
+A (0.1,0.18) 91 R_BAD                   B (16.5,0.18) 91 R_BAD
+
+--------------------------------------------------------------------------------
+-----             LAYER READ SUMMARY (SIMPLE LAYER GEOMETRIES)             -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER      GEOMETRIES                                                    
+--------------------------------------------------------------------------------
+
+  31                     3
+
+--------------------------------------------------------------------------------
+-----            LAYER READ SUMMARY (ORIGINAL LAYER GEOMETRIES)            -----
+--------------------------------------------------------------------------------
+ORIGINAL LAYER       INITIAL GEOMETRIES                 FINAL GEOMETRIES        
+--------------------------------------------------------------------------------
+
+M1                         3 (3)                            3 (3)               
+
+--------------------------------------------------------------------------------
+-----         LAYER READ SUMMARY (TEXT FOR CONNECTIVITY EXTRACTION)        -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+  91                       2 (2)               
+
+--------------------------------------------------------------------------------
+-----          LAYER READ SUMMARY (TEXT FOR WITH TEXT OPERATIONS)          -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----         LAYER READ SUMMARY (TEXT FOR EXPAND TEXT OPERATIONS)         -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----            LAYER READ SUMMARY (TEXT FOR CAPI OPERATIONS)             -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----                      LAYER READ SUMMARY (PORTS)                      -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+  91                       2 (2)               
+
+--------------------------------------------------------------------------------
+-----                      CELL AND PLACEMENT SUMMARY                      -----
+--------------------------------------------------------------------------------
+CELL TYPE                 CELLS           PLACEMENTS       FLAT PLACEMENTS      
+--------------------------------------------------------------------------------
+
+USER                          1                    0                     0
+ VERY SMALL                   0                    0                     0
+ TOP LAYER                    0                    0                     0
+  VERY SMALL                  0                    0                     0
+PSEUDO                        0                    0                     0
+TOTAL                         1                    0                     0
+
+--------------------------------------------------------------------------------
+-----                   LAYOUT DATA INPUT MODULE SUMMARY                   -----
+--------------------------------------------------------------------------------
+
+--- TOTAL GEOMETRIES READ FROM SIMPLE LAYERS = 3
+--- TOTAL GEOMETRIES READ FROM ORIGINAL LAYERS = 3 (3)
+--- TOTAL GEOMETRIES WRITTEN TO ORIGINAL LAYERS = 3 (3)
+--- LVHEAP = 2/5/67
+--- DATABASE EXTENT = [ 0 , 0 ] -> [ 16.8 , 0.4 ]
+--- GEOMETRIC DEPTH = ALL
+--- TEXT DEPTH FOR CONNECTIVITY EXTRACTION = PRIMARY
+--- TOTAL TEXT OBJECTS FOR CONNECTIVITY EXTRACTION = 2 (2)
+--- TOTAL TEXT OBJECTS FOR WITH TEXT OPERATIONS = 0 (0)
+--- TOTAL TEXT OBJECTS FOR EXPAND TEXT OPERATIONS = 0 (0)
+--- TOTAL TEXT OBJECTS FOR CAPI OPERATIONS = 0 (0)
+--- TOTAL PORT OBJECTS = 2 (2)
+--- GEOMETRY FLAGGING = ACUTE (NO)  SKEW (NO)  ANGLED (NO)  OFFGRID (NO)
+                        NONSIMPLE POLYGON (NO)  NONSIMPLE PATH (NO)
+--- PRIMARY CELL = R_BAD
+--- EXCLUDED CELLS =
+--- LAYOUT BASE LAYER = (NOT SPECIFIED)
+--- LAYOUT TOP LAYER = (NOT SPECIFIED)
+--- LAYOUT IGNORE LAYER = (NOT SPECIFIED)
+
+--- CALIBRE LAYOUT DATA INPUT MODULE COMPLETED.  CPU TIME = 0  REAL TIME = 0
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----      CALIBRE::HIERARCHICAL CIRCUIT EXTRACTOR - EXECUTIVE MODULE      -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+M1 = OR M1
+----------
+M1 (HIER TYP=1 CFG=3 HGC=1 FGC=1 HEC=12 FEC=12 IGC=0 VHC=F VPC=F)
+CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129  OPS COMPLETE = 1 OF 1  ELAPSED TIME = 1
+
+Original Layer M1 DELETED -- LVHEAP = 2/5/67
+
+CONNECTIVITY EXTRACTION TOTAL LAYER PREPARATION TIME:  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129 ELAPSED TIME = 1
+
+CONNECTIVITY EXTRACTION
+-----------------------
+NC = Net Count  IPC = Internal Pin Count
+CEC = Cell Edge Count  PEC = Promoted Edge Count
+LVHEAP = Geometry heap memory allocation.
+MALLOC = Total heap memory allocation.
+
+CELL R_BAD
+     R_BAD (NC=1 IPC=0 CEC=6 PEC=0 CFGC=1)
+     R_BAD  CPU TIME = 0  REAL TIME = 0  LVHEAP = 3/5/67  MALLOC = 129/129/129 ELAPSED TIME = 1
+TOTAL CEC=6 PEC=0
+
+POST-PROCESSING CONNECTIVITY DATA STRUCTURE...
+    MARKING TRUE NETS AND EXTERNAL PINS...
+        CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+    DISCARDING FALSE VIRTUAL NETS, RESOLVING DEEP SHORTS AND PERFORMING VIRTUAL CONNECTIONS...
+        CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+    CREATING COMPACT PIN DATA STRUCTURE...
+        CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+    RESOLVING SHORT CIRCUIT TEXT...
+        CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+    PROCESSING HIGH SHORTS...
+        CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+    COMPUTING FINAL NET NAMES AND REPORTING TEXT WARNINGS...
+        CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+POST-PROCESSING completed.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129
+
+CONNECTIVITY EXTRACTION completed.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 129/129/129 ELAPSED TIME = 1
+
+NODE UPDATE: M1
+
+NODE UPDATE completed. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67
+
+WRITING CELL INFORMATION to PHDB /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb
+PHDB CELL DATA WRITE completed.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 130/130/130  ELAPSED TIME = 1
+
+WRITING CONNECT INFORMATION to PHDB /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb
+PHDB CONNECT INFORMATION written. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 130/130/130  ELAPSED TIME = 1
+
+DEVICE RECOGNITION
+------------------
+LVS PUSH DEVICES enabled.
+
+DEVICE RECOGNITION TOTAL LAYER PREPARATION TIME:  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67 ELAPSED TIME = 1
+
+DEVICE RECOGNITION PRECISE INTERACTION BEGINS.
+
+DEVICE RECOGNITION TOTAL PRECISE INTERACTION TIME:  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67 ELAPSED TIME = 1
+TENTATIVE SEED PROMOTIONS:   seed layer  seeds  cell : layers touched
+TENTATIVE SEED PROMOTIONS: ------------  -----  -----------------------------------------
+SEED PROMOTIONS: 
+SEED PROMOTIONS: ==============================================================
+SEED PROMOTIONS: 
+SEED PROMOTIONS:   seed layer  seeds  cell : layers touched
+SEED PROMOTIONS: ------------  -----  -----------------------------------------
+SEED PROMOTIONS: 
+SEED PROMOTIONS:       TOTAL:      0
+
+DEVICE RECOGNITION completed.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 130/130/130 ELAPSED TIME = 1
+
+NODE UPDATE completed. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67
+
+Extraction Errors and Warnings for cell "R_BAD"
+-----------------------------------------------
+
+WARNING:  Short circuit - Different names on one net:
+          Net Id:  1
+          (1)  name  "A"  at location  (0.1,0.18)  on layer  91 "PIN1"
+          (2)  name  "B"  at location  (16.5,0.18)  on layer  91 "PIN1"
+          The name "A" was assigned to the net.
+
+
+
+HIERARCHICAL SPICE NETLISTER
+----------------------------
+HIERARCHICAL SPICE NETLISTER completed.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 130/130/130 ELAPSED TIME = 1
+
+WRITING DEVICE INFORMATION to PHDB /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb
+PHDB DEVICE INFORMATION written. CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/5/67  MALLOC = 130/130/130  ELAPSED TIME = 1
+
+WRITING PHDB to directory /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb
+PHDB WRITE completed.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/67  MALLOC = 131/131/131  ELAPSED TIME = 1
+
+Layer M1 DELETED -- LVHEAP = 1/5/67
+
+--- CALIBRE::HIERARCHICAL CIRCUIT EXTRACTOR COMPLETED - Tue Oct 13 17:33:04 2026
+--- TOTAL CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/67  MALLOC = 131/131/131  ELAPSED TIME = 1
+--- PROCESSOR COUNT = 2
+
+--- SPICE NETLIST FILE = /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb/R_BAD.sp
+--- CIRCUIT EXTRACTION REPORT FILE = NONE.ext
+--- PERSISTENT HIERARCHICAL DATABASE(PHDB) = /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb/R_BAD.phdb
+--- QUERY DATABASE = /home/yongfu/proj/klayout-language/pex/.calibre_pex_run/bad_r/svdb  TOP CELL = R_BAD
+
+--- CALIBRE xRC::PHDB GENERATOR COMPLETED - Tue Oct 13 17:33:05 2026
+--- TOTAL CPU TIME = 0  REAL TIME = 1  LVHEAP = 1/5/67  MALLOC = 131/131/131  ELAPSED TIME = 2

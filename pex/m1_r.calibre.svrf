@@ -1,0 +1,41 @@
+// =============================================================================
+// M1 resistor PEX — Calibre xRC rules (educational)
+// =============================================================================
+// Layers (generate_layout.rb):
+//   M1    GDS 31/0
+//   PIN1  GDS 91/0   net ports A/B (must sit ON M1)
+//
+// Sheet resistance matches KLayout demo: 0.08 ohm/square.
+// Paths / SVDB / netlist names come from run_calibre_pex.sh (temp run deck).
+//
+// Flow:  calibre -xrc -phdb → -pdb -r → -fmt -r
+// =============================================================================
+
+PRECISION 1000
+RESOLUTION 1
+UNIT LENGTH U
+UNIT RESISTANCE OHM
+UNIT CAPACITANCE FF
+
+LAYOUT SYSTEM GDSII
+LAYOUT CASE YES
+
+MASK RESULTS DATABASE NONE
+
+LAYER M1 31
+LAYER PIN1 91
+
+TEXT LAYER PIN1
+TEXT DEPTH PRIMARY
+PORT LAYER TEXT PIN1
+ATTACH PIN1 M1
+
+CONNECT M1
+
+RESISTANCE SHEET M1 [0.08 0]
+CAPACITANCE ORDER M1
+
+PEX REPORT LUMPED NONE
+LVS REPORT NONE
+LVS REPORT MAXIMUM 50
+LVS IGNORE PORTS YES

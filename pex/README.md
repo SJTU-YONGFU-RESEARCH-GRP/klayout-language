@@ -4,8 +4,8 @@ Educational parasitic extraction with the same GOOD pass / BAD fail pattern as [
 
 | What | Tool | Formula / engine |
 |------|------|------------------|
-| **R** | Built-in `RNetExtractor` | `R ≈ (L/W) × sheet_r` |
-| **C** | LVS `capacitor()` | `C = A_overlap × area_cap` |
+| **R** | KLayout `RNetExtractor` **or** Calibre xRC | `R ≈ (L/W) × sheet_r` |
+| **C** | KLayout LVS `capacitor()` **or** Calibre `DEVICE CAP` | `C = A_overlap × area_cap` |
 | **CC** | [KLayout-PEX](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) `kpex --2.5D` | sidewall / fringe / substrate (sky130A) |
 
 > Built-in `klayout.pex` is **R-only**. Overlap **C** uses LVS `capacitor()`. Full coupling **CC** (sidewall) needs **kpex**.
@@ -83,6 +83,30 @@ cd pex
 ```
 
 `kpex --2.5D` uses only KLayout (no MAGIC / FasterCap required). MAGIC engine needs magic ≥ 8.3.679.
+
+### Calibre PEX (R + C)
+
+Same GDS / GOOD–BAD thresholds as the KLayout R/C demos. Uses the licensed Mentor install (see [`../drc/`](../drc/)).
+
+```bash
+# once — reuse DRC env
+ln -sf ../drc/calibre.env calibre.env   # or: cp ../drc/calibre.env.example calibre.env
+
+cd pex
+./run_calibre_pex.sh              # R + C, GOOD/BAD
+./run_calibre_pex.sh --r
+./run_calibre_pex.sh --c
+./run_calibre_pex.sh --setup-help
+```
+
+| Kind | Calibre engine | Rules |
+|------|----------------|-------|
+| **R** | `calibre -xrc` `-phdb` → `-pdb -r` → `-fmt -r` | `m1_r.calibre.svrf` (`RESISTANCE SHEET M1 [0.08 0]`) |
+| **C** | `calibre -lvs -hier -spice` + `DEVICE CAP` | `m1_c.calibre.svrf` (`C = AREA(M1∩M2) × 1e-3` fF) |
+
+> Full Calibre xRC **capacitance** (sidewall / fringe tables) needs a PDK **xCalibrate** deck. This demo’s C path uses educational **DEVICE CAP** (same overlap formula as KLayout), not xCalibrate.
+
+Reports: `calibre_r_{good,bad}.txt` / `calibre_c_{good,bad}.txt` (+ `.sp` / `.pex`).
 ```bash
 # R
 klayout -b -rd input=pex_demo.gds -rd cell=R_GOOD \
@@ -105,13 +129,16 @@ klayout -b -rd input=pex_demo.gds -rd cell=C_GOOD \
 | `generate_kpex_layout.rb` | Builds `kpex_demo.gds` (CC_* + C_PLATE, sky130A li1) |
 | `extract_r.rb` | `RNetExtractor` + PASS/FAIL vs `r_limit` |
 | `extract_c.lvs` | `capacitor()` + PASS/FAIL vs `c_limit` |
-| `run_pex.sh` | Generate + run R/C GOOD/BAD |
+| `m1_r.calibre.svrf` | Calibre xRC resistance rules |
+| `m1_c.calibre.svrf` | Calibre `DEVICE CAP` overlap-C rules |
+| `run_pex.sh` | Generate + run KLayout R/C GOOD/BAD |
+| `run_calibre_pex.sh` | Generate + run Calibre R/C GOOD/BAD |
 | `run_kpex.sh` | Generate + run kpex 2.5D CC GOOD/BAD |
 | `view_pex.sh` | Open GDS + show report |
-| `run_clean.sh` | Delete reports / spice / `kpex_out/` (`--gds` removes GDS) |
+| `run_clean.sh` | Delete reports / spice / `kpex_out/` / `.calibre_pex_run/` |
 | `../scripts/install_kpex.sh` | `pip install --user klayout-pex` (Python ≥ 3.12) |
 
-Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `cc_*.{txt,log,cir}`, `pex_demo.gds`, `kpex_demo.gds`, `kpex_out/`
+Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `cc_*.{txt,log,cir}`, `calibre_*`, `pex_demo.gds`, `kpex_demo.gds`, `kpex_out/`, `.calibre_pex_run/`
 
 ---
 
@@ -123,7 +150,9 @@ Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `cc_*.{txt,log
 |-----|------|-------|------|
 | 31/0 | M1 | blue | resistor metal / capacitor bottom plate |
 | 32/0 | M2 | green | capacitor top plate |
-| 90/0 | labels | purple | A/B / titles |
+| 91/0 | M1 pin | — | net ports A/B on M1 (Calibre ATTACH) |
+| 92/0 | M2 pin | — | net port B on M2 |
+| 90/0 | annotation | purple | titles / dimensions (not ports) |
 | 100/0 | marker | magenta | BAD highlight (screenshots) |
 
 ### kpex CC (`kpex_demo.gds`, sky130A)

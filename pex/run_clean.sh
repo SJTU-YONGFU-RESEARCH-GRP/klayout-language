@@ -49,6 +49,8 @@ for f in \
   "${ROOT}"/cc_*.txt \
   "${ROOT}"/cc_*_extracted.cir \
   "${ROOT}"/cc_*.log \
+  "${ROOT}"/calibre_r_* \
+  "${ROOT}"/calibre_c_* \
   "${ROOT}"/r_extract.txt \
   "${ROOT}"/r_extracted.cir \
   "${ROOT}"/c_extract.txt \
@@ -59,6 +61,7 @@ done
 shopt -u nullglob
 
 remove_path "${ROOT}/kpex_out"
+remove_path "${ROOT}/.calibre_pex_run"
 
 if [[ "$REMOVE_GDS" -eq 1 ]]; then
   remove_path "${ROOT}/pex_demo.gds"

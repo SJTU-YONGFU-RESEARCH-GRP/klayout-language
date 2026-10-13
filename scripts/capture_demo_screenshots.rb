@@ -30,7 +30,10 @@ COLORS = {
   # sky130A li1 (kpex CC demo)
   "67/20" => [0x1E6AFF, "LI1",  { transparent: true, dither: 1 }],   # blue
   "67/16" => [0x27AE60, "LI1PIN",{ transparent: false, dither: 0 }], # green pin
-  "67/5"  => [0x5B2C6F, "LI1LAB",{ transparent: false, dither: 0 }]  # purple label
+  "67/5"  => [0x5B2C6F, "LI1LAB",{ transparent: false, dither: 0 }], # purple label
+  # Calibre port text layers (pex_demo.gds)
+  "91/0"  => [0xF1C40F, "PIN1", { transparent: false, dither: 0 }],  # yellow
+  "92/0"  => [0xE67E22, "PIN2", { transparent: false, dither: 0 }]   # orange
 }
 
 def layer_key(source_str)

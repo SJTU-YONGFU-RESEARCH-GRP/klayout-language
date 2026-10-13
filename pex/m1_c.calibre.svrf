@@ -1,0 +1,49 @@
+// =============================================================================
+// M1/M2 parallel-plate capacitor — Calibre device extract (educational)
+// =============================================================================
+// Layers (generate_layout.rb):
+//   M1    GDS 31/0   bottom plate
+//   M2    GDS 32/0   top plate
+//   PIN1  GDS 91/0   port A on M1
+//   PIN2  GDS 92/0   port B on M2
+//
+// C = overlap_area_um2 * 1e-3 fF  (= 1e-15 F/µm²), same as KLayout capacitor().
+// Full Calibre xRC capacitance needs PDK xCalibrate tables; this DEVICE CAP
+// extractor mirrors the educational overlap-C demo.
+//
+// Flow:  calibre -lvs -hier -spice <out.sp>
+// =============================================================================
+
+PRECISION 1000
+RESOLUTION 1
+UNIT LENGTH U
+UNIT CAPACITANCE FF
+
+LAYOUT SYSTEM GDSII
+LAYOUT CASE YES
+
+MASK RESULTS DATABASE NONE
+LVS REPORT MAXIMUM 50
+LVS IGNORE PORTS YES
+
+LAYER M1 31
+LAYER M2 32
+LAYER PIN1 91
+LAYER PIN2 92
+
+TEXT LAYER PIN1 PIN2
+TEXT DEPTH PRIMARY
+PORT LAYER TEXT PIN1 PIN2
+ATTACH PIN1 M1
+ATTACH PIN2 M2
+
+CONNECT M1
+CONNECT M2
+
+A_ov = M1 AND M2
+
+DEVICE CAP A_ov M1(A) M2(B)
+[
+  PROPERTY C
+  C = AREA(A_ov) * 1e-3
+]

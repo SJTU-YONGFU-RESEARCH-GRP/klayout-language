@@ -16,3 +16,11 @@ r_extracted.cir
 c_extract.txt
 c_extracted.cir
 kpex_out/
+
+calibre.env
+.calibre_pex_run/
+calibre_*.txt
+calibre_*.sp
+calibre_*.sp.pex
+calibre_*.sp.pxi
+calibre_*.log
