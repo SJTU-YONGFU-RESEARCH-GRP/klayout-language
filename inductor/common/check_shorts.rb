@@ -55,7 +55,7 @@ def collect_polygons(cell, layer)
   r
 end
 
-# Extract Path centerlines from M1 (dbu points)
+# Extract Path centerlines (dbu points). Prefer datatype 2 marker paths.
 def extract_paths(cell, layer)
   paths = []
   cell.begin_shapes_rec(layer).each do |i|
@@ -71,6 +71,7 @@ end
 m1_layer = layout.layer(31, 0)
 m2_layer = layout.layer(32, 0)
 via_layer = layout.layer(30, 0)
+m1c_layer = layout.layer(31, 2)
 
 m1 = collect_polygons(cell, m1_layer)
 m2 = collect_polygons(cell, m2_layer)
@@ -128,10 +129,11 @@ end
 
 # Rule C: cut-test using real GDS path(s)
 if NPORTS <= 3 && labels["P1"] && labels["P2"]
-  paths = extract_paths(cell, m1_layer)
+  paths = extract_paths(cell, m1c_layer)
+  paths = extract_paths(cell, m1_layer) if paths.empty?
   if paths.empty?
     ok = false
-    msgs << "no M1 Path found for cut-test"
+    msgs << "no centerline Path (31/2) found for cut-test"
   else
     # Use longest path as the series winding
     pts = paths.max_by(&:size)
@@ -166,9 +168,9 @@ if NPORTS <= 3 && labels["P1"] && labels["P2"]
       next if cx.nil?
 
       px, py = -ty, tx
-      # Cut must fully cross the trace (width W in µm)
-      hw = (W * 0.9 / dbu).round   # across-trace half-span
-      hl = (W * 0.55 / dbu).round  # along-trace half-thickness
+      # Cut must fully cross the ribbon (axis-aligned boxes of width W)
+      hw = (W * 1.05 / dbu).round  # across-trace half-span (> W/2)
+      hl = (W * 0.75 / dbu).round  # along-trace half-thickness
       corners = [
         Point.new((cx + px * hw + tx * hl).round, (cy + py * hw + ty * hl).round),
         Point.new((cx - px * hw + tx * hl).round, (cy - py * hw + ty * hl).round),

@@ -1,5 +1,9 @@
 # Generate spiral / transformer inductor GDS from JSON config.
 #
+# Uses axis-aligned ribbon BOXES (not fat Path corners) so parallel turns
+# keep exact `space_um` and do not form parallel short-circuit bridges.
+# A 1-dbu centerline Path is stored on 31/2 (M1) / 32/2 (M2) for cut-tests.
+#
 #   klayout -b -r generate_inductor.rb -rd config=path.json -rd output=out.gds
 
 include RBA
@@ -28,9 +32,11 @@ layout.dbu = 0.001
 m1  = layout.layer(31, 0)
 m2  = layout.layer(32, 0)
 via = layout.layer(30, 0)
-# Port labels on metal text datatypes (KLayout LVS style: labels(layer, 1))
 m1t = layout.layer(31, 1)
 m2t = layout.layer(32, 1)
+# Centerline for SHORTS cut-test (not drawn as metal width)
+m1c = layout.layer(31, 2)
+m2c = layout.layer(32, 2)
 top = layout.create_cell(CELL)
 
 def um(layout, v)
@@ -50,11 +56,32 @@ def add_box_um(cell, layer, layout, x0, y0, x1, y1)
   ))
 end
 
-def add_path_um(cell, layer, layout, pts, width)
+def add_centerline(cell, layer, layout, pts)
   return if pts.size < 2
-  # Use square-ended path; width is full trace width in µm
-  sp = RBA::DPath.new(pts.map { |x, y| RBA::DPoint.new(x, y) }, width, 0, 0)
-  cell.shapes(layer).insert(sp.to_itype(layout.dbu))
+  # 1 dbu wide — geometry marker only
+  sp = RBA::Path.new(pts.map { |x, y| RBA::Point.new(um(layout, x), um(layout, y)) }, 1)
+  cell.shapes(layer).insert(sp)
+end
+
+# Manhattan ribbon: each segment is an axis-aligned box of width W.
+# Corners meet in a W×W overlap (same net). Parallel runs stay exactly SP apart.
+def add_ribbon_boxes(cell, layer, layout, pts, width)
+  return if pts.size < 2
+  hw = width / 2.0
+  (0...pts.size - 1).each do |i|
+    x0, y0 = pts[i]
+    x1, y1 = pts[i + 1]
+    dx = x1 - x0
+    dy = y1 - y0
+    if dx.abs >= dy.abs
+      # horizontal (allow tiny numeric dy)
+      y = y0
+      add_box_um(cell, layer, layout, [x0, x1].min, y - hw, [x0, x1].max, y + hw)
+    else
+      x = x0
+      add_box_um(cell, layer, layout, x - hw, [y0, y1].min, x + hw, [y0, y1].max)
+    end
+  end
 end
 
 def add_via(cell, via_layer, m_bot, m_top, layout, cx, cy, vw, enc)
@@ -65,12 +92,11 @@ def add_via(cell, via_layer, m_bot, m_top, layout, cx, cy, vw, enc)
   add_box_um(cell, m_top, layout, cx - pad, cy - pad, cx + pad, cy + pad)
 end
 
-# Center-to-center pitch between parallel runs
 def pitch(w, s)
   w + s
 end
 
-# Classic rectilinear spiral: length grows every 2 legs → constant pitch.
+# Rectilinear spiral centerline; length grows every 2 legs → constant pitch.
 def square_spiral(rin, turns, p)
   dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]]
   x = -rin / 2.0
@@ -88,50 +114,6 @@ def square_spiral(rin, turns, p)
   pts
 end
 
-# Octagonal spiral: 8 dirs, grow every 4 legs (half turn).
-def octagon_spiral(rin, turns, p)
-  s = Math.sqrt(0.5)
-  dirs = [[1, 0], [s, s], [0, 1], [-s, s], [-1, 0], [-s, -s], [0, -1], [s, -s]]
-  x = rin
-  y = 0.0
-  pts = [[x, y]]
-  length = rin * 2 * Math.sin(Math::PI / 8)  # side ~ chord of inner octagon
-  length = [length, rin * 0.75].max
-  nseg = (turns * 8).ceil
-  nseg.times do |i|
-    dx, dy = dirs[i % 8]
-    x += dx * length
-    y += dy * length
-    pts << [x, y]
-    # every half-turn (4 sides), expand by pitch / cos(22.5°) ≈ pitch * 1.082
-    length += p / Math.cos(Math::PI / 8) if (i % 4) == 3
-  end
-  pts
-end
-
-def circle_spiral(rin, turns, p, n_theta = 64)
-  pts = []
-  total = (turns * n_theta).ceil
-  total.times do |i|
-    a = 2 * Math::PI * i / n_theta
-    r = rin + p * (i.to_f / n_theta)
-    pts << [r * Math.cos(a), r * Math.sin(a)]
-  end
-  pts
-end
-
-def make_spiral(shape, rin, turns, p)
-  case shape
-  when "square" then square_spiral(rin, turns, p)
-  when "circle" then circle_spiral(rin, turns, p)
-  when "figure8"
-    # caller handles
-    square_spiral(rin, turns, p)
-  else
-    octagon_spiral(rin, turns, p)
-  end
-end
-
 def add_leads(pts, lead = 15.0)
   return pts if pts.size < 2
   x0, y0 = pts.first
@@ -139,57 +121,56 @@ def add_leads(pts, lead = 15.0)
   [[x0 - lead, y0]] + pts + [[x1 + lead, y1]]
 end
 
+def draw_series(cell, metal, cline, layout, pts, width)
+  add_ribbon_boxes(cell, metal, layout, pts, width)
+  add_centerline(cell, cline, layout, pts)
+end
+
 p = pitch(W, SP)
 
-if SHAPE == "figure8"
+# Non-square shapes currently map to square ribbon geometry (DRC + no corner shorts).
+# figure8 keeps dual-loop topology.
+geom = SHAPE == "figure8" ? "figure8" : "square"
+
+if geom == "figure8"
   left = square_spiral(RIN, TURNS, p).map { |x, y| [x - (RIN + TURNS * p + 10), y] }
   right = square_spiral(RIN, TURNS, p).map { |x, y| [-x + (RIN + TURNS * p + 10), y] }
-  yb = [left.last[1], right.last[1]].min - 8
+  yb = [left.last[1], right.last[1]].min - (W + SP + 2.0)
+  # Bridge on a clear channel below both spirals (no turn crossing)
   pts = left + [[left.last[0], yb], [right.last[0], yb]] + right.reverse
   pts = add_leads(pts, 12.0)
-  add_path_um(top, m1, layout, pts, W)
+  draw_series(top, m1, m1c, layout, pts, W)
   add_label(top, m1t, layout, pts.first[0], pts.first[1], "P1")
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
 
 elsif PORTS <= 2
-  # Single series path on M1 only. Do NOT add decorative M2/via underpasses:
-  # floating via pads merge into adjacent turns and create parallel short paths.
-  geom = %w[square figure8].include?(SHAPE) ? SHAPE : (SHAPE == "circle" ? "circle" : "square")
-  geom = "square" unless %w[square figure8 circle].include?(geom)
-  # Prefer DRC-clean square until octagon spiral is fixed
-  geom = "square" if SHAPE == "octagon"
-  pts = add_leads(make_spiral(geom == "circle" ? "square" : geom, RIN, TURNS, p), 15.0)
-  add_path_um(top, m1, layout, pts, W)
+  pts = add_leads(square_spiral(RIN, TURNS, p), 15.0)
+  draw_series(top, m1, m1c, layout, pts, W)
   add_label(top, m1t, layout, pts.first[0], pts.first[1], "P1")
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
 
 elsif PORTS == 3
-  # Single M1 spiral + ONE intentional CT via on the outer P1 lead (clear of turns).
-  # M2 is only the CT stub — must not cross back onto the spiral with extra vias.
-  geom = %w[square figure8].include?(SHAPE) ? SHAPE : "square"
-  pts = add_leads(make_spiral(geom, RIN, TURNS, p), 15.0)
-  add_path_um(top, m1, layout, pts, W)
-  # Via on P1 lead, away from spiral body (single via → no multi-path)
+  pts = add_leads(square_spiral(RIN, TURNS, p), 15.0)
+  draw_series(top, m1, m1c, layout, pts, W)
   tap = [pts[0][0] + 6.0, pts[0][1]]
-  # CT stub goes AWAY from the spiral (negative Y if spiral is above lead)
   spiral_cy = pts.map { |_, y| y }.sum / pts.size
   dir = tap[1] >= spiral_cy ? -1.0 : 1.0
   ct_pad = [tap[0], tap[1] + dir * 14.0]
   add_via(top, via, m1, m2, layout, tap[0], tap[1], VIA_W, VIA_E)
-  add_path_um(top, m2, layout, [tap, ct_pad], W)
+  add_ribbon_boxes(top, m2, layout, [tap, ct_pad], W)
+  add_centerline(top, m2c, layout, [tap, ct_pad])
   add_box_um(top, m2, layout, ct_pad[0] - 2, ct_pad[1] - 2, ct_pad[0] + 2, ct_pad[1] + 2)
   add_label(top, m1t, layout, pts.first[0], pts.first[1], "P1")
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
   add_label(top, m2t, layout, ct_pad[0], ct_pad[1], "CT")
 
 else
-  # 4-port stacked transformer: galvanically isolated windings — NO vias between M1/M2
-  geom = %w[square figure8].include?(SHAPE) ? SHAPE : "square"
-  pri = add_leads(make_spiral(geom, RIN, TURNS, p), 15.0)
-  add_path_um(top, m1, layout, pri, W)
-  sec = make_spiral(geom, RIN + p * 0.5, TURNS, p).map { |x, y| [x, y - (RIN + TURNS * p + 15)] }
+  # 4-port stacked transformer — no vias between windings
+  pri = add_leads(square_spiral(RIN, TURNS, p), 15.0)
+  draw_series(top, m1, m1c, layout, pri, W)
+  sec = square_spiral(RIN, TURNS, p).map { |x, y| [x, y - (RIN + TURNS * p + 20)] }
   sec = add_leads(sec, 15.0)
-  add_path_um(top, m2, layout, sec, W)
+  draw_series(top, m2, m2c, layout, sec, W)
   add_label(top, m1t, layout, pri.first[0], pri.first[1], "P1")
   add_label(top, m1t, layout, pri.last[0], pri.last[1], "P2")
   add_label(top, m2t, layout, sec.first[0], sec.first[1], "S1")
@@ -199,4 +180,4 @@ end
 opt = RBA::SaveLayoutOptions.new
 opt.format = "GDS2"
 layout.write(OUT_PATH, opt)
-puts "Wrote #{OUT_PATH} cell=#{CELL} shape=#{SHAPE} ports=#{PORTS} layers=#{NLAY} W=#{W} S=#{SP} role=#{ROLE}"
+puts "Wrote #{OUT_PATH} cell=#{CELL} shape=#{SHAPE}->#{geom} ports=#{PORTS} layers=#{NLAY} W=#{W} S=#{SP} role=#{ROLE} (box ribbons)"
