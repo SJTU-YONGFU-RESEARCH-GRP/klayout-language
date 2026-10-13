@@ -5,18 +5,8 @@
 //   M1  GDS 31/0
 //   CT  GDS 30/0
 //
-// Rule values (microns):
-//   M1 min width        0.14
-//   M1 min spacing      0.14
-//   CT min width        0.16
-//   CT min spacing      0.18
-//   M1 over CT enc      0.055
-//
-// Run: ./run_calibre_drc.sh
+// Paths are set by run_calibre_drc.sh via environment variables GDS, RDB, REP.
 // =============================================================================
-
-// Override paths via calibre -E, e.g.:
-//   calibre -drc -hier -E GDS=/path/layout.gds -E RDB=/path/out.rdb rules.svrf
 
 LAYOUT PATH "$GDS"
 LAYOUT PRIMARY "M1_CT_DRC_DEMO"
@@ -44,7 +34,8 @@ M1_MIN_WIDTH {
 
 M1_MIN_SPACE {
   @ Metal1 spacing < 0.14 um
-  EXT M1 M1 < 0.14 ABUT < 90 SINGULAR
+  // Same-layer EXTERNAL takes one layer argument (not M1 M1)
+  EXT M1 < 0.14 ABUT < 90 SINGULAR
 }
 
 // ---------------------------------------------------------------------------
@@ -58,7 +49,7 @@ CT_MIN_WIDTH {
 
 CT_MIN_SPACE {
   @ Contact spacing < 0.18 um
-  EXT CT CT < 0.18 ABUT < 90 SINGULAR
+  EXT CT < 0.18 ABUT < 90 SINGULAR
 }
 
 // ---------------------------------------------------------------------------

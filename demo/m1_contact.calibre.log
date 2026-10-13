@@ -1,0 +1,580 @@
+//  Calibre v2019.2_26.18    Tue May 7 10:57:04 PDT 2019
+//  Calibre Utility Library   v0-10_13-2017-1    Sun Feb 24 23:17:33 PST 2019
+//  Litho Libraries v2019.2_26.18  Tue May 7 10:57:04 PDT 2019
+//
+//        Copyright Mentor Graphics Corporation 1996-2019
+//                       All Rights Reserved.
+//   THIS WORK CONTAINS TRADE SECRET AND PROPRIETARY INFORMATION
+//      WHICH IS THE PROPERTY OF MENTOR GRAPHICS CORPORATION
+//        OR ITS LICENSORS AND IS SUBJECT TO LICENSE TERMS.
+//
+//  The registered trademark Linux is used pursuant to a sublicense from LMI, the
+//  exclusive licensee of Linus Torvalds, owner of the mark on a world-wide basis.
+//
+//  Mentor Graphics software executing under x86-64 Linux
+//
+//  Running on Linux hurricane 5.14.0-611.26.1.el9_7.x86_64 #1 SMP PREEMPT_DYNAMIC Sat Jan 17 05:14:35 EST 2026 x86_64 glibc 2.34/NPTL 2.34
+//  OS: Red Hat Enterprise Linux release 9.7 (Plow)[5.14.0-611.26.1.el9_7.x86_64]
+//
+//  Entries in /proc/meminfo:
+//
+//  MemTotal:       395576772 kB
+//  MemFree:        51632272 kB
+//  MemAvailable:   251542736 kB
+//  Buffers:        15063048 kB
+//  Cached:         111433716 kB
+//  SwapCached:       319112 kB
+//  Active:         96156908 kB
+//  Inactive:       156678040 kB
+//  Active(anon):   84502272 kB
+//  Inactive(anon): 42854144 kB
+//  Active(file):   11654636 kB
+//  Inactive(file): 113823896 kB
+//  Unevictable:        4988 kB
+//  Mlocked:            1916 kB
+//  SwapTotal:       4194300 kB
+//  SwapFree:            236 kB
+//  Zswap:                 0 kB
+//  Zswapped:              0 kB
+//  Dirty:               916 kB
+//  Writeback:             0 kB
+//  AnonPages:      125516300 kB
+//  Mapped:          3421732 kB
+//  Shmem:           1016540 kB
+//  KReclaimable:   78285712 kB
+//  Slab:           85142656 kB
+//  SReclaimable:   78285712 kB
+//  SUnreclaim:      6856944 kB
+//  KernelStack:      253296 kB
+//  PageTables:       782040 kB
+//  SecPageTables:      2056 kB
+//  NFS_Unstable:          0 kB
+//  Bounce:                0 kB
+//  WritebackTmp:          0 kB
+//  CommitLimit:    201982684 kB
+//  Committed_AS:   267981664 kB
+//  VmallocTotal:   34359738367 kB
+//  VmallocUsed:      861588 kB
+//  VmallocChunk:          0 kB
+//  Percpu:           273600 kB
+//  HardwareCorrupted:     0 kB
+//  AnonHugePages:  51120128 kB
+//  ShmemHugePages:        0 kB
+//  ShmemPmdMapped:        0 kB
+//  FileHugePages:         0 kB
+//  FilePmdMapped:         0 kB
+//  CmaTotal:              0 kB
+//  CmaFree:               0 kB
+//  Unaccepted:            0 kB
+//  HugePages_Total:       0
+//  HugePages_Free:        0
+//  HugePages_Rsvd:        0
+//  HugePages_Surp:        0
+//  Hugepagesize:       2048 kB
+//  Hugetlb:               0 kB
+//  DirectMap4k:    77174616 kB
+//  DirectMap2M:    308572160 kB
+//  DirectMap1G:    18874368 kB
+//
+//  User limits:
+//
+//  Data size: unlimited
+//  RSS: unlimited
+//  Stack size: 8192 kB
+//  Max user processes: 1544068
+//  VM: unlimited
+//  nf_conntrack_max: 262144
+//
+//  Processor Intel(R) Xeon(R) CPU E5-2678 v3 @ 2.50GHz [06632] (4th generation)
+//  CPU Info: Cores = 24, SMT enabled with 24 additional virtual processors
+//  Max file descriptors: 65535
+//  64 bit virtual addressing enabled
+//  Running aoi_cal_2019.2_26.18/pkgs/icv/pvt/calibre -drc -hier -turbo -nowait /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf
+//  Process ID: 3303551
+//
+//  Starting time: Tue Oct 13 13:57:39 2026
+//
+
+--- CALIBRE_* ENVIRONMENT VARIABLES:
+
+CALIBRE_ATOMIC_LVHEAP=0
+CALIBRE_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv/pvt/calibre  -drc -hier -turbo -nowait /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf'
+CALIBRE_HOME=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18
+CALIBRE_INITIAL_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/bin/calibre -drc -hier -turbo -nowait /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf'
+CALIBRE_READDB_LD_LIBRARY_PATH=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/shared/pkgs/icv/tools/calibre_client/lib/64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/calibre_base/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_lib/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel68_gcc44x_64/opt:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel61_gcc44x_64/opt:/home/yongfu/local/lib/calibre-stubs
+CALIBRE_SKIP_OS_CHECKS=
+CALIBRE_SSE3_SUPPORTED=1
+
+//  Calibre Controller Connection hurricane:58437
+//  Running on 24 CPUs (pending licensing) 
+//
+//  LITHO operations available for use on 24 CPUs (pending licensing)
+//
+//  Created Core System logfile = /data1/yongfu/proj/klayout-language/demo/.calibre_run/CalibreRRLog.hurricane.3303551.2026_1013_1357
+//  SMT utilized, running on maximum 24 additional virtual processors
+
+--- CALIBRE::DRC-H - Tue Oct 13 13:57:39 2026
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----          STANDARD VERIFICATION RULE FILE COMPILATION MODULE          -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--- RULE FILE = /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf
+
+// =============================================================================
+// M1 / Contact DRC demo — Calibre SVRF (mirrors demo/m1_contact.drc)
+// =============================================================================
+// Layers (from generate_layout.rb):
+//   M1  GDS 31/0
+//   CT  GDS 30/0
+//
+// Paths are set by run_calibre_drc.sh via environment variables GDS, RDB, REP.
+// =============================================================================
+
+LAYOUT PATH "$GDS"
+LAYOUT PRIMARY "M1_CT_DRC_DEMO"
+LAYOUT SYSTEM GDSII
+
+DRC MAXIMUM RESULTS ALL
+DRC SUMMARY REPORT "$REP"
+DRC RESULTS DATABASE "$RDB" ASCII
+DRC KEEP EMPTY NO
+
+PRECISION 1000
+RESOLUTION 1
+
+LAYER M1 31 0
+LAYER CT 30 0
+
+// ---------------------------------------------------------------------------
+// Metal 1
+// ---------------------------------------------------------------------------
+
+M1_MIN_WIDTH {
+  @ Metal1 width < 0.14 um
+  INT M1 < 0.14 ABUT < 90 SINGULAR
+}
+
+M1_MIN_SPACE {
+  @ Metal1 spacing < 0.14 um
+  // Same-layer EXTERNAL takes one layer argument (not M1 M1)
+  EXT M1 < 0.14 ABUT < 90 SINGULAR
+}
+
+// ---------------------------------------------------------------------------
+// Contact
+// ---------------------------------------------------------------------------
+
+CT_MIN_WIDTH {
+  @ Contact width < 0.16 um
+  INT CT < 0.16 ABUT < 90 SINGULAR
+}
+
+CT_MIN_SPACE {
+  @ Contact spacing < 0.18 um
+  EXT CT < 0.18 ABUT < 90 SINGULAR
+}
+
+// ---------------------------------------------------------------------------
+// Enclosure — M1 must surround CT by at least 0.055 um
+// ---------------------------------------------------------------------------
+
+M1_OVER_CT_ENCLOSURE {
+  @ M1 enclosure of contact < 0.055 um
+  ENC M1 CT < 0.055 OPPOSITE
+}
+
+
+--- STANDARD VERIFICATION RULE FILE COMPILATION MODULE COMPLETED.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/3
+
+--- CALIBRE_* ENVIRONMENT VARIABLES:
+
+CALIBRE_ATOMIC_LVHEAP=0
+CALIBRE_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv/pvt/calibre  -drc -hier -turbo -nowait /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf'
+CALIBRE_HOME=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18
+CALIBRE_INITIAL_CMD_LINE='/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/bin/calibre -drc -hier -turbo -nowait /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf'
+CALIBRE_READDB_LD_LIBRARY_PATH=/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/shared/pkgs/icv/tools/calibre_client/lib/64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/calibre_base/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_lib/lib64:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel68_gcc44x_64/opt:/data1/eda/eda/mentor/aoi_cal_2019.2_26.18/pkgs/icv_oa/22.41p004/lib/linux_rhel61_gcc44x_64/opt:/home/yongfu/local/lib/calibre-stubs
+CALIBRE_SKIP_OS_CHECKS=
+CALIBRE_SSE3_SUPPORTED=1
+
+--- VARIABLES:
+
+--- SELECTED RULE CHECKS:
+    M1_MIN_WIDTH
+    M1_MIN_SPACE
+    CT_MIN_WIDTH
+    CT_MIN_SPACE
+    M1_OVER_CT_ENCLOSURE
+
+--- UNSELECTED RULE CHECKS (IMPLICIT):
+
+--- UNSELECTED RULE CHECKS (EXPLICIT):
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----                  CALIBRE::DRC-H - LICENSING MODULE                   -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+
+//  Applying licensing policy...
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+//  mgc_s license acquired (calibrehdrc requested).
+//  mgc_s license acquired (calibredrc requested).
+
+//  Licensed Products
+//  -----------------
+//  Base products running on 24 cores:
+//  - DRC (Hierarchical)
+
+--- CALIBRE::DRC-H LICENSING MODULE COMPLETED.  CPU TIME = 0  REAL TIME = 1
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----                   CALIBRE LAYOUT DATA INPUT MODULE                   -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--- LAYOUT SYSTEM = GDS
+--- LAYOUT MAGNIFICATION = 1
+
+--------------------------------------------------------------------------------
+-----                     GDS FILE SUMMARY INFORMATION                     -----
+--------------------------------------------------------------------------------
+
+GDS FILENAME:        /home/yongfu/proj/klayout-language/demo/m1_contact_demo.gds
+GDS VERSION:         600
+LIBRARY NAME:        LIB
+LAST MODIFIED:       ON 2026/10/13 AT 13:53:9
+LAST ACCESSED:       ON 2026/10/13 AT 13:53:9
+DATABASE PRECISION:  0.001 user units per database unit
+PHYSICAL PRECISION:  1e-09 meters per database unit
+MAGNIFICATION:       1
+
+--------------------------------------------------------------------------------
+-----                 GDS INPUT DATA FOR INDIVIDUAL CELLS                  -----
+--------------------------------------------------------------------------------
+     CELL NAME                  PLACEMENTS   ARRAYS   POLYGONS    PATHS    TEXTS
+--------------------------------------------------------------------------------
+M1_CT_DRC_DEMO                           0        0         18        0       11
+
+NOTE: UNUSED geometric data is present on the following layer/datatype pairs:
+
+NOTE: USED geometric data is present on the following layer/datatype pairs:
+    SIMPLE LAYER = 30
+        LAYER = 30 DATATYPE = 0
+    SIMPLE LAYER = 31
+        LAYER = 31 DATATYPE = 0
+
+NOTE: The following required simple layers are EMPTY:
+    0
+
+--- LAYOUT DATABASE CONSTRUCTOR COMPLETED.  CPU TIME = 0  REAL TIME = 0  LVHEAP = 2/4/4
+
+CONSTRUCTING HIERARCHICAL DATABASE
+    COPYING LAYOUT DATABASE
+    COPY COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    (P=0 A=0(0) AX=0(0) AY=0(0) D=0)
+    LITHO HEURISTICS OFF
+    MDP HEURISTICS OFF
+    CLONE STATE: LCTP(Y/N/U) = U LCRP(Y/N/U) = U LITHO(0/1/2) = 0 DFM(0/1/2) = 0
+    PROCESSING TEXT
+    ELIMINATING DUPLICATE TEXT
+    DUPLICATE TEXT ELIMINATION COMPLETE (0 -> 0 = 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    ELIMINATING EMPTY CELLS
+    EMPTY CELL ELIMINATION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    COMPUTING RECTANGULAR EXTENTS
+    RECTANGULAR EXTENTS COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    IDENTIFYING TOP LAYER CELLS
+    TOP LAYER CELL IDENTIFICATION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    IDENTIFYING VERY SMALL CELLS
+    VERY SMALL CELL IDENTIFICATION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    CHECKING ACUTE/SKEW/ANGLED/OFFGRID
+    ELIMINATING DUPLICATE PLACEMENTS
+    DUPLICATE PLACEMENT ELIMINATION COMPLETE (0 -> 0 = 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    FLATTENING SELECTED LAYERS
+    EXPANDING UNIQUE ICV PLACEMENTS
+    COMPUTING RECTILINEAR EXTENTS
+    RECTILINEAR EXTENTS COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    SORTING PLACEMENTS VERTICALLY
+    SORT COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    ELIMINATING DUPLICATE PLACEMENTS
+    DUPLICATE PLACEMENT ELIMINATION COMPLETE (0 -> 0 = 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    EXPANDING UNIQUE TRANSPARENT CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    EXPANDING TRIVIAL CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    EXPANDING VERY SPARSE ARRAY PLACEMENTS
+    EXPANDING LARGE CELL ARRAY PLACEMENTS
+    EXPANDING VERY SPARSE CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    ELIMINATING DUPLICATE SUPER-HIERARCHICAL PLACEMENTS
+    DUPLICATE SUPER-HIERARCHICAL PLACEMENT ELIMINATION COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    EXPANDING DENSE OVERLAPS
+    EXPANDING UNIQUE META-CELL PLACEMENTS
+      PRE-EXPAND COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    EXPANDING DENSE OVERLAPS
+    ANALYZING HIERARCHY FOR AUTOMATIC TURBO FLEX
+    ANALYSIS COMPLETE (TA=22.86). CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    IDENTIFYING MULTI-CORE CELLS
+    INJECTING HIERARCHY
+      INJECTION PREP COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+      PRIORITY INJECTION COMPLETE CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+      INJECTION POST COMPLETE (0 0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    INJECTION COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    COMPUTING RECTANGULAR EXTENTS
+    RECTANGULAR EXTENTS COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    SORTING PLACEMENTS VERTICALLY
+    SORT COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    PUSHING VERY SMALL CELL PLACEMENTS
+    PUSHING TOP LAYER CELL PLACEMENTS
+    COMPUTING CELL-TO-WORLD TRANSFORMS
+    COMPUTE COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    SORTING PLACEMENTS BY CELL
+    SORT COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    PACKING HIERARCHY. (C=1 CN=1 P1=0 P2=0 XF=0) LVHEAP = 1/3/4
+    PACKING COMPLETE. (C=1 CN=1 P=0 XF=0) CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/3/4
+    COMPUTING PLACEMENT OVERLAPS
+    COMPUTE COMPLETE (OC=0 V1=0 V2=0 SC=0 FC=0). CPU TIME = 0  REAL TIME = 0  LVHEAP = 3/5/5
+    COMPUTING CELL OVERLAP AREAS
+    COMPUTE COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5
+    COMPUTING PLACEMENT / OVERLAP AREA INTERSECTIONS
+    COMPUTE COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5
+HIERARCHICAL DATABASE CONSTRUCTOR COMPLETE. CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5
+(C=1 CN=1 P=0 G=3 GH=1 D=0 TXT=0 XF=0 PO=0)
+
+--------------------------------------------------------------------------------
+-----                           VPC REQUIREMENTS                           -----
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+-----               TEXT OBJECTS FOR CONNECTIVITY EXTRACTION               -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----                TEXT OBJECTS FOR WITH TEXT OPERATIONS                 -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----               TEXT OBJECTS FOR EXPAND TEXT OPERATIONS                -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----                  TEXT OBJECTS FOR CAPI OPERATIONS                    -----
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----             LAYER READ SUMMARY (SIMPLE LAYER GEOMETRIES)             -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER      GEOMETRIES                                                    
+--------------------------------------------------------------------------------
+
+  0                      0
+  30                     7
+  31                    11
+
+--------------------------------------------------------------------------------
+-----            LAYER READ SUMMARY (ORIGINAL LAYER GEOMETRIES)            -----
+--------------------------------------------------------------------------------
+ORIGINAL LAYER       INITIAL GEOMETRIES                 FINAL GEOMETRIES        
+--------------------------------------------------------------------------------
+
+M1                        11 (11)                          11 (11)              
+CT                         7 (7)                            7 (7)               
+
+--------------------------------------------------------------------------------
+-----         LAYER READ SUMMARY (TEXT FOR CONNECTIVITY EXTRACTION)        -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----          LAYER READ SUMMARY (TEXT FOR WITH TEXT OPERATIONS)          -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----         LAYER READ SUMMARY (TEXT FOR EXPAND TEXT OPERATIONS)         -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----            LAYER READ SUMMARY (TEXT FOR CAPI OPERATIONS)             -----
+--------------------------------------------------------------------------------
+SIMPLE LAYER              TEXTS                                                 
+--------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+-----                      CELL AND PLACEMENT SUMMARY                      -----
+--------------------------------------------------------------------------------
+CELL TYPE                 CELLS           PLACEMENTS       FLAT PLACEMENTS      
+--------------------------------------------------------------------------------
+
+USER                          1                    0                     0
+ VERY SMALL                   0                    0                     0
+ TOP LAYER                    0                    0                     0
+  VERY SMALL                  0                    0                     0
+PSEUDO                        0                    0                     0
+TOTAL                         1                    0                     0
+
+--------------------------------------------------------------------------------
+-----                   LAYOUT DATA INPUT MODULE SUMMARY                   -----
+--------------------------------------------------------------------------------
+
+--- TOTAL GEOMETRIES READ FROM SIMPLE LAYERS = 18
+--- TOTAL GEOMETRIES READ FROM ORIGINAL LAYERS = 18 (18)
+--- TOTAL GEOMETRIES WRITTEN TO ORIGINAL LAYERS = 18 (18)
+--- LVHEAP = 1/5/5
+--- DATABASE EXTENT = [ 7.92 , -1.88 ] -> [ 8.8 , 23.5 ]
+--- GEOMETRIC DEPTH = ALL
+--- TEXT DEPTH FOR CONNECTIVITY EXTRACTION = PRIMARY
+--- TOTAL TEXT OBJECTS FOR CONNECTIVITY EXTRACTION = 0 (0)
+--- TOTAL TEXT OBJECTS FOR WITH TEXT OPERATIONS = 0 (0)
+--- TOTAL TEXT OBJECTS FOR EXPAND TEXT OPERATIONS = 0 (0)
+--- TOTAL TEXT OBJECTS FOR CAPI OPERATIONS = 0 (0)
+--- GEOMETRY FLAGGING = ACUTE (NO)  SKEW (NO)  ANGLED (NO)  OFFGRID (NO)
+                        NONSIMPLE POLYGON (NO)  NONSIMPLE PATH (NO)
+--- PRIMARY CELL = M1_CT_DRC_DEMO
+--- EXCLUDED CELLS =
+--- LAYOUT BASE LAYER = (NOT SPECIFIED)
+--- LAYOUT TOP LAYER = (NOT SPECIFIED)
+--- LAYOUT IGNORE LAYER = (NOT SPECIFIED)
+
+--- CALIBRE LAYOUT DATA INPUT MODULE COMPLETED.  CPU TIME = 0  REAL TIME = 0
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----        CALIBRE::DRC-H - RESULTS DATABASE INITIALIZATION MODULE       -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+--- GLOBAL DRC RESULTS DATABASE FILE = /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb (ASCII)
+--- GLOBAL MAXIMUM RESULTS PER RULECHECK = ALL
+--- GLOBAL MAXIMUM VERTICES PER RESULT POLYGON = 4096
+--- CHECK TEXT MAPPING = COMMENTS + RULE FILE INFORMATION
+--- KEEP EMPTY RULE CHECKS = NO
+--- DRC RESULTS MAGNIFICATION = 1
+--- DRC RESULTS DATABASE PRECISION = 1000
+
+--------------------------------------------------------------------------------
+-----              DRC RULECHECK -> RESULTS DATABASE MAPPING               -----
+--------------------------------------------------------------------------------
+                                                          DATA        MAX    MAX
+RULECHECK            RESULTS DATABASE         TYPE LAYER  TYPE     RESULT VERTEX
+--------------------------------------------------------------------------------
+M1_MIN_WIDTH         /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb
+                                             ASCII   N/A   N/A        ALL   4096
+M1_MIN_SPACE         /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb
+                                             ASCII   N/A   N/A        ALL   4096
+CT_MIN_WIDTH         /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb
+                                             ASCII   N/A   N/A        ALL   4096
+CT_MIN_SPACE         /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb
+                                             ASCII   N/A   N/A        ALL   4096
+M1_OVER_CT_ENCLOSURE /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb
+                                             ASCII   N/A   N/A        ALL   4096
+
+--- CALIBRE::DRC-H RESULTS DATABASE INITIALIZATION MODULE COMPLETED.  CPU TIME = 0  REAL TIME = 0
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-----                   CALIBRE::DRC-H - EXECUTIVE MODULE                  -----
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+M1 = OR M1
+----------
+M1 (HIER TYP=1 CFG=1 HGC=11 FGC=11 HEC=44 FEC=44 IGC=0 VHC=F VPC=F)
+CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5  OPS COMPLETE = 1 OF 7  ELAPSED TIME = 1
+
+Original Layer M1 DELETED -- LVHEAP = 1/5/5
+
+M1_MIN_SPACE::<1> = EXT M1 < 0.14 ABUT < 90 SINGULAR
+M1_MIN_WIDTH::<1> = INT M1 < 0.14 ABUT < 90 SINGULAR
+----------------------------------------------------
+M1_MIN_SPACE::<1> (HIER TYP=3 HGC=1 FGC=1 HEC=2 FEC=2 IGC=0)
+M1_MIN_WIDTH::<1> (HIER TYP=3 HGC=1 FGC=1 HEC=2 FEC=2 IGC=0)
+CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5  OPS COMPLETE = 3 OF 7  ELAPSED TIME = 1
+
+Layer M1_MIN_WIDTH::<1> DELETED -- LVHEAP = 1/5/5
+
+DRC RuleCheck M1_MIN_WIDTH COMPLETED. Number of Results = 1 (1)
+
+Layer M1_MIN_SPACE::<1> DELETED -- LVHEAP = 1/5/5
+
+DRC RuleCheck M1_MIN_SPACE COMPLETED. Number of Results = 1 (1)
+
+CT = OR CT
+----------
+CT (HIER TYP=1 CFG=1 HGC=7 FGC=7 HEC=28 FEC=28 IGC=0 VHC=F VPC=F)
+CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5  OPS COMPLETE = 4 OF 7  ELAPSED TIME = 1
+
+Original Layer CT DELETED -- LVHEAP = 1/5/5
+
+CT_MIN_SPACE::<1> = EXT CT < 0.18 ABUT < 90 SINGULAR
+CT_MIN_WIDTH::<1> = INT CT < 0.16 ABUT < 90 SINGULAR
+----------------------------------------------------
+CT_MIN_SPACE::<1> (HIER TYP=3 HGC=1 FGC=1 HEC=2 FEC=2 IGC=0)
+CT_MIN_WIDTH::<1> (HIER TYP=3 HGC=1 FGC=1 HEC=2 FEC=2 IGC=0)
+CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5  OPS COMPLETE = 6 OF 7  ELAPSED TIME = 1
+
+Layer CT_MIN_WIDTH::<1> DELETED -- LVHEAP = 1/5/5
+
+DRC RuleCheck CT_MIN_WIDTH COMPLETED. Number of Results = 1 (1)
+
+Layer CT_MIN_SPACE::<1> DELETED -- LVHEAP = 1/5/5
+
+DRC RuleCheck CT_MIN_SPACE COMPLETED. Number of Results = 1 (1)
+
+M1_OVER_CT_ENCLOSURE::<1> = ENC M1 CT < 0.055 OPPOSITE
+------------------------------------------------------
+M1_OVER_CT_ENCLOSURE::<1> (HIER TYP=3 HGC=0 FGC=0 HEC=0 FEC=0 IGC=0)
+CPU TIME = 0  REAL TIME = 0  LVHEAP = 1/5/5  OPS COMPLETE = 7 OF 7  ELAPSED TIME = 1
+
+Layer M1 DELETED -- LVHEAP = 1/5/5
+
+Layer CT DELETED -- LVHEAP = 1/5/5
+
+Layer M1_OVER_CT_ENCLOSURE::<1> DELETED -- LVHEAP = 1/5/5
+
+WRITE to ASCII DRC Results Database /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb COMPLETED
+
+DRC RuleCheck M1_OVER_CT_ENCLOSURE COMPLETED. Number of Results = 0 (0)
+
+Cumulative ONE-LAYER BOOLEAN Time: CPU = 0  REAL = 0
+Cumulative ONE-LAYER DRC Time: CPU = 0  REAL = 0
+Cumulative TWO-LAYER DRC Time: CPU = 0  REAL = 0
+Cumulative RDB Time: CPU = 0  REAL = 0
+
+--- CALIBRE::DRC-H EXECUTIVE MODULE COMPLETED.  CPU TIME = 0  REAL TIME = 0
+--- TOTAL RULECHECKS EXECUTED = 5
+--- TOTAL RESULTS GENERATED = 4 (4)
+--- DRC RESULTS DATABASE FILE = /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rdb (ASCII)
+
+--- CALIBRE::DRC-H COMPLETED - Tue Oct 13 13:57:39 2026
+--- TOTAL CPU TIME = 0  REAL TIME = 0
+--- PROCESSOR COUNT = 24 + 24(virtual)
+--- SUMMARY REPORT FILE = /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.rep
+

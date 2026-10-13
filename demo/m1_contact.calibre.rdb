@@ -1,0 +1,29 @@
+M1_CT_DRC_DEMO 1000
+M1_MIN_WIDTH
+1 1 2 Oct 13 13:57:39 2026                     
+Rule File Pathname: /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf
+Metal1 width < 0.14 um
+e 1 2
+8000 19000 8000 20500
+8100 19000 8100 20500
+M1_MIN_SPACE
+1 1 2 Oct 13 13:57:39 2026                     
+Rule File Pathname: /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf
+Metal1 spacing < 0.14 um
+e 1 2
+8300 13000 8300 14500
+8380 13000 8380 14500
+CT_MIN_WIDTH
+1 1 2 Oct 13 13:57:39 2026                     
+Rule File Pathname: /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf
+Contact width < 0.16 um
+e 1 2
+8000 -1800 8000 -1600
+8120 -1800 8120 -1600
+CT_MIN_SPACE
+1 1 2 Oct 13 13:57:39 2026                     
+Rule File Pathname: /home/yongfu/proj/klayout-language/demo/m1_contact.calibre.svrf
+Contact spacing < 0.18 um
+e 1 2
+8200 1200 8200 1400
+8320 1200 8320 1400

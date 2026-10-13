@@ -5,12 +5,46 @@
 #   ./run_calibre_drc.sh              # generate GDS + run Calibre DRC
 #   ./run_calibre_drc.sh --drc-only   # skip GDS generation
 #   ./run_calibre_drc.sh --gen-only   # only write GDS
-#   ./run_calibre_drc.sh --view        # run DRC then open Calibre RVE
+#   ./run_calibre_drc.sh --view       # run DRC then open Calibre RVE
+#   ./run_calibre_drc.sh --setup-help # print Calibre setup instructions
 #
-# Environment:
-#   MGC_HOME   Mentor install root (default: search common paths)
-#   CALIBRE    Calibre binary override (default: $MGC_HOME/bin/calibre)
-#   CALDRV     Calibre DRV/RVE binary override (default: $MGC_HOME/bin/calibredrv)
+# ---------------------------------------------------------------------------
+# Calibre setup (first time)
+# ---------------------------------------------------------------------------
+# Calibre is a licensed Mentor/Siemens tool — it is NOT installed by this repo.
+#
+# Option A — local env file (recommended):
+#   cp calibre.env.example calibre.env
+#   $EDITOR calibre.env          # set MGC_HOME to your install
+#   ./run_calibre_drc.sh
+#
+# Option B — export in your shell:
+#   export MGC_HOME=/opt/mentor/calibre
+#   export PATH="$MGC_HOME/bin:$PATH"
+#   ./run_calibre_drc.sh
+#
+# Option C — HPC module (if your site provides one):
+#   module avail calibre          # find module name
+#   module load calibre/2024.1    # example
+#   ./run_calibre_drc.sh
+#
+# Option D — point directly at the binary:
+#   export CALIBRE=/path/to/calibre/bin/calibre
+#   ./run_calibre_drc.sh
+#
+# Verify setup:
+#   $CALIBRE -version             # or: $MGC_HOME/bin/calibre -version
+#
+# View results after a run:
+#   ./run_calibre_drc.sh --view   # opens calibredrv + RVE
+#   # or manually:
+#   calibredrv m1_contact_demo.gds -rve m1_contact.calibre.rdb
+#
+# Environment (auto-loaded from calibre.env when present):
+#   MGC_HOME   Mentor install root (must contain bin/calibre)
+#   CALIBRE    Calibre binary override
+#   CALDRV     Calibre DRV/RVE binary override
+#   MGLS_LICENSE_FILE   License server (site-specific)
 
 set -euo pipefail
 
@@ -21,23 +55,84 @@ REP="${ROOT}/m1_contact.calibre.rep"
 LOG="${ROOT}/m1_contact.calibre.log"
 RULES="${ROOT}/m1_contact.calibre.svrf"
 GEN_RB="${ROOT}/generate_layout.rb"
+ENV_FILE="${ROOT}/calibre.env"
+ENV_EXAMPLE="${ROOT}/calibre.env.example"
 
 MODE="all"
 VIEW=0
+SETUP_HELP=0
+
+load_calibre_env() {
+  if [[ -f "$ENV_FILE" ]]; then
+    # shellcheck disable=SC1090
+    source "$ENV_FILE"
+    echo "==> Loaded ${ENV_FILE}"
+  fi
+}
+
+print_calibre_setup() {
+  cat <<EOF
+Calibre is not on PATH. Set it up using one of these options:
+
+  Option A — local env file (recommended for this demo)
+    cp ${ENV_EXAMPLE} ${ENV_FILE}
+    \$EDITOR ${ENV_FILE}          # set MGC_HOME to your Calibre install
+    ./run_calibre_drc.sh
+
+  Option B — export in your shell session
+    export MGC_HOME=/opt/mentor/calibre    # adjust path
+    export PATH="\$MGC_HOME/bin:\$PATH"
+    ./run_calibre_drc.sh
+
+  Option C — environment module (HPC / shared CAD server)
+    module avail calibre
+    module load calibre                  # use your site's module name
+    ./run_calibre_drc.sh
+
+  Option D — explicit binary path
+    export CALIBRE=/path/to/calibre/bin/calibre
+    ./run_calibre_drc.sh
+
+  License (if Calibre reports license errors)
+    export MGLS_LICENSE_FILE=1717@your-license-server
+    # ask your CAD/IT team for the correct value
+
+  Verify before running DRC
+    \$MGC_HOME/bin/calibre -version
+    # or: calibre -version
+
+  Find an existing install (run on a machine that has Calibre)
+    which calibre
+    ls /opt/mentor/*/bin/calibre 2>/dev/null
+    ls /usr/local/mentor/*/bin/calibre 2>/dev/null
+
+  After a successful run, view markers
+    ./run_calibre_drc.sh --view
+    calibredrv ${GDS} -rve ${RDB}
+
+See also: ${ROOT}/README.md
+EOF
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --drc-only) MODE="drc" ;;
     --gen-only) MODE="gen" ;;
     --view) VIEW=1 ;;
+    --setup-help) SETUP_HELP=1 ;;
     -h|--help)
-      sed -n '2,14p' "$0"
+      sed -n '2,48p' "$0"
       exit 0
       ;;
-    *) echo "Unknown option: $1" >&2; exit 1 ;;
+    *) echo "Unknown option: $1 (try --setup-help)" >&2; exit 1 ;;
   esac
   shift
 done
+
+if [[ "$SETUP_HELP" -eq 1 ]]; then
+  print_calibre_setup
+  exit 0
+fi
 
 find_calibre() {
   if [[ -n "${CALIBRE:-}" && -x "${CALIBRE}" ]]; then
@@ -122,7 +217,6 @@ print_summary() {
     python3 - "$REP" <<'PY'
 import re, sys
 text = open(sys.argv[1], encoding="utf-8", errors="replace").read()
-# Calibre summary lines like: "M1_MIN_WIDTH ........ TOTAL ........ 1"
 counts = {}
 for line in text.splitlines():
     m = re.match(r"^(M1_|CT_)\S+\s+\.+ TOTAL\s+\.+ (\d+)\s*$", line.strip())
@@ -137,6 +231,8 @@ PY
   fi
 }
 
+load_calibre_env
+
 if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
   generate_gds
 fi
@@ -147,26 +243,34 @@ if [[ "$MODE" == "all" || "$MODE" == "drc" ]]; then
 
   CALIBRE_BIN="$(find_calibre)" || {
     echo "ERROR: calibre not found." >&2
-    echo "Set MGC_HOME or CALIBRE, e.g.:" >&2
-    echo "  export MGC_HOME=/opt/mentor/calibre" >&2
-    echo "  ./run_calibre_drc.sh" >&2
+    echo >&2
+    print_calibre_setup >&2
     exit 1
   }
 
   rm -f "$RDB" "$REP" "$LOG"
   echo "==> Calibre: $("$CALIBRE_BIN" -version 2>/dev/null | head -1 || echo "$CALIBRE_BIN")"
+  echo "==> License: ${MGLS_LICENSE_FILE:-unset}"
   echo "==> Running DRC on ${GDS}"
   echo "    Rules: ${RULES}"
   echo "    RDB:   ${RDB}"
 
+  # Calibre 2019 expands $GDS/$RDB/$REP from the process environment
+  # (shell export), not reliably from -E flags on this install.
+  export GDS RDB REP
+  WORK="${ROOT}/.calibre_run"
+  mkdir -p "$WORK"
+
   set +e
-  "$CALIBRE_BIN" -drc -hier -turbo -nowait \
-    -E "GDS=${GDS}" \
-    -E "RDB=${RDB}" \
-    -E "REP=${REP}" \
-    "$RULES" 2>&1 | tee "$LOG"
+  (
+    cd "$WORK"
+    "$CALIBRE_BIN" -drc -hier -turbo -nowait "$RULES"
+  ) 2>&1 | tee "$LOG"
   rc=${PIPESTATUS[0]}
   set -e
+
+  # Clean per-run Calibre controller logs left in WORK
+  rm -f "$WORK"/CalibreRRLog.* 2>/dev/null || true
 
   if [[ "$rc" -ne 0 ]]; then
     echo "ERROR: calibre exited with status ${rc} (see ${LOG})" >&2

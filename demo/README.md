@@ -30,6 +30,7 @@ A minimal side-by-side demo of **Metal 1** and **Contact** design rules using **
 | `m1_contact.lyrdb` | KLayout | Report database (XML RDB with markers linked to the GDS) |
 | `m1_contact.calibre.svrf` | **Calibre DRC** | SVRF rule deck (same rules as KLayout) |
 | `run_calibre_drc.sh` | Calibre | Generate GDS + run Calibre DRC → `.rdb` / `.rep` / `.log` |
+| `calibre.env.example` | Calibre | Template for local setup — copy to `calibre.env` (auto-sourced by run script) |
 | `m1_contact.calibre.rdb` | Calibre RVE | ASCII results database |
 | `m1_contact.calibre.rep` | Calibre | Text summary report |
 | `m1_contact.calibre.log` | Calibre | Full run log |
@@ -72,11 +73,21 @@ klayout -b \
 
 ### 3. Run Calibre DRC
 
-Requires a licensed Calibre install (`MGC_HOME` or `calibre` on `PATH`).
+Requires a licensed Calibre install. Setup is documented in `run_calibre_drc.sh` (see header or `./run_calibre_drc.sh --setup-help`).
+
+**Recommended — local env file:**
+
+```bash
+cp calibre.env.example calibre.env
+$EDITOR calibre.env                  # set MGC_HOME to your Calibre install
+./run_calibre_drc.sh
+```
+
+**Or export in your shell:**
 
 ```bash
 export MGC_HOME=/opt/mentor/calibre   # adjust to your site
-
+export PATH="$MGC_HOME/bin:$PATH"
 ./run_calibre_drc.sh              # generate GDS + run DRC
 ./run_calibre_drc.sh --drc-only   # DRC only
 ./run_calibre_drc.sh --view       # run DRC + open Calibre RVE
