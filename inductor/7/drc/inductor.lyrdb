@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<report-database>
+ <description>Inductor DRC</description>
+ <original-file>/home/yongfu/proj/klayout-language/inductor/7/layout/inductor.gds</original-file>
+ <generator>drc: script='/home/yongfu/proj/klayout-language/inductor/common/inductor.drc'</generator>
+ <top-cell>IND_OCT_3P</top-cell>
+ <tags>
+ </tags>
+ <categories>
+  <category>
+   <name>M1.min_width</name>
+   <description>M1 width &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M1.min_space</name>
+   <description>M1 spacing &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.min_width</name>
+   <description>M2 width &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.min_space</name>
+   <description>M2 spacing &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>VIA.min_width</name>
+   <description>VIA width &lt; 0.6 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>VIA.min_space</name>
+   <description>VIA spacing &lt; 0.6 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M1.over_VIA.enclosure</name>
+   <description>M1 enclosure of VIA &lt; 0.2 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.over_VIA.enclosure</name>
+   <description>M2 enclosure of VIA &lt; 0.2 µm</description>
+   <categories>
+   </categories>
+  </category>
+ </categories>
+ <cells>
+  <cell>
+   <name>IND_OCT_3P</name>
+   <variant/>
+   <layout-name/>
+   <references>
+   </references>
+  </cell>
+ </cells>
+ <items>
+  <item>
+   <tags/>
+   <category>'M2.min_space'</category>
+   <cell>IND_OCT_3P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (7.707,-27.315;8.707,-27.315)|(8.707,-26.815;7.707,-26.815)</value>
+   </values>
+  </item>
+ </items>
+</report-database>

@@ -1,0 +1,3 @@
+PEEC_GEOMETRY
+Physical EM from GDS centerline (Grover self + mutual, skin R, oxide C).
+L0=0.3433 nH  Q@fref=1.14  Qmax=5.37

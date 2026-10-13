@@ -1,0 +1,4 @@
+* Auto schematic for IND_OCT_2P (inductor)
+.SUBCKT IND_OCT_2P P1 P2
+Rwind P1 P2 0.01
+.ENDS
