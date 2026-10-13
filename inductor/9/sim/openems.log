@@ -1,0 +1,17 @@
+== extract geometry ==
+Wrote /home/yongfu/proj/klayout-language/inductor/9/sim/geometry.json centerlines=1 primary_pts=217
+== try openEMS FDTD ==
+openEMS not available: No module named 'openEMS'
+Install openEMS+CSXCAD or re-run with --allow-analytic
+== PEEC geometry EM (physical, from GDS centerline) ==
+PEEC OK  L0=0.090 nH  Q@ref=0.4  Qmax=2.0 @ 40.00 GHz  segs=216 len=382.4 µm
+== plot ==
+Wrote /home/yongfu/proj/klayout-language/inductor/9/sim/performance.png
+== done ==
+PEEC_GEOMETRY
+Physical EM from GDS centerline (Grover self + mutual, skin R, oxide C).
+L0=0.0895 nH  Q@fref=0.39  Qmax=1.98
+-rw-r--r--. 1 yongfu yongfu   6389 Oct 13 17:50 /home/yongfu/proj/klayout-language/inductor/9/sim/lq.csv
+-rw-r--r--. 1 yongfu yongfu 140494 Oct 13 17:50 /home/yongfu/proj/klayout-language/inductor/9/sim/performance.png
+-rw-r--r--. 1 yongfu yongfu   9031 Oct 13 17:50 /home/yongfu/proj/klayout-language/inductor/9/sim/sparams.csv
+-rw-r--r--. 1 yongfu yongfu    319 Oct 13 17:50 /home/yongfu/proj/klayout-language/inductor/9/sim/summary.json

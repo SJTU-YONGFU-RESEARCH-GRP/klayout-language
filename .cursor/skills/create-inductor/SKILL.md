@@ -234,13 +234,16 @@ If any run is missing `sim/summary.json`, still include it (EM columns show —)
 ## Quick commands
 
 ```bash
-# First / next run (example: use folder 1)
+# Next run (N = last+1) — picker enforces shape ≠ previous
+N=$(( $(ls -d inductor/[0-9]* 2>/dev/null | sort -n | tail -1 | xargs basename) + 1 ))
+mkdir -p inductor/$N/{layout,drc,lvs,sim}
+python3 inductor/common/pick_next_config.py --root inductor --write inductor/$N/config.yaml
 python3 inductor/common/generate_inductor.py \
-  --config inductor/1/config.yaml --out inductor/1/layout/inductor.gds
-./inductor/common/run_drc.sh inductor/1
-./inductor/common/run_lvs.sh inductor/1
-./inductor/common/run_screenshot.sh inductor/1
-./inductor/common/run_openems.sh inductor/1
-# write inductor/1/RESULT.md, then:
+  --config inductor/$N/config.yaml --out inductor/$N/layout/inductor.gds
+./inductor/common/run_drc.sh inductor/$N
+./inductor/common/run_lvs.sh inductor/$N
+./inductor/common/run_screenshot.sh inductor/$N
+./inductor/common/run_openems.sh inductor/$N
+# write inductor/$N/RESULT.md, then:
 ./inductor/common/run_benchmark.sh
 ```
