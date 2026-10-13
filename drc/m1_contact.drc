@@ -5,6 +5,7 @@
 #   CT  30/0
 #
 # Run: ./run_klayout_drc.sh
+# Optional -rd vars: input, report, cell
 
 M1_MIN_WIDTH   = 0.14
 M1_MIN_SPACE   = 0.14
@@ -12,11 +13,15 @@ M1_OVER_CT_ENC = 0.055
 CT_MIN_WIDTH   = 0.16
 CT_MIN_SPACE   = 0.18
 
+cell_name = ($cell || "M1_CT_DRC_DEMO").to_s
+
 if $input
-  source($input)
+  source($input, cell_name)
+else
+  # interactive / default
 end
 
-report("M1 / Contact DRC demo", $report || "m1_contact.lyrdb", "M1_CT_DRC_DEMO")
+report("M1 / Contact DRC demo", $report || "m1_contact.lyrdb", cell_name)
 if $input
   def_output.rdb.original_file = $input
 end
@@ -24,27 +29,24 @@ end
 metal1  = input(31, 0)
 contact = input(30, 0)
 
-metal1.width(M1_MIN_WIDTH.um).output(
-  "M1.min_width",
-  "Metal1 width < #{M1_MIN_WIDTH} µm"
-)
+mw = metal1.width(M1_MIN_WIDTH.um)
+mw.output("M1.min_width", "Metal1 width < #{M1_MIN_WIDTH} µm")
 
-metal1.space(M1_MIN_SPACE.um).output(
-  "M1.min_space",
-  "Metal1 spacing < #{M1_MIN_SPACE} µm"
-)
+ms = metal1.space(M1_MIN_SPACE.um)
+ms.output("M1.min_space", "Metal1 spacing < #{M1_MIN_SPACE} µm")
 
-contact.width(CT_MIN_WIDTH.um).output(
-  "CT.min_width",
-  "Contact width < #{CT_MIN_WIDTH} µm"
-)
+cw = contact.width(CT_MIN_WIDTH.um)
+cw.output("CT.min_width", "Contact width < #{CT_MIN_WIDTH} µm")
 
-contact.space(CT_MIN_SPACE.um).output(
-  "CT.min_space",
-  "Contact spacing < #{CT_MIN_SPACE} µm"
-)
+cs = contact.space(CT_MIN_SPACE.um)
+cs.output("CT.min_space", "Contact spacing < #{CT_MIN_SPACE} µm")
 
-metal1.enclosing(contact, M1_OVER_CT_ENC.um).output(
-  "M1.over_CT.enclosure",
-  "M1 enclosure of contact < #{M1_OVER_CT_ENC} µm"
-)
+enc = metal1.enclosing(contact, M1_OVER_CT_ENC.um)
+enc.output("M1.over_CT.enclosure", "M1 enclosure of contact < #{M1_OVER_CT_ENC} µm")
+
+total = mw.data.size + ms.data.size + cw.data.size + cs.data.size + enc.data.size
+if total == 0
+  puts "DRC PASS — #{cell_name} (0 violations)"
+else
+  puts "DRC FAIL — #{cell_name} (#{total} violations)"
+end

@@ -5,6 +5,8 @@ calibredrc/
 *.calibre.rep
 *.calibre.log
 m1_contact.lyrdb
+m1_contact_*.lyrdb
+m1_contact_*.log
 out.rdb
 out.rep
 

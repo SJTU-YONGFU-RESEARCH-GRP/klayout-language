@@ -22,13 +22,16 @@ fi
 
 mkdir -p "${ROOT}/screenshots"
 
+# Avoid Calibre/Qt library conflicts if MGC_HOME is in the environment
+CLEAN_ENV=(env -u LD_LIBRARY_PATH)
+
 if command -v xvfb-run >/dev/null 2>&1; then
   echo "==> Capturing via xvfb-run + klayout -z -x"
-  xvfb-run -a -s '-screen 0 1920x1080x24' \
+  "${CLEAN_ENV[@]}" xvfb-run -a -s '-screen 0 1920x1080x24' \
     klayout -z -x -r "${SCRIPT}"
 else
   echo "==> Capturing via klayout -z -x (needs DISPLAY=${DISPLAY:-unset})"
-  klayout -z -x -r "${SCRIPT}"
+  "${CLEAN_ENV[@]}" klayout -z -x -r "${SCRIPT}"
 fi
 
 echo "==> Screenshots:"

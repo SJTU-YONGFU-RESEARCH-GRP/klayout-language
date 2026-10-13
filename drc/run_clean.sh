@@ -42,6 +42,11 @@ echo "==> Cleaning generated files in ${ROOT}"
 
 # KLayout
 remove_path "${ROOT}/m1_contact.lyrdb"
+shopt -s nullglob
+for f in "${ROOT}"/m1_contact_*.lyrdb "${ROOT}"/m1_contact_*.log; do
+  remove_path "$f"
+done
+shopt -u nullglob
 
 # Calibre results / logs
 remove_path "${ROOT}/m1_contact.calibre.rdb"

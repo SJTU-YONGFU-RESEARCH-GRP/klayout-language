@@ -155,15 +155,14 @@ M$1 2 1 2 3 NMOS L=0.18U W=0.5U    # S/D shorted → FAIL
 ## Screenshots
 
 ```bash
-./run_lvs.sh --gen-only
-xvfb-run -a klayout -z -x -r ../scripts/capture_demo_screenshots.rb
+../scripts/run_capture_screenshots.sh   # regenerate GDS + LVS + all PNGs
 ```
 
 | File | Content |
 |------|---------|
 | [`../screenshots/lvs_nmos_demo.png`](../screenshots/lvs_nmos_demo.png) | GOOD + BAD side by side |
 | [`../screenshots/lvs_nmos_good.png`](../screenshots/lvs_nmos_good.png) | Passing transistor |
-| [`../screenshots/lvs_nmos_bad.png`](../screenshots/lvs_nmos_bad.png) | Failing S–D short |
+| [`../screenshots/lvs_nmos_bad.png`](../screenshots/lvs_nmos_bad.png) | Failing S–D short (metal bridge) |
 
 ---
 

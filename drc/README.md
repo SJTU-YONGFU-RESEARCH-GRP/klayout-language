@@ -1,8 +1,16 @@
 # M1 / Contact DRC Demo
 
-Side-by-side **KLayout** and **Calibre** DRC on the same Metal1 / Contact test layout.
+Side-by-side **KLayout** and **Calibre** DRC on the same Metal1 / Contact test layout — GOOD pass / BAD fail (same pattern as [`../lvs/`](../lvs/)).
 
-![M1/Contact DRC test layout — GOOD vs BAD rows](../screenshots/drc_m1_contact_layout.png)
+![M1/Contact DRC — GOOD (left) vs BAD (right)](../screenshots/drc_m1_contact_layout.png)
+
+![Same layout with DRC error markers (red)](../screenshots/drc_m1_contact_with_markers.png)
+
+| Cell | Layout | Expected |
+|------|--------|----------|
+| `M1_CT_GOOD` | Passing width / space / enclosure | **PASS** (0 violations) |
+| `M1_CT_BAD` | One intentional fail per rule | **FAIL** (8 markers) |
+| `M1_CT_DRC_DEMO` | Both (for viewing / Calibre) | FAIL (BAD subcell) |
 
 | Rule | Value | KLayout | Calibre |
 |------|-------|---------|---------|
@@ -14,7 +22,7 @@ Side-by-side **KLayout** and **Calibre** DRC on the same Metal1 / Contact test l
 
 **Layers:** M1 = **31/0**, Contact = **30/0**, labels = **90/0**
 
-**Expected:** bad rows only. KLayout → **8** markers (enclosure = 4 edge-pairs). Calibre → **5** results (enclosure = 1 polygon).
+**Expected on BAD / DEMO:** KLayout → **8** markers (enclosure = 4 edge-pairs). Calibre on DEMO → **6** results (enclosure = 2).
 
 Sibling demo: [`../lvs/`](../lvs/) (NMOS transistor LVS).
 
@@ -25,18 +33,30 @@ Sibling demo: [`../lvs/`](../lvs/) (NMOS transistor LVS).
 ```bash
 cd drc
 
-# KLayout
-./run_klayout_drc.sh          # generate GDS + DRC
-./view_klayout_drc.sh         # open GDS + .lyrdb in GUI
+# KLayout — GOOD → PASS, BAD → FAIL
+./run_klayout_drc.sh
+./run_klayout_drc.sh --good
+./run_klayout_drc.sh --bad
+
+./view_klayout_drc.sh          # DEMO + markers
+./view_klayout_drc.sh --bad
 
 # Calibre (needs calibre.env — see below)
-./view_calibre_drc.sh         # UI: DESIGNrev → DRC → RVE
-./run_calibre_drc.sh          # batch
+./view_calibre_drc.sh          # UI: DESIGNrev → DRC → RVE
+./run_calibre_drc.sh           # batch on M1_CT_DRC_DEMO
 
-./run_clean.sh                # remove generated reports
+./run_clean.sh
 ```
 
 Requires [KLayout](https://www.klayout.de/) on `PATH` (`../scripts/install-klayout.sh`).
+
+```bash
+klayout -b \
+  -rd input=m1_contact_demo.gds \
+  -rd cell=M1_CT_GOOD \
+  -rd report=m1_contact_good.lyrdb \
+  -r m1_contact.drc
+```
 
 ---
 
@@ -44,10 +64,10 @@ Requires [KLayout](https://www.klayout.de/) on `PATH` (`../scripts/install-klayo
 
 | File | Role |
 |------|------|
-| `generate_layout.rb` | Builds `m1_contact_demo.gds` (labeled good/bad rows) |
+| `generate_layout.rb` | Builds `m1_contact_demo.gds` (GOOD + BAD + DEMO) |
 | `m1_contact_demo.gds` | Test layout |
-| `m1_contact.drc` | KLayout rule deck |
-| `run_klayout_drc.sh` | Generate + run KLayout DRC |
+| `m1_contact.drc` | KLayout rule deck (`puts DRC PASS/FAIL`) |
+| `run_klayout_drc.sh` | Generate + run GOOD/BAD/DEMO |
 | `view_klayout_drc.sh` | `klayout gds -m lyrdb` |
 | `m1_contact.calibre.svrf` | Calibre rules only (no LAYOUT PATH) |
 | `run_calibre_drc.sh` | Batch Calibre (writes temp `INCLUDE` run deck) |
@@ -56,23 +76,24 @@ Requires [KLayout](https://www.klayout.de/) on `PATH` (`../scripts/install-klayo
 | `calibre.env.example` | Site `MGC_HOME` / `MGLS_LICENSE_FILE` template |
 | `run_clean.sh` | Delete reports / logs (`--gds` also removes GDS) |
 
-Generated (gitignored): `m1_contact.lyrdb`, `m1_contact.calibre.{rdb,rep,log}`, `.calibre_run/`, `calibredrc/`, `calibre.env`
+Generated (gitignored): `m1_contact_{good,bad,demo}.{lyrdb,log}`, `m1_contact.lyrdb`, `m1_contact.calibre.{rdb,rep,log}`, `.calibre_run/`, `calibredrc/`, `calibre.env`
 
 ---
 
-## Test structures
+## Good vs bad
 
-Labels on layer **90/0**. GOOD rows pass; BAD rows fail one rule (see screenshot above).
+| GOOD (`M1_CT_GOOD`) | BAD (`M1_CT_BAD`) |
+|:-------------------:|:-----------------:|
+| ![GOOD](../screenshots/drc_m1_contact_good.png) | ![BAD](../screenshots/drc_m1_contact_bad.png) |
+| All structures meet rules | Thin wire, tight space, weak enc, tight CT, tiny CT |
 
-| Row | Expected |
-|-----|----------|
-| GOOD M1 width 0.20 µm | pass |
+**BAD rows (expect fail):**
+
+| Row | Rule |
+|-----|------|
 | BAD M1 width 0.10 µm | `M1.min_width` |
-| GOOD M1 space 0.20 µm | pass |
 | BAD M1 space 0.08 µm | `M1.min_space` |
-| GOOD CT 0.20 + M1 enc 0.08 µm | pass |
 | BAD M1 enc 0.03 µm | `M1.over_CT.enclosure` |
-| GOOD CT space 0.25 µm | pass |
 | BAD CT space 0.12 µm | `CT.min_space` |
 | BAD CT width 0.12 µm | `CT.min_width` |
 
@@ -85,14 +106,14 @@ Labels on layer **90/0**. GOOD rows pass; BAD rows fail one rule (see screenshot
 **KLayout** — Ruby DSL; report linked to source GDS for the GUI:
 
 ```ruby
-source($input)
-report("M1 / Contact DRC demo", "m1_contact.lyrdb", "M1_CT_DRC_DEMO")
+source($input, $cell || "M1_CT_DRC_DEMO")
+report("M1 / Contact DRC demo", "m1_contact.lyrdb", cell_name)
 def_output.rdb.original_file = $input
 metal1  = input(31, 0)
 contact = input(30, 0)
 ```
 
-**Calibre** — SVRF rules file has **no** layout/RDB paths. Batch / DESIGNrev write a tiny run deck that `INCLUDE`s this file (or Calibre Interactive fills paths in the GUI).
+**Calibre** — SVRF rules file has **no** layout/RDB paths. Batch / DESIGNrev write a tiny run deck that `INCLUDE`s this file (or Calibre Interactive fills paths in the GUI). Topcell: `M1_CT_DRC_DEMO`.
 
 ```svrf
 LAYER M1 31 0
@@ -150,16 +171,16 @@ cp calibre.env.example calibre.env   # already configured on this host if presen
 
 ## Screenshots
 
-Regenerate README images (needs Xvfb + KLayout GUI libs):
-
 ```bash
-./run_klayout_drc.sh --gen-only
-xvfb-run -a klayout -z -x -r ../scripts/capture_demo_screenshots.rb
+../scripts/run_capture_screenshots.sh   # regenerate GDS + DRC + all PNGs
 ```
 
 | File | Content |
 |------|---------|
-| [`../screenshots/drc_m1_contact_layout.png`](../screenshots/drc_m1_contact_layout.png) | Full GOOD/BAD test layout |
+| [`../screenshots/drc_m1_contact_layout.png`](../screenshots/drc_m1_contact_layout.png) | GOOD + BAD side by side |
+| [`../screenshots/drc_m1_contact_good.png`](../screenshots/drc_m1_contact_good.png) | Passing structures |
+| [`../screenshots/drc_m1_contact_bad.png`](../screenshots/drc_m1_contact_bad.png) | Failing structures |
+| [`../screenshots/drc_m1_contact_with_markers.png`](../screenshots/drc_m1_contact_with_markers.png) | DEMO + red DRC markers |
 
 ---
 
