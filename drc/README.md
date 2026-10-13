@@ -20,7 +20,7 @@ Side-by-side **KLayout** and **Calibre** DRC on the same Metal1 / Contact test l
 | CT min space | 0.18 µm | `CT.min_space` | `CT_MIN_SPACE` |
 | M1 over CT enclosure | 0.055 µm | `M1.over_CT.enclosure` | `M1_OVER_CT_ENCLOSURE` |
 
-**Layers:** M1 = **31/0**, Contact = **30/0**, labels = **90/0**
+**Layers (screenshot colors):** M1 **31/0** blue · CT **30/0** red-orange · labels **90/0** purple · DRC markers magenta
 
 **Expected on BAD / DEMO:** KLayout → **8** markers (enclosure = 4 edge-pairs). Calibre on DEMO → **6** results (enclosure = 2).
 
@@ -80,22 +80,48 @@ Generated (gitignored): `m1_contact_{good,bad,demo}.{lyrdb,log}`, `m1_contact.ly
 
 ---
 
-## Good vs bad
+## Good vs bad (overview)
 
 | GOOD (`M1_CT_GOOD`) | BAD (`M1_CT_BAD`) |
 |:-------------------:|:-----------------:|
 | ![GOOD](../screenshots/drc_m1_contact_good.png) | ![BAD](../screenshots/drc_m1_contact_bad.png) |
 | All structures meet rules | Thin wire, tight space, weak enc, tight CT, tiny CT |
 
-**BAD rows (expect fail):**
+---
 
-| Row | Rule |
-|-----|------|
-| BAD M1 width 0.10 µm | `M1.min_width` |
-| BAD M1 space 0.08 µm | `M1.min_space` |
-| BAD M1 enc 0.03 µm | `M1.over_CT.enclosure` |
-| BAD CT space 0.12 µm | `CT.min_space` |
-| BAD CT width 0.12 µm | `CT.min_width` |
+## Per-rule zoom (rulers + error markers)
+
+Each shot is zoomed to one structure. Dimension rulers show the measured value; BAD cases also highlight DRC markers (magenta).
+
+### M1 min width (limit 0.14 µm)
+
+| GOOD 0.20 µm | BAD 0.10 µm |
+|:------------:|:-----------:|
+| ![GOOD width](../screenshots/drc_case_m1_width_good.png) | ![BAD width](../screenshots/drc_case_m1_width_bad.png) |
+
+### M1 min space (limit 0.14 µm)
+
+| GOOD 0.20 µm | BAD 0.08 µm |
+|:------------:|:-----------:|
+| ![GOOD space](../screenshots/drc_case_m1_space_good.png) | ![BAD space](../screenshots/drc_case_m1_space_bad.png) |
+
+### M1 over CT enclosure (limit 0.055 µm)
+
+| GOOD 0.08 µm | BAD 0.03 µm |
+|:------------:|:-----------:|
+| ![GOOD enc](../screenshots/drc_case_m1_enc_good.png) | ![BAD enc](../screenshots/drc_case_m1_enc_bad.png) |
+
+### CT min space (limit 0.18 µm)
+
+| GOOD 0.25 µm | BAD 0.12 µm |
+|:------------:|:-----------:|
+| ![GOOD CT space](../screenshots/drc_case_ct_space_good.png) | ![BAD CT space](../screenshots/drc_case_ct_space_bad.png) |
+
+### CT min width (limit 0.16 µm)
+
+| BAD 0.12 µm |
+|:-----------:|
+| ![BAD CT width](../screenshots/drc_case_ct_width_bad.png) |
 
 ---
 
@@ -180,7 +206,8 @@ cp calibre.env.example calibre.env   # already configured on this host if presen
 | [`../screenshots/drc_m1_contact_layout.png`](../screenshots/drc_m1_contact_layout.png) | GOOD + BAD side by side |
 | [`../screenshots/drc_m1_contact_good.png`](../screenshots/drc_m1_contact_good.png) | Passing structures |
 | [`../screenshots/drc_m1_contact_bad.png`](../screenshots/drc_m1_contact_bad.png) | Failing structures |
-| [`../screenshots/drc_m1_contact_with_markers.png`](../screenshots/drc_m1_contact_with_markers.png) | DEMO + red DRC markers |
+| [`../screenshots/drc_m1_contact_with_markers.png`](../screenshots/drc_m1_contact_with_markers.png) | DEMO + DRC markers |
+| `drc_case_*.png` | Per-rule zoom with rulers / markers (see above) |
 
 ---
 

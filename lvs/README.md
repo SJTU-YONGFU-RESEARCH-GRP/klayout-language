@@ -136,6 +136,10 @@ M1 D G S B NMOS L=0.18U W=0.50U
 | ![GOOD NMOS](../screenshots/lvs_nmos_good.png) | ![BAD NMOS with S–D short](../screenshots/lvs_nmos_bad.png) |
 | Separate S / G / D / B | Metal strap shorts S–D |
 
+Zoom on the failing bridge:
+
+![S–D short zoom with ruler](../screenshots/lvs_case_sd_short.png)
+
 **GOOD** — four nets:
 
 ```spice
@@ -163,6 +167,9 @@ M$1 2 1 2 3 NMOS L=0.18U W=0.5U    # S/D shorted → FAIL
 | [`../screenshots/lvs_nmos_demo.png`](../screenshots/lvs_nmos_demo.png) | GOOD + BAD side by side |
 | [`../screenshots/lvs_nmos_good.png`](../screenshots/lvs_nmos_good.png) | Passing transistor |
 | [`../screenshots/lvs_nmos_bad.png`](../screenshots/lvs_nmos_bad.png) | Failing S–D short (metal bridge) |
+| [`../screenshots/lvs_case_sd_short.png`](../screenshots/lvs_case_sd_short.png) | Zoom on short + ruler |
+
+**Layers (screenshot colors):** DIFF red · POLY green · CONT yellow · METAL1 blue · PTIE orange · labels purple
 
 ---
 

@@ -4,7 +4,7 @@
 #
 # Needs a display (Xvfb is fine). Do not use -b/-zz — MainWindow is required.
 #
-# Per-testcase zoom shots include dimension rulers and (for BAD) DRC error markers.
+# Per-testcase zoom shots include drawn dimension rulers and DRC error highlights.
 
 include RBA
 
@@ -12,41 +12,47 @@ REPO = File.expand_path("..", __dir__)
 SHOT = File.join(REPO, "screenshots")
 Dir.mkdir(SHOT) unless File.directory?(SHOT)
 
-# High-contrast, distinct hues (0xRRGGBB)
+# High-contrast hues (0xRRGGBB)
 COLORS = {
-  # DRC
-  "31/0"  => [0x1E6AFF, "M1"],       # bright blue
-  "30/0"  => [0xE63900, "CT"],       # vivid red-orange
-  "90/0"  => [0x5B2C6F, "LABEL"],   # purple
-  # LVS
-  "1/0"   => [0xE74C3C, "DIFF"],    # red
-  "2/0"   => [0x27AE60, "POLY"],    # green
-  "3/0"   => [0xF1C40F, "CONT"],    # yellow
-  "4/0"   => [0x2980B9, "METAL1"],  # blue
-  "4/1"   => [0x8E44AD, "LABEL"],   # purple
-  "6/0"   => [0xD35400, "PTIE"],    # orange
-  # synthetic DRC error markers
-  "100/0" => [0xFF00AA, "DRC_ERR"]  # magenta hotspot
+  "31/0"  => [0x1E6AFF, "M1",   { transparent: true, dither: 1 }],   # blue outline+tint
+  "30/0"  => [0xE63900, "CT",   { transparent: false, dither: 0 }],  # solid red-orange
+  "90/0"  => [0x5B2C6F, "LABEL",{ transparent: false, dither: 0 }],  # purple
+  "1/0"   => [0xE74C3C, "DIFF", { transparent: true, dither: 1 }],   # red
+  "2/0"   => [0x27AE60, "POLY", { transparent: false, dither: 0 }],  # green
+  "3/0"   => [0xF1C40F, "CONT", { transparent: false, dither: 0 }],  # yellow
+  "4/0"   => [0x2980B9, "METAL1",{ transparent: true, dither: 1 }],  # blue
+  "4/1"   => [0x8E44AD, "LABEL",{ transparent: false, dither: 0 }],  # purple
+  "6/0"   => [0xD35400, "PTIE", { transparent: false, dither: 0 }],  # orange
+  "100/0" => [0xFF00AA, "DRC_ERR",{ transparent: false, dither: 5 }],# magenta
+  "101/0" => [0x111111, "DIM",  { transparent: false, dither: 0 }],  # black rulers
+  "102/0" => [0x8E44AD, "DIMTXT",{ transparent: false, dither: 0 }]  # purple labels
 }
 
+def layer_key(source_str)
+  m = source_str.to_s.match(/(\d+)\s*\/\s*(\d+)/)
+  m ? "#{m[1]}/#{m[2]}" : nil
+end
+
 def apply_colors(view)
+  begin
+    view.add_missing_layers
+  rescue
+  end
   iter = view.begin_layers
   while !iter.at_end?
     node = iter.current
-    src = node.source.to_s
-    key = src.split("@").first
-    if COLORS[key]
-      color, name = COLORS[key]
+    key = layer_key(node.source.to_s)
+    if key && COLORS[key]
+      color, name, opts = COLORS[key]
       props = node.dup
       props.name = name
       props.fill_color = color
       props.frame_color = color
-      # Contacts / plugs: hatch so they stay visible over metal
-      props.dither_pattern = (key == "30/0" || key == "3/0" || key == "100/0") ? 5 : 0
+      props.dither_pattern = opts[:dither]
+      props.transparent = !!opts[:transparent]
       props.visible = true
-      # Thicker frames on tiny plugs / markers
       begin
-        props.width = (key == "30/0" || key == "3/0" || key == "100/0") ? 2 : 1
+        props.width = (key == "30/0" || key == "3/0" || key == "100/0" || key == "101/0") ? 2 : 1
       rescue
       end
       view.set_layer_properties(iter, props)
@@ -55,21 +61,80 @@ def apply_colors(view)
   end
 end
 
-def clear_rulers(view)
-  view.clear_annotations
+def dbu(layout, um)
+  (um / layout.dbu).round
 end
 
-# Horizontal or vertical dimension ruler (µm coords in the active cell).
-def add_ruler(view, x1, y1, x2, y2, label: nil)
-  a = Annotation.new
-  a.p1 = DPoint.new(x1, y1)
-  a.p2 = DPoint.new(x2, y2)
-  a.style = Annotation::StyleArrowBoth
-  a.outline = Annotation::OutlineXY
-  a.fmt = label ? label : "$D µm"
-  a.fmt_x = ""
-  a.fmt_y = ""
-  view.insert_annotation(a)
+def add_box(cell, layer, layout, x, y, w, h)
+  cell.shapes(layer).insert(Box.new(
+    dbu(layout, x), dbu(layout, y),
+    dbu(layout, x + w), dbu(layout, y + h)
+  ))
+end
+
+def add_text(cell, layer, layout, x, y, text, height_um)
+  t = Text.new(text, dbu(layout, x), dbu(layout, y))
+  t.size = dbu(layout, height_um)
+  cell.shapes(layer).insert(t)
+end
+
+# Draw a dimension: ticks + bar + label (µm coords).
+def draw_dim(cell, layout, ly_line, ly_txt, x1, y1, x2, y2, label, text_h: 0.045)
+  # tick length
+  dx = x2 - x1
+  dy = y2 - y1
+  len = Math.sqrt(dx * dx + dy * dy)
+  return if len < 1e-9
+  # perpendicular unit for ticks
+  px = -dy / len
+  py = dx / len
+  tick = [len * 0.12, 0.025].max
+  tw = [len * 0.02, 0.008].max  # stroke width
+
+  # main bar as thin box along the segment
+  if dx.abs >= dy.abs
+    # mostly horizontal
+    y = 0.5 * (y1 + y2)
+    add_box(cell, ly_line, layout, [x1, x2].min, y - tw * 0.5, dx.abs, tw)
+    add_box(cell, ly_line, layout, x1 - tw * 0.5, y1 - tick * 0.5, tw, tick)
+    add_box(cell, ly_line, layout, x2 - tw * 0.5, y2 - tick * 0.5, tw, tick)
+    add_text(cell, ly_txt, layout, 0.5 * (x1 + x2) - label.length * text_h * 0.22,
+             y + tick * 0.55, label, text_h)
+  else
+    # mostly vertical
+    x = 0.5 * (x1 + x2)
+    add_box(cell, ly_line, layout, x - tw * 0.5, [y1, y2].min, tw, dy.abs)
+    add_box(cell, ly_line, layout, x1 - tick * 0.5, y1 - tw * 0.5, tick, tw)
+    add_box(cell, ly_line, layout, x2 - tick * 0.5, y2 - tw * 0.5, tick, tw)
+    add_text(cell, ly_txt, layout, x + tick * 0.55,
+             0.5 * (y1 + y2), label, text_h)
+  end
+end
+
+def prepare_case_gds(gds, cell_name, markers:, rulers:)
+  layout = Layout.new
+  layout.read(gds)
+  cell = layout.cell(cell_name)
+  raise "missing #{cell_name}" unless cell
+
+  ly_err = layout.layer(100, 0)
+  ly_dim = layout.layer(101, 0)
+  ly_txt = layout.layer(102, 0)
+
+  (markers || []).each do |mx0, my0, mx1, my1|
+    cell.shapes(ly_err).insert(Box.new(
+      dbu(layout, mx0), dbu(layout, my0),
+      dbu(layout, mx1), dbu(layout, my1)
+    ))
+  end
+
+  (rulers || []).each do |rx1, ry1, rx2, ry2, label|
+    draw_dim(cell, layout, ly_dim, ly_txt, rx1, ry1, rx2, ry2, label.to_s)
+  end
+
+  tmp = File.join(SHOT, "_case_#{cell_name}_#{Process.pid}_#{rand(10000)}.gds")
+  layout.write(tmp)
+  tmp
 end
 
 def load_cell(gds, cell_name)
@@ -83,60 +148,32 @@ def load_cell(gds, cell_name)
   cv.cell = cell
   apply_colors(view)
   view.max_hier
-  [view, cv]
+  view
 end
 
 def capture(path, gds, cell_name:, width:, height:)
-  view, _cv = load_cell(gds, cell_name)
-  clear_rulers(view)
+  view = load_cell(gds, cell_name)
   view.zoom_fit
   view.update_content
   view.save_image(path, width, height)
   puts "Wrote #{path} (#{File.size(path)} bytes)"
 end
 
-# Zoom to a µm box, draw rulers, optionally overlay error marker boxes (µm).
 def capture_zoom(path, gds, cell_name:, box:, rulers: [], markers: [],
-                 width: 900, height: 700, pad: 0.25)
+                 width: 1000, height: 750, pad: 0.18)
   x0, y0, x1, y1 = box
-  src = gds
-
-  if markers && !markers.empty?
-    layout = Layout.new
-    layout.read(gds)
-    cell = layout.cell(cell_name)
-    err = layout.layer(100, 0)
-    markers.each do |mx0, my0, mx1, my1|
-      cell.shapes(err).insert(Box.new(
-        (mx0 / layout.dbu).round, (my0 / layout.dbu).round,
-        (mx1 / layout.dbu).round, (my1 / layout.dbu).round
-      ))
-    end
-    src = File.join(SHOT, "_zoom_tmp.gds")
-    layout.write(src)
-  end
-
-  view, _cv = load_cell(src, cell_name)
+  tmp = prepare_case_gds(gds, cell_name, markers: markers, rulers: rulers)
   begin
-    view.add_missing_layers
-  rescue
+    view = load_cell(tmp, cell_name)
+    view.zoom_box(DBox.new(x0 - pad, y0 - pad, x1 + pad, y1 + pad))
+    view.update_content
+    view.save_image(path, width, height)
+    puts "Wrote #{path} (#{File.size(path)} bytes)"
+  ensure
+    File.delete(tmp) if File.exist?(tmp)
   end
-  apply_colors(view)
-  clear_rulers(view)
-
-  rulers.each do |rx1, ry1, rx2, ry2, *rest|
-    add_ruler(view, rx1, ry1, rx2, ry2, label: rest[0])
-  end
-
-  view.zoom_box(DBox.new(x0 - pad, y0 - pad, x1 + pad, y1 + pad))
-  view.update_content
-  view.save_image(path, width, height)
-  puts "Wrote #{path} (#{File.size(path)} bytes)"
-  clear_rulers(view)
-  File.delete(src) if src != gds && File.exist?(src)
 end
 
-# Parse edge-pair markers from lyrdb → list of [x0,y0,x1,y1] µm boxes (padded).
 def lyrdb_marker_boxes(lyrdb, pad: 0.015)
   return [] unless lyrdb && File.file?(lyrdb)
   boxes = []
@@ -149,7 +186,7 @@ def lyrdb_marker_boxes(lyrdb, pad: 0.015)
   boxes
 end
 
-def markers_in_box(all, box, slack: 0.05)
+def markers_in_box(all, box, slack: 0.08)
   x0, y0, x1, y1 = box
   all.select do |mx0, my0, mx1, my1|
     cx = 0.5 * (mx0 + mx1)
@@ -159,108 +196,86 @@ def markers_in_box(all, box, slack: 0.05)
 end
 
 def capture_drc_with_markers(path, gds, lyrdb, cell_name:, width:, height:)
-  layout = Layout.new
-  layout.read(gds)
-  cell = layout.cell(cell_name)
-  raise "missing #{cell_name}" unless cell
-
-  err = layout.layer(100, 0)
-  lyrdb_marker_boxes(lyrdb, pad: 0.02).each do |x0, y0, x1, y1|
-    cell.shapes(err).insert(Box.new(
-      (x0 / layout.dbu).round, (y0 / layout.dbu).round,
-      (x1 / layout.dbu).round, (y1 / layout.dbu).round
-    ))
+  tmp = prepare_case_gds(gds, cell_name,
+                         markers: lyrdb_marker_boxes(lyrdb, pad: 0.02),
+                         rulers: [])
+  begin
+    capture(path, tmp, cell_name: cell_name, width: width, height: height)
+  ensure
+    File.delete(tmp) if File.exist?(tmp)
   end
-
-  tmp = File.join(SHOT, "_drc_with_markers_tmp.gds")
-  layout.write(tmp)
-  capture(path, tmp, cell_name: cell_name, width: width, height: height)
-  File.delete(tmp) if File.exist?(tmp)
 end
 
-# ---------------------------------------------------------------------------
-# DRC per-testcase zoom definitions (µm, in M1_CT_GOOD / M1_CT_BAD)
-# Each: name, cell, view box [x0,y0,x1,y1], rulers [[x1,y1,x2,y2,label?], ...]
-# ---------------------------------------------------------------------------
+# Per-testcase zooms (µm in M1_CT_GOOD / M1_CT_BAD)
 DRC_CASES = [
   {
-    file: "drc_case_m1_width_good.png",
-    cell: "M1_CT_GOOD", title: "GOOD M1 width 0.20 µm",
-    box: [7.7, 11.8, 8.6, 13.7],
-    rulers: [[8.0, 13.6, 8.20, 13.6, "0.20 µm width"]]
+    file: "drc_case_m1_width_good.png", cell: "M1_CT_GOOD",
+    box: [7.85, 11.9, 8.45, 13.6],
+    rulers: [[8.0, 13.55, 8.20, 13.55, "0.20 um"]],
+    markers: []
   },
   {
-    file: "drc_case_m1_width_bad.png",
-    cell: "M1_CT_BAD", title: "BAD M1 width 0.10 µm",
-    box: [7.7, 11.8, 8.5, 13.7],
-    rulers: [[8.0, 13.6, 8.10, 13.6, "0.10 µm (<0.14)"]],
-    mark_box: [7.9, 12.0, 8.2, 13.5]
+    file: "drc_case_m1_width_bad.png", cell: "M1_CT_BAD",
+    box: [7.85, 11.9, 8.35, 13.6],
+    rulers: [[8.0, 13.55, 8.10, 13.55, "0.10 um (<0.14)"]],
+    mark_box: [7.95, 12.0, 8.15, 13.5]
   },
   {
-    file: "drc_case_m1_space_good.png",
-    cell: "M1_CT_GOOD", title: "GOOD M1 space 0.20 µm",
-    box: [7.7, 8.8, 9.2, 10.7],
-    rulers: [[8.30, 10.6, 8.50, 10.6, "0.20 µm space"]]
+    file: "drc_case_m1_space_good.png", cell: "M1_CT_GOOD",
+    box: [7.70, 8.85, 9.15, 10.65],
+    rulers: [[8.30, 10.55, 8.50, 10.55, "0.20 um space"]],
+    markers: []
   },
   {
-    file: "drc_case_m1_space_bad.png",
-    cell: "M1_CT_BAD", title: "BAD M1 space 0.08 µm",
-    box: [7.7, 8.8, 9.1, 10.7],
-    rulers: [[8.30, 10.6, 8.38, 10.6, "0.08 µm (<0.14)"]],
-    mark_box: [8.25, 9.0, 8.45, 10.5]
+    file: "drc_case_m1_space_bad.png", cell: "M1_CT_BAD",
+    box: [7.70, 8.85, 9.05, 10.65],
+    rulers: [[8.30, 10.55, 8.38, 10.55, "0.08 um (<0.14)"]],
+    mark_box: [8.30, 9.15, 8.38, 10.35]
   },
   {
-    file: "drc_case_m1_enc_good.png",
-    cell: "M1_CT_GOOD", title: "GOOD M1 enclosure 0.08 µm",
-    # pad: CT at 8.5,6.2 size 0.20 → M1 8.42..8.78 / 6.12..6.48
+    file: "drc_case_m1_enc_good.png", cell: "M1_CT_GOOD",
     box: [8.35, 6.05, 8.85, 6.55],
     rulers: [
-      [8.42, 6.50, 8.50, 6.50, "0.08 µm enc"],  # left enclosure
-      [8.50, 6.12, 8.50, 6.20, "0.08 µm"]       # bottom
-    ]
+      [8.42, 6.52, 8.50, 6.52, "enc 0.08 um"],
+      [8.70, 6.12, 8.70, 6.20, "0.08 um"]
+    ],
+    markers: []
   },
   {
-    file: "drc_case_m1_enc_bad.png",
-    cell: "M1_CT_BAD", title: "BAD M1 enclosure 0.03 µm",
+    file: "drc_case_m1_enc_bad.png", cell: "M1_CT_BAD",
     box: [8.40, 6.10, 8.80, 6.50],
-    rulers: [
-      [8.47, 6.45, 8.50, 6.45, "0.03 µm (<0.055)"]
-    ],
+    rulers: [[8.47, 6.48, 8.50, 6.48, "enc 0.03 um (<0.055)"]],
     mark_box: [8.45, 6.15, 8.75, 6.45]
   },
   {
-    file: "drc_case_ct_space_good.png",
-    cell: "M1_CT_GOOD", title: "GOOD CT space 0.25 µm",
-    box: [7.8, 3.0, 9.0, 3.7],
-    rulers: [[8.20, 3.55, 8.45, 3.55, "0.25 µm space"]]
+    file: "drc_case_ct_space_good.png", cell: "M1_CT_GOOD",
+    box: [7.85, 3.05, 8.85, 3.65],
+    rulers: [[8.20, 3.58, 8.45, 3.58, "0.25 um space"]],
+    markers: []
   },
   {
-    file: "drc_case_ct_space_bad.png",
-    cell: "M1_CT_BAD", title: "BAD CT space 0.12 µm",
-    box: [7.8, 3.0, 8.8, 3.7],
-    rulers: [[8.20, 3.55, 8.32, 3.55, "0.12 µm (<0.18)"]],
+    file: "drc_case_ct_space_bad.png", cell: "M1_CT_BAD",
+    box: [7.85, 3.05, 8.65, 3.65],
+    rulers: [[8.20, 3.58, 8.32, 3.58, "0.12 um (<0.18)"]],
     mark_box: [8.15, 3.15, 8.40, 3.45]
   },
   {
-    file: "drc_case_ct_width_bad.png",
-    cell: "M1_CT_BAD", title: "BAD CT width 0.12 µm",
-    box: [7.85, 0.05, 8.40, 0.55],
-    rulers: [[8.0, 0.48, 8.12, 0.48, "0.12 µm (<0.16)"]],
+    file: "drc_case_ct_width_bad.png", cell: "M1_CT_BAD",
+    box: [7.90, 0.10, 8.35, 0.55],
+    rulers: [[8.0, 0.50, 8.12, 0.50, "0.12 um (<0.16)"]],
     mark_box: [7.95, 0.15, 8.20, 0.45]
   }
 ]
 
-# ---------------------------------------------------------------------------
 drc = File.join(REPO, "drc")
 lvs = File.join(REPO, "lvs")
 drc_gds = File.join(drc, "m1_contact_demo.gds")
+lvs_gds = File.join(lvs, "nmos_demo.gds")
 
 capture(File.join(SHOT, "drc_m1_contact_layout.png"),
         drc_gds, cell_name: "M1_CT_DRC_DEMO", width: 1600, height: 900)
-
 capture(File.join(SHOT, "drc_m1_contact_good.png"),
         drc_gds, cell_name: "M1_CT_GOOD", width: 1000, height: 900)
-
 capture(File.join(SHOT, "drc_m1_contact_bad.png"),
         drc_gds, cell_name: "M1_CT_BAD", width: 1000, height: 900)
 
@@ -279,11 +294,10 @@ end
 bad_markers = lyrdb_marker_boxes(lyrdb_bad)
 
 DRC_CASES.each do |c|
-  markers = []
+  markers = c[:markers] || []
   if c[:mark_box]
-    markers = markers_in_box(bad_markers, c[:mark_box])
-    # Always show at least the intended highlight region
-    markers = [c[:mark_box]] if markers.empty?
+    found = markers_in_box(bad_markers, c[:mark_box])
+    markers = found.empty? ? [c[:mark_box]] : found
   end
   capture_zoom(
     File.join(SHOT, c[:file]),
@@ -292,33 +306,25 @@ DRC_CASES.each do |c|
     box: c[:box],
     rulers: c[:rulers],
     markers: markers,
-    width: 1000, height: 750, pad: 0.15
+    width: 1100, height: 800, pad: 0.12
   )
 end
 
-# LVS overview + GOOD/BAD (distinct colors) + zoomed SHORT
-lvs_gds = File.join(lvs, "nmos_demo.gds")
-
 capture(File.join(SHOT, "lvs_nmos_demo.png"),
         lvs_gds, cell_name: "NMOS_DEMO", width: 1400, height: 700)
-
 capture(File.join(SHOT, "lvs_nmos_good.png"),
         lvs_gds, cell_name: "NMOS_GOOD", width: 1000, height: 700)
-
 capture(File.join(SHOT, "lvs_nmos_bad.png"),
         lvs_gds, cell_name: "NMOS_BAD", width: 1000, height: 700)
 
-# Zoom on S–D short bridge with length ruler
 capture_zoom(
   File.join(SHOT, "lvs_case_sd_short.png"),
   lvs_gds,
   cell_name: "NMOS_BAD",
-  box: [-0.05, -0.25, 1.15, 0.55],
-  rulers: [
-    [0.05 - 0.05, -0.12, 0.58 + 0.16 + 0.05, -0.12, "S–D short bridge"]
-  ],
-  markers: [[0.0, -0.18, 0.98, -0.02]],
-  width: 1100, height: 700, pad: 0.08
+  box: [-0.05, -0.28, 1.15, 0.60],
+  rulers: [[0.07, -0.20, 0.91, -0.20, "S-D short bridge"]],
+  markers: [[0.05, -0.18, 0.95, -0.02]],
+  width: 1200, height: 800, pad: 0.06
 )
 
 puts "Done → #{SHOT}"
