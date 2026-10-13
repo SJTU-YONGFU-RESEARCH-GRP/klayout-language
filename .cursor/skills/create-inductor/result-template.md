@@ -13,6 +13,7 @@
 | Turns | |
 | DRC | PASS / FAIL / SKIPPED |
 | LVS | PASS / FAIL / SKIPPED |
+| SHORTS | PASS / FAIL / SKIPPED |
 | openEMS | OK / SKIPPED |
 
 One-line verdict: …

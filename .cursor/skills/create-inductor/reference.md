@@ -11,6 +11,29 @@
 
 When adding a run, scan `inductor/*/config.yaml` and choose an unused `(shape, ports, role)` — never only change `turns`.
 
+## Avoiding parallel short paths
+
+Inductance requires **one series path**. A turn-to-turn metal bridge (or via pad touching two turns) creates a DC bypass that shorts out loops.
+
+### Cut-test (`check_shorts.rb`)
+
+1. Rebuild the design centerline from config.
+2. At ~35% / 50% / 65% along the path, cut a notch across the M1 trace.
+3. After each cut, **P1 and P2 must disconnect** on M1.
+4. If they stay connected → a parallel short exists → `SHORTS FAIL`.
+
+Also enforced:
+
+- ≤1 M1 polygon for 2p/3p (no via-pad islands)
+- Via count caps: 2p→0 (or 2 only for real underpass), 3p→1 (CT only), 4p→0
+- 4p: primary must not DC-connect to secondary
+
+### Generator rules of thumb
+
+- Never add “decorative” M2/via under a 2-port spiral.
+- CT via only on the outer lead, stub pointing **away** from the spiral.
+- Stacked transformer: no vias between windings.
+
 ## Ports and roles
 
 ### 2-port (`ports: 2`, `role: inductor`)

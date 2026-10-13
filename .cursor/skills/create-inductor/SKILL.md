@@ -34,10 +34,10 @@ Copy this checklist and track it:
 ```
 create-inductor Progress:
 - [ ] 1. Allocate run folder inductor/<N>
-- [ ] 2. Write config.yaml
+- [ ] 2. Write config.yaml (diversify + no multi-path shorts)
 - [ ] 3. Generate GDS (+ port labels)
 - [ ] 4. Run DRC → record pass/fail
-- [ ] 5. Run LVS → record pass/fail
+- [ ] 5. Run LVS + SHORTS cut-test → record pass/fail
 - [ ] 6. Screenshot → layout/inductor.png (blue/red/yellow/…)
 - [ ] 7. openEMS sim → S-params, L, Q
 - [ ] 8. Write RESULT.md (must embed screenshot)
@@ -104,6 +104,24 @@ Layers (fixed for this flow):
 
 Generator must honor `width_um` / `space_um` exactly (default 1.0 / 1.0).
 
+### Single-series-path rule (avoid multiple short-circuit paths)
+
+An inductor winding must be **one series ribbon** from port to port. Extra DC bridges between turns kill inductance.
+
+| Rule | Required |
+|------|----------|
+| One M1 series path | 2-port / 3-port: a single continuous M1 path; no turn-to-turn metal bridges |
+| No decorative vias | Do **not** drop via+M1 pads that touch adjacent turns |
+| Underpass only if needed | M2 underpass only at an intentional crossover with **exactly** the vias required (usually 2); never a via forest |
+| Center-tap | Exactly **one** CT via on an **outer lead**, clear of the spiral body; M2 stub must not re-enter the turns |
+| Transformer (4-port) | **Zero** vias between primary (M1) and secondary (M2) — galvanic isolation |
+| Verify | `./inductor/common/run_shorts.sh inductor/<N>` (cut-test: after cutting mid-trace, P1–P2 must open) |
+
+❌ Forbidden: floating via pads, M2 stubs that cross the spiral with extra vias, overlapping paths, turn shorts.  
+✅ Pass criterion: `SHORTS PASS` in `lvs/shorts.log`.
+
+Details: [reference.md](reference.md#avoiding-parallel-short-paths).
+
 ### Step 4 — DRC
 
 ```bash
@@ -114,16 +132,18 @@ Rules (see `inductor/common/inductor.drc`): M1/M2 min width & space = config val
 
 Save log under `inductor/<N>/drc/`.
 
-### Step 5 — LVS (connectivity)
+### Step 5 — LVS + short-path check
 
 ```bash
-./inductor/common/run_lvs.sh inductor/<N>
+./inductor/common/run_lvs.sh inductor/<N>    # includes run_shorts.sh
+# or separately:
+./inductor/common/run_shorts.sh inductor/<N>
 ```
 
 - Write documentary SPICE (`lvs/inductor.cir`) via `write_schematic.py`.
-- Run `check_connectivity.rb`: port labels on `31/1` / `32/1` must match DC topology
-  (2-port: P1↔P2 short; 4-port: P1↔P2, S1↔S2, primary ⟂ secondary).
-- Save `lvs/inductor.log`.
+- `check_connectivity.rb`: port labels match topology (2p: P1↔P2; 3p: P1–CT–P2; 4p: windings isolated).
+- `check_shorts.rb`: **cut-test** for parallel/bypass shorts + via-count limits.
+- Save `lvs/inductor.log` and `lvs/shorts.log`. Both must PASS.
 
 ### Step 6 — Screenshot
 
@@ -166,10 +186,11 @@ Must include: **layout screenshot** (`![…](layout/inductor.png)`), config summ
 ## Agent rules
 
 - All work products stay under `inductor/` (shared code in `inductor/common/`, runs in `inductor/<N>/`).
-- Do not invent DRC/LVS PASS without running the scripts (or recording SKIPPED).
+- Do not invent DRC/LVS/SHORTS PASS without running the scripts (or recording SKIPPED).
 - Prefer regenerating GDS from `config.yaml` over hand-editing polygons.
+- If SHORTS FAIL: fix generator/config (remove vias/bridges); do not weaken the cut-test.
 - Match sibling demo style in `drc/` and `lvs/` (shell runners, KLayout `-b`).
-- After a successful run, briefly tell the user: path to `RESULT.md`, PASS/FAIL, and peak Q / L if EM ran.
+- After a successful run, briefly tell the user: path to `RESULT.md`, PASS/FAIL, SHORTS, and peak Q / L if EM ran.
 
 ## Quick commands
 

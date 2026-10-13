@@ -23,6 +23,9 @@ klayout -b \
   -rd "ports=$PORTS" \
   -rd "log=$LOG" \
   -r "$ROOT/inductor/common/check_connectivity.rb" \
-  | tee -a "$LOG"
+  | tee "$LOG"
 
 grep -q "LVS PASS" "$LOG"
+
+# Also enforce single-series-path / no parallel shorts
+"$ROOT/inductor/common/run_shorts.sh" "$RUN_REL"

@@ -152,27 +152,29 @@ if SHAPE == "figure8"
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
 
 elsif PORTS <= 2
-  pts = add_leads(make_spiral(SHAPE, RIN, TURNS, p), 15.0)
+  # Single series path on M1 only. Do NOT add decorative M2/via underpasses:
+  # floating via pads merge into adjacent turns and create parallel short paths.
+  geom = %w[square figure8].include?(SHAPE) ? SHAPE : (SHAPE == "circle" ? "circle" : "square")
+  geom = "square" unless %w[square figure8 circle].include?(geom)
+  # Prefer DRC-clean square until octagon spiral is fixed
+  geom = "square" if SHAPE == "octagon"
+  pts = add_leads(make_spiral(geom == "circle" ? "square" : geom, RIN, TURNS, p), 15.0)
   add_path_um(top, m1, layout, pts, W)
-  if NLAY >= 2
-    ux = pts[1][0]
-    uy = pts[1][1]
-    add_path_um(top, m2, layout, [[ux - 6, uy - 8], [ux + 6, uy - 8]], W)
-    add_via(top, via, m1, m2, layout, ux - 6, uy - 8, VIA_W, VIA_E)
-    add_via(top, via, m1, m2, layout, ux + 6, uy - 8, VIA_W, VIA_E)
-  end
   add_label(top, m1t, layout, pts.first[0], pts.first[1], "P1")
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
 
 elsif PORTS == 3
-  # Single spiral: P1/P2 at ends; CT via on outer lead → M2 stub (avoids turn spacing hits)
-  # octagon/circle fall back to square until those generators are DRC-clean
+  # Single M1 spiral + ONE intentional CT via on the outer P1 lead (clear of turns).
+  # M2 is only the CT stub — must not cross back onto the spiral with extra vias.
   geom = %w[square figure8].include?(SHAPE) ? SHAPE : "square"
   pts = add_leads(make_spiral(geom, RIN, TURNS, p), 15.0)
   add_path_um(top, m1, layout, pts, W)
-  # Via on P1 lead, clear of the spiral body
-  tap = [pts[0][0] + 8.0, pts[0][1]]
-  ct_pad = [tap[0], tap[1] + 12.0]
+  # Via on P1 lead, away from spiral body (single via → no multi-path)
+  tap = [pts[0][0] + 6.0, pts[0][1]]
+  # CT stub goes AWAY from the spiral (negative Y if spiral is above lead)
+  spiral_cy = pts.map { |_, y| y }.sum / pts.size
+  dir = tap[1] >= spiral_cy ? -1.0 : 1.0
+  ct_pad = [tap[0], tap[1] + dir * 14.0]
   add_via(top, via, m1, m2, layout, tap[0], tap[1], VIA_W, VIA_E)
   add_path_um(top, m2, layout, [tap, ct_pad], W)
   add_box_um(top, m2, layout, ct_pad[0] - 2, ct_pad[1] - 2, ct_pad[0] + 2, ct_pad[1] + 2)
@@ -181,9 +183,11 @@ elsif PORTS == 3
   add_label(top, m2t, layout, ct_pad[0], ct_pad[1], "CT")
 
 else
-  pri = add_leads(make_spiral(SHAPE, RIN, TURNS, p), 15.0)
+  # 4-port stacked transformer: galvanically isolated windings — NO vias between M1/M2
+  geom = %w[square figure8].include?(SHAPE) ? SHAPE : "square"
+  pri = add_leads(make_spiral(geom, RIN, TURNS, p), 15.0)
   add_path_um(top, m1, layout, pri, W)
-  sec = make_spiral(SHAPE, RIN + p * 0.5, TURNS, p).map { |x, y| [x, y - 10] }
+  sec = make_spiral(geom, RIN + p * 0.5, TURNS, p).map { |x, y| [x, y - (RIN + TURNS * p + 15)] }
   sec = add_leads(sec, 15.0)
   add_path_um(top, m2, layout, sec, W)
   add_label(top, m1t, layout, pri.first[0], pri.first[1], "P1")
