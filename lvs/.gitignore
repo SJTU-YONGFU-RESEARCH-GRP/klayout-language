@@ -1,0 +1,9 @@
+# Generated / run outputs
+nmos_demo.gds
+nmos_*.lvsdb
+nmos_*.l2ndb
+nmos_*_extracted.cir
+nmos_*.log
+nmos.lvsdb
+nmos.l2ndb
+nmos_extracted.cir

@@ -1,0 +1,85 @@
+# KLayout LVS — single NMOS transistor demo
+#
+# Layers (see generate_layout.rb):
+#   DIFF 1/0  POLY 2/0  CONT 3/0  METAL1 4/0  labels 4/1  PTIE 6/0
+#
+# Bulk follows the KLayout manual pattern: empty polygon_layer + connect_global.
+#
+# Run: ./run_lvs.sh [--good|--bad]
+
+deep
+
+if $input
+  source($input, $cell || "NMOS_GOOD")
+end
+
+schematic($schematic || File.join(File.dirname(__FILE__), "nmos.cir"))
+
+report_lvs($lvsdb || "nmos.lvsdb")
+report_netlist($l2ndb || "nmos.l2ndb")
+target_netlist($extracted || "nmos_extracted.cir", write_spice, "Extracted by KLayout LVS demo")
+
+# ---------------------------------------------------------------------------
+# Drawing layers
+# ---------------------------------------------------------------------------
+diff   = input(1, 0)
+poly   = input(2, 0)
+cont   = input(3, 0)
+metal1 = input(4, 0)
+m1_lbl = labels(4, 1)
+ptie   = input(6, 0)
+
+# Empty bulk layer for MOS4 well/substrate terminal (KLayout LVS intro style)
+bulk = polygon_layer
+
+# ---------------------------------------------------------------------------
+# Derived recognition layers
+# ---------------------------------------------------------------------------
+gate = diff & poly
+nsd  = diff - poly
+
+# ---------------------------------------------------------------------------
+# Device extraction — 4-terminal NMOS
+# ---------------------------------------------------------------------------
+extract_devices(mos4("NMOS"), {
+  "SD" => nsd,
+  "G"  => gate,
+  "W"  => bulk,
+  "tS" => nsd,
+  "tD" => nsd,
+  "tG" => poly,
+  "tW" => bulk
+})
+
+# ---------------------------------------------------------------------------
+# Connectivity
+# ---------------------------------------------------------------------------
+connect(nsd, cont)
+connect(poly, cont)
+connect(ptie, cont)
+connect(cont, metal1)
+connect(metal1, m1_lbl)
+
+# All bulk / substrate-tap shapes share the global SUBSTRATE net (pin B via label)
+connect_global(bulk, "SUBSTRATE")
+connect_global(ptie, "SUBSTRATE")
+
+# ---------------------------------------------------------------------------
+# Compare
+# ---------------------------------------------------------------------------
+ignore_parameter("NMOS", "AS")
+ignore_parameter("NMOS", "AD")
+ignore_parameter("NMOS", "PS")
+ignore_parameter("NMOS", "PD")
+tolerance("NMOS", "L", 0.01)
+tolerance("NMOS", "W", 0.01)
+
+align
+netlist.simplify
+ok = compare
+
+if ok
+  info("LVS PASS — layout matches schematic")
+else
+  warn("LVS FAIL — see LVS browser / report database")
+end

@@ -4,7 +4,7 @@
 # Pulls GDS path + top cell from the open layout — no GDS/RDB/REP env vars.
 #
 # From an open DESIGNrev GUI console:
-#   source /path/to/demo/run_drc_in_calibredrv.tcl
+#   source /path/to/drc/run_drc_in_calibredrv.tcl
 #   run_m1_contact_drc
 #
 # Or via wrapper:

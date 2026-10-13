@@ -1,5 +1,5 @@
 // =============================================================================
-// M1 / Contact DRC demo — Calibre SVRF rules (mirrors demo/m1_contact.drc)
+// M1 / Contact DRC demo — Calibre SVRF rules (mirrors drc/m1_contact.drc)
 // =============================================================================
 // Layers (from generate_layout.rb):
 //   M1  GDS 31/0
