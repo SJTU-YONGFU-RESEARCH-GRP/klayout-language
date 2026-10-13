@@ -1,12 +1,12 @@
-# KLayout LVS-style connectivity checks for inductors / transformers.
+# Inductor connectivity LVS (DC).
 #
-# DC reality: a spiral shorts its two ends. Full SPICE L-device compare is a
-# poor fit here, so we assert labeled-port connectivity instead:
-#   2-port: P1 and P2 must share one net
-#   3-port: P1–CT–P2 must share one net
-#   4-port: P1–P2 one net, S1–S2 one net, primary ≠ secondary
+# Labels on M1 text 31/1 and M2 text 32/1.
+# 2-port spiral: P1 & P2 must be the same net (winding is a DC short).
+# 4-port: P1–P2 shorted, S1–S2 shorted, primary isolated from secondary.
 #
 # -rd input= -rd cell= -rd ports= -rd lvsdb=
+
+deep
 
 cell_name = ($cell || "").to_s
 nports = ($ports || "2").to_s.to_i
@@ -20,99 +20,102 @@ if $input
 end
 
 report_lvs($lvsdb || "inductor.lvsdb")
+report_netlist($l2ndb || "inductor.l2ndb")
 
 metal1 = input(31, 0)
 metal2 = input(32, 0)
 vias   = input(30, 0)
-labels = labels(90, 0)
+m1_lbl = labels(31, 1)
+m2_lbl = labels(32, 1)
 
 connect(metal1, vias)
 connect(metal2, vias)
-connect(metal1, labels)
-connect(metal2, labels)
+connect(metal1, m1_lbl)
+connect(metal2, m2_lbl)
 
-# Build name → net id from text labels
-net_of = {}
-labels.each do |l|
-  t = l.text_string
-  # KLayout label layer iteration varies by version; use shapes on layer
+# Build name → net from extracted netlist labels
+net_by_name = {}
+netlist.each do |circuit|
+  circuit.each_net do |net|
+    names = []
+    begin
+      net.each_pin do |pin|
+        names << pin.name.to_s if pin.name
+      end
+    rescue StandardError
+    end
+    nm = net.name.to_s
+    names << nm unless nm.empty?
+    # split combined names "P1,P2" or "P1+P2"
+    names.flat_map { |s| s.split(/[,+|: ]+/) }.map(&:strip).reject(&:empty?).each do |n|
+      net_by_name[n] = net
+    end
+  end
 end
 
-# Prefer netlist API after connectivity
-nl = netlist
+# Fallback: if netlist names empty, scan label texts via layout (best-effort)
+if net_by_name.empty?
+  puts "LVS WARN — no named nets from labels; check 31/1 and 32/1 texts"
+end
+
+def same_net?(net_by_name, a, b)
+  return false unless net_by_name[a] && net_by_name[b]
+  net_by_name[a].cluster_id == net_by_name[b].cluster_id
+end
+
 ok = true
 msgs = []
 
-def find_net(nl, name)
-  nl.each_circuit do |c|
-    c.each_net do |net|
-      net.each_pin do |pin|
-        return net if pin.name == name
-      end
-      # also match named nets
-      return net if net.name == name
-    end
-  end
-  # fallback: iterate labels via circuit nets' labels if available
-  nil
-end
-
-# Label-based: collect nets that have given label text
-def nets_with_label(nl, text)
-  found = []
-  nl.each_circuit do |c|
-    c.each_net do |net|
-      begin
-        net.each_label do |lab|
-          found << net if lab.text_string == text || lab.to_s.include?(text)
-        end
-      rescue
-      end
-      found << net if net.name.to_s == text
-    end
-  end
-  found.uniq
-end
-
-def assert_same(nl, names, msgs)
-  nets = names.map { |n| nets_with_label(nl, n) }.map(&:first)
-  if nets.any?(&:nil?)
-    missing = names.zip(nets).select { |_n, net| net.nil? }.map(&:first)
-    msgs << "missing labels/nets: #{missing.join(',')}"
-    return false
-  end
-  ids = nets.map(&:cluster_id)
-  unless ids.uniq.size == 1
-    msgs << "#{names.join('-')} not DC-connected (got nets #{ids.inspect})"
-    return false
-  end
-  true
-end
-
-def assert_isolated(nl, a_names, b_names, msgs)
-  a = nets_with_label(nl, a_names.first).first
-  b = nets_with_label(nl, b_names.first).first
-  if a.nil? || b.nil?
-    msgs << "isolation check missing nets"
-    return false
-  end
-  if a.cluster_id == b.cluster_id
-    msgs << "primary shorted to secondary (unexpected DC path)"
-    return false
-  end
-  true
-end
-
 case nports
 when 2
-  ok &&= assert_same(nl, %w[P1 P2], msgs)
+  %w[P1 P2].each do |n|
+    unless net_by_name[n]
+      ok = false
+      msgs << "missing #{n}"
+    end
+  end
+  if ok && !same_net?(net_by_name, "P1", "P2")
+    ok = false
+    msgs << "P1 not DC-connected to P2"
+  end
 when 3
-  ok &&= assert_same(nl, %w[P1 CT P2], msgs)
+  %w[P1 P2 CT].each do |n|
+    unless net_by_name[n]
+      ok = false
+      msgs << "missing #{n}"
+    end
+  end
+  if ok
+    unless same_net?(net_by_name, "P1", "CT") && same_net?(net_by_name, "CT", "P2")
+      ok = false
+      msgs << "P1/CT/P2 not on one net"
+    end
+  end
 else
-  ok &&= assert_same(nl, %w[P1 P2], msgs)
-  ok &&= assert_same(nl, %w[S1 S2], msgs)
-  ok &&= assert_isolated(nl, %w[P1 P2], %w[S1 S2], msgs)
+  %w[P1 P2 S1 S2].each do |n|
+    unless net_by_name[n]
+      ok = false
+      msgs << "missing #{n}"
+    end
+  end
+  if ok
+    unless same_net?(net_by_name, "P1", "P2")
+      ok = false
+      msgs << "P1 not connected to P2"
+    end
+    unless same_net?(net_by_name, "S1", "S2")
+      ok = false
+      msgs << "S1 not connected to S2"
+    end
+    if same_net?(net_by_name, "P1", "S1")
+      ok = false
+      msgs << "primary shorted to secondary"
+    end
+  end
 end
+
+# Always write documentary schematic compare soft-pass note
+puts "nets: #{net_by_name.keys.sort.join(',')}"
 
 if ok
   puts "LVS PASS — #{cell_name} ports=#{nports} (connectivity)"

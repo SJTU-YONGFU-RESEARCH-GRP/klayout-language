@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<report-database>
+ <description>Inductor DRC</description>
+ <original-file>/home/yongfu/proj/klayout-language/inductor/1/layout/inductor.gds</original-file>
+ <generator>drc: script='/home/yongfu/proj/klayout-language/inductor/common/inductor.drc'</generator>
+ <top-cell>IND_SQ_2P</top-cell>
+ <tags>
+ </tags>
+ <categories>
+  <category>
+   <name>M1.min_width</name>
+   <description>M1 width &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M1.min_space</name>
+   <description>M1 spacing &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.min_width</name>
+   <description>M2 width &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.min_space</name>
+   <description>M2 spacing &lt; 1.0 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>VIA.min_width</name>
+   <description>VIA width &lt; 0.6 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>VIA.min_space</name>
+   <description>VIA spacing &lt; 0.6 µm</description>
+   <categories>
+   </categories>
+  </category>
+ </categories>
+ <cells>
+  <cell>
+   <name>IND_SQ_2P</name>
+   <variant/>
+   <layout-name/>
+   <references>
+   </references>
+  </cell>
+ </cells>
+ <items>
+ </items>
+</report-database>

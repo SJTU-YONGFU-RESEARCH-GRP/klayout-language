@@ -1,6 +1,6 @@
-name: octagon_2p_l1
-cell: IND_OCT_2P
-shape: octagon
+name: square_2p_l1
+cell: IND_SQ_2P
+shape: square
 ports: 2
 role: inductor
 n_layers: 1
