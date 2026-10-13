@@ -1,0 +1,5 @@
+* Auto schematic for IND_OCT_3P (inductor)
+.SUBCKT IND_OCT_3P P1 P2 CT
+Ra P1 CT 0.01
+Rb CT P2 0.01
+.ENDS

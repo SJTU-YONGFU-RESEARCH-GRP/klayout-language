@@ -66,17 +66,5 @@
   </cell>
  </cells>
  <items>
-  <item>
-   <tags/>
-   <category>'M2.min_space'</category>
-   <cell>IND_OCT_3P</cell>
-   <visited>false</visited>
-   <multiplicity>1</multiplicity>
-   <comment/>
-   <image/>
-   <values>
-    <value>edge-pair: (7.707,-27.315;8.707,-27.315)|(8.707,-26.815;7.707,-26.815)</value>
-   </values>
-  </item>
  </items>
 </report-database>

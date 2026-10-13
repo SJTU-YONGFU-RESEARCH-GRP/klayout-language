@@ -224,8 +224,8 @@ end
 def add_inner_exit_underpass(cell, m1, m2, via, m2c, layout, inner_pt, spiral_pts, width, via_w, via_e, path_metal: false)
   x0, y0 = inner_pt
   xmin, ymin, xmax, ymax = bbox_of(spiral_pts)
-  # Outside pad to the left of spiral, below the body
-  y_chan = ymin - (width + 8.0)
+  # Outside pad to the left of spiral, well below the body (keep clear of CT / outer lead)
+  y_chan = ymin - (width + 18.0)
   x_pad = xmin - 15.0
   # Via1 at inner; Path half-width can exceed default via pad — cover tip
   # Match Path half-width exactly — extra margin crowds turn-1 (space fail)
@@ -290,13 +290,17 @@ elsif PORTS == 3
   pts = add_outer_lead(core, 15.0)
   draw_series(top, m1, m1c, layout, pts, W, use_path: USE_PATH)
   p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E, path_metal: USE_PATH)
-  tap = [(pts[-2][0] + pts[-1][0]) / 2.0, (pts[-2][1] + pts[-1][1]) / 2.0]
-  xmin, ymin, _, _ = bbox_of(core)
-  ct_pad = [tap[0], ymin - 14.0]
-  ct_pad = [tap[0], bbox_of(core)[3] + 14.0] if (ct_pad[1] - (ymin - (W + 8.0))).abs < 6.0
+  # CT on outer lead tip; stub ABOVE spiral (underpass channel is deep below)
+  x1, y1 = pts.last
+  x0, y0 = pts[-2]
+  dx, dy = x1 - x0, y1 - y0
+  len = Math.sqrt(dx * dx + dy * dy)
+  tap = len > 1e-9 ? [x1 - dx / len * 3.0, y1 - dy / len * 3.0] : [x1, y1]
+  _, _, _, ymax = bbox_of(core)
+  ct_pad = [tap[0], [ymax + 16.0, tap[1] + 16.0].max]
   add_via(top, via, m1, m2, layout, tap[0], tap[1], VIA_W, VIA_E)
-  add_ribbon_boxes(top, m2, layout, [tap, ct_pad], W)
-  add_centerline(top, m2c, layout, [tap, ct_pad])
+  add_ribbon_boxes(top, m2, layout, [tap, [tap[0], ct_pad[1]], ct_pad], W)
+  add_centerline(top, m2c, layout, [tap, [tap[0], ct_pad[1]], ct_pad])
   add_box_um(top, m2, layout, ct_pad[0] - 2, ct_pad[1] - 2, ct_pad[0] + 2, ct_pad[1] + 2)
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P1")
   add_label(top, m1t, layout, p2[0], p2[1], "P2")
