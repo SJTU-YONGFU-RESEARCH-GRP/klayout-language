@@ -1,0 +1,69 @@
+# KLayout DRC — Metal 1 and Contact (width, space, enclosure)
+#
+# Run in GUI: Tools → DRC → load this script
+# Batch:      klayout -b -r examples/m1_contact.drc -rd input=design.gds
+#
+# Layer numbers are illustrative — change to match your PDK / layer map.
+
+# ---------------------------------------------------------------------------
+# Rule parameters (micrometers)
+# ---------------------------------------------------------------------------
+M1_MIN_WIDTH    = 0.14
+M1_MIN_SPACE    = 0.14
+M1_OVER_CT_ENC  = 0.055   # M1 must extend at least this far beyond contact
+
+CT_MIN_WIDTH    = 0.16
+CT_MIN_SPACE    = 0.18
+
+# ---------------------------------------------------------------------------
+# Input layout (optional — omit to use the active layout in the GUI)
+# ---------------------------------------------------------------------------
+if $input
+  source($input)
+end
+
+report("M1 / Contact DRC", "m1_contact.lyrdb")
+
+# ---------------------------------------------------------------------------
+# Layer inputs — adjust layer/datatype to your technology
+#   Typical mappings (examples only):
+#     M1  → 31/0, 15/0, or a named layer "M1"
+#     CT  → 30/0,  6/0, or "CONT"
+# ---------------------------------------------------------------------------
+metal1  = input(31, 0)
+contact = input(30, 0)
+
+# ---------------------------------------------------------------------------
+# Metal 1 — minimum width and spacing
+# ---------------------------------------------------------------------------
+metal1.width(M1_MIN_WIDTH.um).output(
+  "M1.min_width",
+  "Metal1 width < #{M1_MIN_WIDTH} µm"
+)
+
+metal1.space(M1_MIN_SPACE.um).output(
+  "M1.min_space",
+  "Metal1 spacing < #{M1_MIN_SPACE} µm"
+)
+
+# ---------------------------------------------------------------------------
+# Contact — minimum width and spacing
+# ---------------------------------------------------------------------------
+contact.width(CT_MIN_WIDTH.um).output(
+  "CT.min_width",
+  "Contact width < #{CT_MIN_WIDTH} µm"
+)
+
+contact.space(CT_MIN_SPACE.um).output(
+  "CT.min_space",
+  "Contact spacing < #{CT_MIN_SPACE} µm"
+)
+
+# ---------------------------------------------------------------------------
+# Enclosure — Metal1 must surround every contact by M1_OVER_CT_ENC
+#   enclosing(primary, secondary, distance)  →  primary encloses secondary
+# ---------------------------------------------------------------------------
+metal1.enclosing(contact, M1_OVER_CT_ENC.um).output(
+  "M1.over_CT.enclosure",
+  "M1 enclosure of contact < #{M1_OVER_CT_ENC} µm"
+)
