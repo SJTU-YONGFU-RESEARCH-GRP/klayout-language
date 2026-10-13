@@ -64,3 +64,13 @@ Generate with: `./inductor/common/run_screenshot.sh inductor/<N>`
 ## Next steps
 
 - …
+
+---
+
+After writing this file, regenerate the cross-run board:
+
+```bash
+./inductor/common/run_benchmark.sh
+```
+
+See [`../BENCHMARK.md`](../BENCHMARK.md).

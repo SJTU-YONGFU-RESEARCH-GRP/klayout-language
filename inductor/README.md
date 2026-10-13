@@ -9,8 +9,9 @@ Work directory for **create-inductor** runs. Shared tooling lives in `common/`; 
 - Shapes: `square` | `octagon` | `circle` | `figure8`
 - Ports: 2 / 3 (center-tap) / 4 (transformer, coupler, balun)
 - Verify: KLayout **DRC** + connectivity **LVS**
-- EM: **openEMS** (or analytic placeholder) → Q, S-params
+- EM: **PEEC** (or openEMS FDTD) → Q, S-params + `sim/performance.png`
 - Per-run report: `RESULT.md`
+- Cross-run board: **[`BENCHMARK.md`](BENCHMARK.md)** (auto-updated)
 
 ## Quick start (run 1)
 
@@ -27,7 +28,13 @@ python3 inductor/common/generate_inductor.py \
 ./inductor/common/run_openems.sh inductor/1   # PEEC (or openEMS) + plots
 ```
 
-Then inspect `inductor/1/RESULT.md` (layout + `sim/performance.png`).
+Then write `RESULT.md` and refresh the board:
+
+```bash
+./inductor/common/run_benchmark.sh   # → inductor/BENCHMARK.md
+```
+
+Inspect [`1/RESULT.md`](1/RESULT.md) and [`BENCHMARK.md`](BENCHMARK.md).
 
 **EM:** GDS → PEEC (Grover L + skin R) when openEMS is missing; outputs `sim/performance.png`.
 
@@ -41,7 +48,8 @@ If openEMS is missing: `./scripts/install-openems.sh --deps --disable-gui`, then
 N=$(( $(ls -d inductor/[0-9]* 2>/dev/null | sort -n | tail -1 | xargs -n1 basename) + 1 ))
 mkdir -p inductor/$N/{layout,drc,lvs,sim}
 cp inductor/common/templates/config.yaml inductor/$N/config.yaml
-# edit config, then generate + DRC + LVS + openEMS + RESULT.md
+# edit config → generate + DRC + LVS + screenshot + EM + RESULT.md
+./inductor/common/run_benchmark.sh
 ```
 
 Or invoke the Cursor skill **create-inductor**.

@@ -46,6 +46,9 @@ for f in \
   "${ROOT}"/c_*.txt \
   "${ROOT}"/c_*_extracted.cir \
   "${ROOT}"/c_*.log \
+  "${ROOT}"/cc_*.txt \
+  "${ROOT}"/cc_*_extracted.cir \
+  "${ROOT}"/cc_*.log \
   "${ROOT}"/r_extract.txt \
   "${ROOT}"/r_extracted.cir \
   "${ROOT}"/c_extract.txt \
@@ -55,9 +58,12 @@ do
 done
 shopt -u nullglob
 
+remove_path "${ROOT}/kpex_out"
+
 if [[ "$REMOVE_GDS" -eq 1 ]]; then
   remove_path "${ROOT}/pex_demo.gds"
   remove_path "${ROOT}/r_demo.gds"
+  remove_path "${ROOT}/kpex_demo.gds"
 fi
 
 if [[ "$DRY_RUN" -eq 1 ]]; then

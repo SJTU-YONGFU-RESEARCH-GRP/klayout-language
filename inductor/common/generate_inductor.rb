@@ -62,18 +62,54 @@ def add_centerline(cell, layer, layout, pts)
   cell.shapes(layer).insert(sp)
 end
 
+# Continuous Path ribbon — correct for arcs / diagonals (no chord-joint notches).
+# Do NOT use for Manhattan square spirals: Path corner miters can bridge turns.
+def add_ribbon_path(cell, layer, layout, pts, width)
+  return if pts.size < 2
+  wdbu = um(layout, width)
+  sp = RBA::Path.new(
+    pts.map { |x, y| RBA::Point.new(um(layout, x), um(layout, y)) },
+    wdbu
+  )
+  sp.bgn_ext = wdbu / 2
+  sp.end_ext = wdbu / 2
+  cell.shapes(layer).insert(sp)
+  # Square end caps swallow Path tip slivers that trip projection min-width
+  hw = width / 2.0
+  [pts.first, pts.last].each do |x, y|
+    add_box_um(cell, layer, layout, x - hw, y - hw, x + hw, y + hw)
+  end
+end
+
 def add_ribbon_boxes(cell, layer, layout, pts, width)
   return if pts.size < 2
   hw = width / 2.0
   (0...pts.size - 1).each do |i|
     x0, y0 = pts[i]
     x1, y1 = pts[i + 1]
-    if (x1 - x0).abs >= (y1 - y0).abs
-      y = y0
-      add_box_um(cell, layer, layout, [x0, x1].min, y - hw, [x0, x1].max, y + hw)
+    dx = x1 - x0
+    dy = y1 - y0
+    # Manhattan → box; general (diag / arc chord) → thick polygon strip
+    if dx.abs < 1e-9 || dy.abs < 1e-9
+      if dx.abs >= dy.abs
+        y = y0
+        add_box_um(cell, layer, layout, [x0, x1].min, y - hw, [x0, x1].max, y + hw)
+      else
+        x = x0
+        add_box_um(cell, layer, layout, x - hw, [y0, y1].min, x + hw, [y0, y1].max)
+      end
     else
-      x = x0
-      add_box_um(cell, layer, layout, x - hw, [y0, y1].min, x + hw, [y0, y1].max)
+      len = Math.sqrt(dx * dx + dy * dy)
+      next if len < 1e-12
+      px = -dy / len * hw
+      py = dx / len * hw
+      poly = RBA::DPolygon.new([
+        RBA::DPoint.new(x0 + px, y0 + py),
+        RBA::DPoint.new(x1 + px, y1 + py),
+        RBA::DPoint.new(x1 - px, y1 - py),
+        RBA::DPoint.new(x0 - px, y0 - py)
+      ])
+      cell.shapes(layer).insert(poly.to_itype(layout.dbu))
     end
   end
 end
@@ -108,6 +144,47 @@ def square_spiral(rin, turns, p)
   pts
 end
 
+def octagon_spiral(rin, turns, p)
+  s = Math.sqrt(0.5)
+  dirs = [[1, 0], [s, s], [0, 1], [-s, s], [-1, 0], [-s, -s], [0, -1], [s, -s]]
+  x = rin
+  y = 0.0
+  pts = [[x, y]]
+  length = [rin * 2 * Math.sin(Math::PI / 8), rin * 0.75].max
+  nseg = (turns * 8).ceil
+  nseg.times do |i|
+    dx, dy = dirs[i % 8]
+    x += dx * length
+    y += dy * length
+    pts << [x, y]
+    length += p / Math.cos(Math::PI / 8) if (i % 4) == 3
+  end
+  pts
+end
+
+def circle_spiral(rin, turns, p, n_theta = 72)
+  pts = []
+  total = (turns * n_theta).ceil
+  total.times do |i|
+    a = 2 * Math::PI * i / n_theta
+    r = rin + p * (i.to_f / n_theta)
+    pts << [r * Math.cos(a), r * Math.sin(a)]
+  end
+  pts
+end
+
+def make_core(shape, rin, turns, p)
+  case shape
+  when "octagon" then octagon_spiral(rin, turns, p)
+  when "circle" then circle_spiral(rin, turns, p)
+  else square_spiral(rin, turns, p)
+  end
+end
+
+def curved_geom?(shape)
+  %w[circle octagon].include?(shape.to_s)
+end
+
 def bbox_of(pts)
   xs = pts.map { |x, _| x }
   ys = pts.map { |_, y| y }
@@ -131,8 +208,13 @@ def add_outer_lead(pts, lead = 15.0)
   end
 end
 
-def draw_series(cell, metal, cline, layout, pts, width)
-  add_ribbon_boxes(cell, metal, layout, pts, width)
+def draw_series(cell, metal, cline, layout, pts, width, use_path: false)
+  if use_path
+    # Archimedean Path segments are slight trapezoids; +2% keeps projection width ≥ W
+    add_ribbon_path(cell, metal, layout, pts, width * 1.02)
+  else
+    add_ribbon_boxes(cell, metal, layout, pts, width)
+  end
   add_centerline(cell, cline, layout, pts)
 end
 
@@ -157,8 +239,15 @@ def add_inner_exit_underpass(cell, m1, m2, via, m2c, layout, inner_pt, spiral_pt
   [x_pad - 12.0, y_chan]
 end
 
+# Path ribbons for circle/octagon: extra pitch for +2% path width + curvature
 p = pitch(W, SP)
-geom = SHAPE == "figure8" ? "figure8" : "square"
+p *= 1.15 if curved_geom?(SHAPE)
+USE_PATH = curved_geom?(SHAPE)
+geom = case SHAPE
+       when "figure8" then "figure8"
+       when "octagon", "circle" then SHAPE
+       else "square"
+       end
 
 if geom == "figure8"
   # Series figure-8: P1 → left(outer→inner) → M2 channel bridge → right(inner→outer) → P2
@@ -187,26 +276,21 @@ if geom == "figure8"
   add_label(top, m1t, layout, p2[0], p2[1], "P2")
 
 elsif PORTS <= 2
-  core = square_spiral(RIN, TURNS, p)  # inner → outer
-  pts = add_outer_lead(core, 15.0)     # extend OUTER only
-  draw_series(top, m1, m1c, layout, pts, W)
+  core = make_core(geom, RIN, TURNS, p)  # inner → outer
+  pts = add_outer_lead(core, 15.0)
+  draw_series(top, m1, m1c, layout, pts, W, use_path: USE_PATH)
   p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E)
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P1")
   add_label(top, m1t, layout, p2[0], p2[1], "P2")
 
 elsif PORTS == 3
-  core = square_spiral(RIN, TURNS, p)
+  core = make_core(geom, RIN, TURNS, p)
   pts = add_outer_lead(core, 15.0)
-  draw_series(top, m1, m1c, layout, pts, W)
-  # P2 via underpass from inner; CT via on outer lead (away from body)
+  draw_series(top, m1, m1c, layout, pts, W, use_path: USE_PATH)
   p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E)
-  # CT on outer lead segment
-  tap = [pts[-2][0], pts[-2][1]]
-  # nudge tap onto lead between pts[-2] and pts[-1]
   tap = [(pts[-2][0] + pts[-1][0]) / 2.0, (pts[-2][1] + pts[-1][1]) / 2.0]
   xmin, ymin, _, _ = bbox_of(core)
   ct_pad = [tap[0], ymin - 14.0]
-  # If CT pad would hit underpass channel, place above instead
   ct_pad = [tap[0], bbox_of(core)[3] + 14.0] if (ct_pad[1] - (ymin - (W + 8.0))).abs < 6.0
   add_via(top, via, m1, m2, layout, tap[0], tap[1], VIA_W, VIA_E)
   add_ribbon_boxes(top, m2, layout, [tap, ct_pad], W)
@@ -217,20 +301,13 @@ elsif PORTS == 3
   add_label(top, m2t, layout, ct_pad[0], ct_pad[1], "CT")
 
 else
-  pri = add_outer_lead(square_spiral(RIN, TURNS, p), 15.0)
-  # Primary: for 4-port keep both ends on M1 without underpass by labeling
-  # outer as P1 and using underpass for P2 (same as 2-port primary)
-  core = square_spiral(RIN, TURNS, p)
+  core = make_core(geom, RIN, TURNS, p)
   pri = add_outer_lead(core, 15.0)
-  draw_series(top, m1, m1c, layout, pri, W)
+  draw_series(top, m1, m1c, layout, pri, W, use_path: USE_PATH)
   p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E)
-  # Secondary on M2, shifted down — both ends outer by using lead on M2 only
-  # For secondary, wind and put both leads outside without crossing: reverse
-  # so we draw outer-to-inner then underpass on M1? Simpler: same spiral on M2
-  # fully, leads outward only on outer end; inner labeled at center (S2).
-  sec_core = square_spiral(RIN, TURNS, p).map { |x, y| [x, y - (RIN + TURNS * p + 25)] }
+  sec_core = make_core(geom, RIN, TURNS, p).map { |x, y| [x, y - (RIN + TURNS * p + 25)] }
   sec = add_outer_lead(sec_core, 15.0)
-  draw_series(top, m2, m2c, layout, sec, W)
+  draw_series(top, m2, m2c, layout, sec, W, use_path: USE_PATH)
   add_label(top, m1t, layout, pri.last[0], pri.last[1], "P1")
   add_label(top, m1t, layout, p2[0], p2[1], "P2")
   add_label(top, m2t, layout, sec.last[0], sec.last[1], "S1")
@@ -240,4 +317,4 @@ end
 opt = RBA::SaveLayoutOptions.new
 opt.format = "GDS2"
 layout.write(OUT_PATH, opt)
-puts "Wrote #{OUT_PATH} cell=#{CELL} shape=#{SHAPE}->#{geom} ports=#{PORTS} W=#{W} S=#{SP} role=#{ROLE} (box ribbons, no lead-through)"
+puts "Wrote #{OUT_PATH} cell=#{CELL} shape=#{SHAPE}->#{geom} ports=#{PORTS} W=#{W} S=#{SP} role=#{ROLE}"

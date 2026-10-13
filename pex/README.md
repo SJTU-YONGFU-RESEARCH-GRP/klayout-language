@@ -1,17 +1,20 @@
-# M1 Resistor + Parallel-Plate Capacitor PEX Demo (KLayout)
+# PEX Demo — R / C (KLayout) + CC (KLayout-PEX)
 
-Educational **R** and **C** extraction — same GOOD pass / BAD fail pattern as [`../drc/`](../drc/) and [`../lvs/`](../lvs/).
+Educational parasitic extraction with the same GOOD pass / BAD fail pattern as [`../drc/`](../drc/) and [`../lvs/`](../lvs/).
 
-| What | API | Formula |
-|------|-----|---------|
-| **R** | Built-in `RNetExtractor` (square counting) | `R ≈ (L/W) × sheet_r` |
-| **C** | LVS `capacitor()` device extractor | `C = A_overlap × area_cap` |
+| What | Tool | Formula / engine |
+|------|------|------------------|
+| **R** | Built-in `RNetExtractor` | `R ≈ (L/W) × sheet_r` |
+| **C** | LVS `capacitor()` | `C = A_overlap × area_cap` |
+| **CC** | [KLayout-PEX](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) `kpex --2.5D` | sidewall / fringe / substrate (sky130A) |
 
-> The built-in `klayout.pex` module is **R-only**. Full parasitic C (sidewall / fringe / 2.5D) needs [KLayout-PEX (`kpex`)](https://iic-jku.github.io/klayout-pex-website/doc/doc.html). This demo teaches the **overlap-area capacitor** extractor that ships with KLayout LVS.
+> Built-in `klayout.pex` is **R-only**. Overlap **C** uses LVS `capacitor()`. Full coupling **CC** (sidewall) needs **kpex**.
 
 ![PEX R DEMO](../screenshots/pex_r_demo.png)
 
 ![PEX C DEMO](../screenshots/pex_c_demo.png)
+
+![PEX CC DEMO](../screenshots/pex_cc_demo.png)
 
 ### Resistance
 
@@ -20,18 +23,27 @@ Educational **R** and **C** extraction — same GOOD pass / BAD fail pattern as 
 | `R_GOOD` | L=2.0, W=1.0 µm | 2 | **0.16 Ω** | **PASS** (R < 1.0) |
 | `R_BAD` | L=16.0, W=0.20 µm | 80 | **6.40 Ω** | **FAIL** |
 
-### Capacitance
+### Capacitance (overlap)
 
 | Cell | Overlap | C (@ 1e-15 F/µm²) | Result |
 |------|---------|-------------------|--------|
 | `C_GOOD` | 3×3 = 9 µm² | **9.0 fF** | **PASS** (C ≥ 1 fF) |
 | `C_BAD` | 0.5×0.5 = 0.25 µm² | **0.25 fF** | **FAIL** |
 
+### Coupling capacitance (kpex / sky130A li1)
+
+| Cell | Geometry | C_AB (typical) | Result |
+|------|----------|----------------|--------|
+| `CC_GOOD` | L=20 µm, W=1 µm, **gap=0.20 µm** | **~0.75 fF** | **PASS** (C_AB ≥ 0.30 fF) |
+| `CC_BAD` | same, **gap=5.0 µm** | **~0.05 fF** | **FAIL** |
+
 Sibling demos: [`../drc/`](../drc/) · [`../lvs/`](../lvs/).
 
 ---
 
 ## Quick start
+
+### Built-in R + C
 
 ```bash
 cd pex
@@ -51,6 +63,22 @@ cd pex
 
 Requires KLayout **0.30.2+** for `RNetExtractor` (`../scripts/install-klayout.sh`).
 
+### KLayout-PEX (CC)
+
+```bash
+# once
+../scripts/install_kpex.sh          # needs Python >= 3.12
+
+cd pex
+./run_kpex.sh                       # CC_GOOD PASS + CC_BAD FAIL
+./run_kpex.sh --good
+./run_kpex.sh --bad
+./run_kpex.sh --plate               # also C_PLATE (li1 → substrate)
+
+# outputs: cc_good.txt / cc_bad.txt / cc_*_extracted.cir / kpex_out/
+```
+
+`kpex --2.5D` uses only KLayout (no MAGIC / FasterCap required). MAGIC engine needs magic ≥ 8.3.679.
 ```bash
 # R
 klayout -b -rd input=pex_demo.gds -rd cell=R_GOOD \
@@ -70,17 +98,22 @@ klayout -b -rd input=pex_demo.gds -rd cell=C_GOOD \
 | File | Role |
 |------|------|
 | `generate_layout.rb` | Builds `pex_demo.gds` (R_* + C_* + demos) |
+| `generate_kpex_layout.rb` | Builds `kpex_demo.gds` (CC_* + C_PLATE, sky130A li1) |
 | `extract_r.rb` | `RNetExtractor` + PASS/FAIL vs `r_limit` |
 | `extract_c.lvs` | `capacitor()` + PASS/FAIL vs `c_limit` |
 | `run_pex.sh` | Generate + run R/C GOOD/BAD |
+| `run_kpex.sh` | Generate + run kpex 2.5D CC GOOD/BAD |
 | `view_pex.sh` | Open GDS + show report |
-| `run_clean.sh` | Delete reports / spice (`--gds` removes GDS) |
+| `run_clean.sh` | Delete reports / spice / `kpex_out/` (`--gds` removes GDS) |
+| `../scripts/install_kpex.sh` | `pip install --user klayout-pex` (Python ≥ 3.12) |
 
-Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `pex_demo.gds`
+Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `cc_*.{txt,log,cir}`, `pex_demo.gds`, `kpex_demo.gds`, `kpex_out/`
 
 ---
 
 ## Layers
+
+### Built-in R / C (`pex_demo.gds`)
 
 | GDS | Name | Color | Role |
 |-----|------|-------|------|
@@ -88,6 +121,16 @@ Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `pex_demo.gds`
 | 32/0 | M2 | green | capacitor top plate |
 | 90/0 | labels | purple | A/B / titles |
 | 100/0 | marker | magenta | BAD highlight (screenshots) |
+
+### kpex CC (`kpex_demo.gds`, sky130A)
+
+| GDS | Name | Role |
+|-----|------|------|
+| 67/20 | li1 | metal drawing |
+| 67/16 | li1 pin | pin polygons |
+| 67/5 | li1 label | net names `A` / `B` / `PLATE` |
+| 90/0 | annotation | titles |
+| 100/0 | marker | BAD highlight |
 
 ---
 
@@ -129,6 +172,26 @@ C1 A B 9e-15
 .ENDS
 ```
 
+### CC — `kpex extract --2.5D` (sky130A)
+
+```bash
+kpex extract --pdk sky130A --2.5D \
+  --gds kpex_demo.gds --cell CC_GOOD --out_dir kpex_out/good
+# → *_k25d_pex_netlist.spice / .csv
+```
+
+Typical netlist:
+
+```spice
+.SUBCKT CC_GOOD sky130_gnd
+Cext_1 A B 750a          ; coupling (~0.75 fF)
+Cext_2 A sky130_gnd 1.72f
+Cext_3 B sky130_gnd 1.72f
+.ENDS
+```
+
+PASS if coupling `C_AB >= CC_LIMIT_FF` (default **0.30 fF**).
+
 ---
 
 ## Good vs bad
@@ -140,12 +203,19 @@ C1 A B 9e-15
 | ![R GOOD](../screenshots/pex_r_good.png) | ![R BAD](../screenshots/pex_r_bad.png) |
 | ![R zoom](../screenshots/pex_case_good_lw.png) | ![R zoom](../screenshots/pex_case_bad_r.png) |
 
-### Capacitance
+### Capacitance (overlap)
 
 | GOOD (full overlap) | BAD (misaligned) |
 |:-------------------:|:----------------:|
 | ![C GOOD](../screenshots/pex_c_good.png) | ![C BAD](../screenshots/pex_c_bad.png) |
 | ![C zoom](../screenshots/pex_case_c_good.png) | ![C zoom](../screenshots/pex_case_c_bad.png) |
+
+### Coupling (kpex)
+
+| GOOD (gap 0.20 µm) | BAD (gap 5.0 µm) |
+|:------------------:|:----------------:|
+| ![CC GOOD](../screenshots/pex_cc_good.png) | ![CC BAD](../screenshots/pex_cc_bad.png) |
+| ![CC zoom](../screenshots/pex_case_cc_good.png) | ![CC zoom](../screenshots/pex_case_cc_bad.png) |
 
 ---
 
@@ -157,8 +227,8 @@ C1 A B 9e-15
 
 | File | Content |
 |------|---------|
-| `pex_r_demo.png` / `pex_c_demo.png` | R / C overviews |
-| `pex_r_*.png` / `pex_c_*.png` | Cell views |
+| `pex_r_demo.png` / `pex_c_demo.png` / `pex_cc_demo.png` | R / C / CC overviews |
+| `pex_r_*.png` / `pex_c_*.png` / `pex_cc_*.png` | Cell views |
 | `pex_case_*.png` | Zoom + rulers / markers |
 
 ---
@@ -168,4 +238,4 @@ C1 A B 9e-15
 - [`../docs/PEX.md`](../docs/PEX.md) — `RExtractor` / `RNetExtractor` reference  
 - [`../docs/LVS.md`](../docs/LVS.md) — `capacitor` / `capacitor_with_bulk`  
 - [`../drc/`](../drc/) · [`../lvs/`](../lvs/)  
-- [KLayout-PEX](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) — full parasitic C engine  
+- [KLayout-PEX](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) — full parasitic C / CC engine  

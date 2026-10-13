@@ -26,7 +26,11 @@ COLORS = {
   "6/0"   => [0xD35400, "PTIE", { transparent: false, dither: 0 }],  # orange
   "100/0" => [0xFF00AA, "DRC_ERR",{ transparent: false, dither: 5 }],# magenta
   "101/0" => [0x111111, "DIM",  { transparent: false, dither: 0 }],  # black rulers
-  "102/0" => [0x8E44AD, "DIMTXT",{ transparent: false, dither: 0 }]  # purple labels
+  "102/0" => [0x8E44AD, "DIMTXT",{ transparent: false, dither: 0 }], # purple labels
+  # sky130A li1 (kpex CC demo)
+  "67/20" => [0x1E6AFF, "LI1",  { transparent: true, dither: 1 }],   # blue
+  "67/16" => [0x27AE60, "LI1PIN",{ transparent: false, dither: 0 }], # green pin
+  "67/5"  => [0x5B2C6F, "LI1LAB",{ transparent: false, dither: 0 }]  # purple label
 }
 
 def layer_key(source_str)
@@ -494,6 +498,57 @@ if File.file?(pex_gds)
   )
 else
   puts "SKIP PEX screenshots (missing #{pex_gds})"
+end
+
+# ---------------------------------------------------------------------------
+# PEX — CC (kpex / sky130A li1 sidewall)
+# ---------------------------------------------------------------------------
+kpex_gds = File.join(pex, "kpex_demo.gds")
+unless File.file?(kpex_gds)
+  gen_kpex = File.join(pex, "generate_kpex_layout.rb")
+  if File.file?(gen_kpex)
+    system("klayout", "-b", "-rd", "output=#{kpex_gds}", "-r", gen_kpex)
+  end
+end
+
+if File.file?(kpex_gds)
+  capture(File.join(SHOT, "pex_cc_demo.png"),
+          kpex_gds, cell_name: "CC_DEMO", width: 1400, height: 1100)
+  capture(File.join(SHOT, "pex_cc_good.png"),
+          kpex_gds, cell_name: "CC_GOOD", width: 1400, height: 500)
+  capture(File.join(SHOT, "pex_cc_bad.png"),
+          kpex_gds, cell_name: "CC_BAD", width: 1400, height: 700)
+
+  capture_zoom(
+    File.join(SHOT, "pex_case_cc_good.png"),
+    kpex_gds,
+    cell_name: "CC_GOOD",
+    box: [-0.5, -0.4, 20.5, 2.8],
+    rulers: [
+      [0.0, 2.45, 20.0, 2.45, "L = 20 um"],
+      [20.3, 0.0, 20.3, 1.0, "W = 1 um"],
+      [8.0, 1.0, 8.0, 1.2, "gap = 0.20 um"],
+      [0.0, -0.25, 20.0, -0.25, "C_AB ~ 0.75 fF"]
+    ],
+    markers: [],
+    width: 1400, height: 600, pad: 0.12
+  )
+
+  capture_zoom(
+    File.join(SHOT, "pex_case_cc_bad.png"),
+    kpex_gds,
+    cell_name: "CC_BAD",
+    box: [-0.5, -0.5, 20.5, 7.5],
+    rulers: [
+      [0.0, 7.2, 20.0, 7.2, "L = 20 um"],
+      [10.0, 1.0, 10.0, 6.0, "gap = 5.0 um"],
+      [0.0, -0.30, 20.0, -0.30, "C_AB ~ 0.05 fF (FAIL)"]
+    ],
+    markers: [[0.0, 6.0, 20.0, 7.0]],
+    width: 1400, height: 800, pad: 0.15
+  )
+else
+  puts "SKIP kpex CC screenshots (missing #{kpex_gds})"
 end
 
 puts "Done → #{SHOT}"

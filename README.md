@@ -16,7 +16,7 @@ KLayout DRC / LVS / PEX language notes and runnable demos.
 |------|----------------|
 | [`drc/`](drc/) | M1 / Contact **width, space, enclosure** — GOOD pass / BAD fail (KLayout + Calibre) |
 | [`lvs/`](lvs/) | Single **NMOS** transistor LVS — GOOD pass / BAD (S–D short) fail |
-| [`pex/`](pex/) | **R** (`RNetExtractor`) + **C** (`capacitor()` overlap) — GOOD pass / BAD fail |
+| [`pex/`](pex/) | **R** + overlap **C** (KLayout) + sidewall **CC** ([kpex](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) 2.5D) — GOOD pass / BAD fail |
 
 ![DRC test layout](screenshots/drc_m1_contact_layout.png)
 
@@ -26,6 +26,8 @@ KLayout DRC / LVS / PEX language notes and runnable demos.
 
 ![PEX C GOOD vs BAD](screenshots/pex_c_demo.png)
 
+![PEX CC GOOD vs BAD](screenshots/pex_cc_demo.png)
+
 ```bash
 # DRC
 cd drc && ./run_klayout_drc.sh && ./view_klayout_drc.sh
@@ -33,11 +35,15 @@ cd drc && ./run_klayout_drc.sh && ./view_klayout_drc.sh
 # LVS
 cd lvs && ./run_lvs.sh && ./view_lvs.sh
 
-# PEX
+# PEX (built-in R + C)
 cd pex && ./run_pex.sh && ./view_pex.sh
+
+# PEX coupling (kpex 2.5D, sky130A)
+../scripts/install_kpex.sh    # once, Python >= 3.12
+./run_kpex.sh
 
 # Regenerate README screenshots (Xvfb + colored layers + rulers)
 ./scripts/run_capture_screenshots.sh
 ```
 
-Install KLayout (if needed): [`scripts/install-klayout.sh`](scripts/install-klayout.sh). Needs **0.30.2+** for the built-in PEX API.
+Install KLayout (if needed): [`scripts/install-klayout.sh`](scripts/install-klayout.sh). Needs **0.30.2+** for the built-in PEX API. Install kpex: [`scripts/install_kpex.sh`](scripts/install_kpex.sh).

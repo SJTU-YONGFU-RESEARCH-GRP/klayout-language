@@ -1,13 +1,18 @@
 # Generated / run outputs
 pex_demo.gds
 r_demo.gds
+kpex_demo.gds
 r_*.txt
 r_*_extracted.cir
 r_*.log
 c_*.txt
 c_*_extracted.cir
 c_*.log
+cc_*.txt
+cc_*_extracted.cir
+cc_*.log
 r_extract.txt
 r_extracted.cir
 c_extract.txt
 c_extracted.cir
+kpex_out/

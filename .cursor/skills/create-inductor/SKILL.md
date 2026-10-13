@@ -3,17 +3,18 @@ name: create-inductor
 description: >-
   Designs 1–2 metal-layer on-chip CMOS inductors (spiral, octagon, circle,
   figure-8; 2/3/4-port including center-tap, transformer, coupler) under
-  inductor/, with KLayout DRC/LVS and openEMS Q/S-parameter analysis writing
-  RESULT.md per run. Use when creating inductors, transformers, baluns,
-  couplers, or when the user mentions create-inductor, inductor/N, openEMS
-  inductor sim, or on-chip spiral design.
+  inductor/, with KLayout DRC/LVS, SHORTS checks, PEEC/openEMS EM plots,
+  per-run RESULT.md, and cross-run BENCHMARK.md. Use when creating inductors,
+  transformers, baluns, couplers, benchmarking inductor runs, or when the user
+  mentions create-inductor, inductor/N, BENCHMARK.md, or openEMS inductor sim.
 disable-model-invocation: true
 ---
 
 # create-inductor
 
 Generate and verify on-chip inductors under `inductor/` in **klayout-language**.
-Each design run lives in `inductor/<N>/` and ends with `RESULT.md`.
+Each design run lives in `inductor/<N>/` with `RESULT.md`; after every completed
+run, refresh **`inductor/BENCHMARK.md`** (summary leaderboard + per-run detail).
 
 ## Defaults (override only if user asks)
 
@@ -39,8 +40,9 @@ create-inductor Progress:
 - [ ] 4. Run DRC → record pass/fail
 - [ ] 5. Run LVS + SHORTS cut-test → record pass/fail
 - [ ] 6. Screenshot → layout/inductor.png (blue/red/yellow/…)
-- [ ] 7. openEMS sim → S-params, L, Q
-- [ ] 8. Write RESULT.md (must embed screenshot)
+- [ ] 7. EM sim + plots → sim/performance.png
+- [ ] 8. Write RESULT.md (layout + EM plots)
+- [ ] 9. Update inductor/BENCHMARK.md (all runs)
 ```
 
 ### Step 1 — Allocate run folder
@@ -184,7 +186,30 @@ openEMS install notes: [reference.md](reference.md#openems).
 Mandatory path: `inductor/<N>/RESULT.md`  
 Template: [result-template.md](result-template.md)
 
-Must include: **layout screenshot** (`![…](layout/inductor.png)`), config summary, DRC/LVS status, EM metrics (L, Q_max, f @ Q_max, key S-params), next-step notes.
+Must include: **layout** + **EM** screenshots, config summary, DRC/LVS/SHORTS, EM metrics.
+
+### Step 9 — Update `BENCHMARK.md` (mandatory)
+
+After `RESULT.md` is written, regenerate the cross-run benchmark:
+
+```bash
+./inductor/common/run_benchmark.sh
+# equivalent:
+python3 inductor/common/update_benchmark.py --root inductor
+```
+
+Writes **`inductor/BENCHMARK.md`** with:
+
+| Section | Contents |
+|---------|----------|
+| **Summary leaderboard** | One row per run: shape/ports, gates, L₀, L@f_ref, Q@f_ref, Q_max, SRF, links |
+| **Champions** | Best L₀ / Q@f_ref / Q_max / SRF |
+| **Gate status** | DRC/LVS/SHORTS/EM pass rates |
+| **Design diversity** | `(shape, ports, role)` + geometry params |
+| **Detail by run** | Layout + performance thumbnails and full metrics |
+
+Do **not** hand-edit `BENCHMARK.md` — always regenerate from disk state.  
+If any run is missing `sim/summary.json`, still include it (EM columns show —).
 
 ## Agent rules
 
@@ -192,8 +217,9 @@ Must include: **layout screenshot** (`![…](layout/inductor.png)`), config summ
 - Do not invent DRC/LVS/SHORTS PASS without running the scripts (or recording SKIPPED).
 - Prefer regenerating GDS from `config.yaml` over hand-editing polygons.
 - If SHORTS FAIL: fix generator/config (remove vias/bridges); do not weaken the cut-test.
+- **Always** run `run_benchmark.sh` before declaring a create-inductor task done.
 - Match sibling demo style in `drc/` and `lvs/` (shell runners, KLayout `-b`).
-- After a successful run, briefly tell the user: path to `RESULT.md`, PASS/FAIL, SHORTS, and peak Q / L if EM ran.
+- After a successful run, tell the user: `RESULT.md`, `BENCHMARK.md`, PASS/FAIL, and peak Q / L.
 
 ## Quick commands
 
@@ -205,5 +231,6 @@ python3 inductor/common/generate_inductor.py \
 ./inductor/common/run_lvs.sh inductor/1
 ./inductor/common/run_screenshot.sh inductor/1
 ./inductor/common/run_openems.sh inductor/1
-# then write inductor/1/RESULT.md (embed layout/inductor.png)
+# write inductor/1/RESULT.md, then:
+./inductor/common/run_benchmark.sh
 ```

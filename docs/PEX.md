@@ -4,7 +4,7 @@ Extracted from KLayout official DRC/LVS reference HTML and built-in macros (KLay
 
 Built-in **resistance** parasitic extraction API: Python `klayout.pex` / Ruby module `pex` (`libklayout_pex`, since 0.30.2).
 
-> [KLayout-PEX (`kpex`)](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) is a separate flow. This file covers the **built-in `pex` module** only.
+> [KLayout-PEX (`kpex`)](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) is a separate flow (full parasitic **C/CC**). This file covers the **built-in `pex` module** (R-only) only. For a runnable sky130A sidewall **CC** demo, see [`../pex/`](../pex/) (`./run_kpex.sh`).
 
 **API coverage:** 8 classes · 2 enums · 60 methods (with examples).
 
