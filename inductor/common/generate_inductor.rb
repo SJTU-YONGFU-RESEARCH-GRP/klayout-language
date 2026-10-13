@@ -71,14 +71,8 @@ def add_ribbon_path(cell, layer, layout, pts, width)
     pts.map { |x, y| RBA::Point.new(um(layout, x), um(layout, y)) },
     wdbu
   )
-  sp.bgn_ext = wdbu / 2
-  sp.end_ext = wdbu / 2
+  # No bgn/end_ext: extensions create tip cusps under projection width
   cell.shapes(layer).insert(sp)
-  # Square end caps swallow Path tip slivers that trip projection min-width
-  hw = width / 2.0
-  [pts.first, pts.last].each do |x, y|
-    add_box_um(cell, layer, layout, x - hw, y - hw, x + hw, y + hw)
-  end
 end
 
 def add_ribbon_boxes(cell, layer, layout, pts, width)
@@ -114,10 +108,12 @@ def add_ribbon_boxes(cell, layer, layout, pts, width)
   end
 end
 
-def add_via(cell, via_layer, m_bot, m_top, layout, cx, cy, vw, enc)
+def add_via(cell, via_layer, m_bot, m_top, layout, cx, cy, vw, enc, metal_hw: nil)
   half = vw / 2.0
   add_box_um(cell, via_layer, layout, cx - half, cy - half, cx + half, cy + half)
   pad = half + enc
+  # Optional larger metal pad so Path tips (half-width > via pad) do not stick out
+  pad = [pad, metal_hw].max if metal_hw
   add_box_um(cell, m_bot, layout, cx - pad, cy - pad, cx + pad, cy + pad)
   add_box_um(cell, m_top, layout, cx - pad, cy - pad, cx + pad, cy + pad)
 end
@@ -210,8 +206,12 @@ end
 
 def draw_series(cell, metal, cline, layout, pts, width, use_path: false)
   if use_path
-    # Archimedean Path segments are slight trapezoids; +2% keeps projection width ≥ W
-    add_ribbon_path(cell, metal, layout, pts, width * 1.02)
+    # Archimedean Path segments are slight trapezoids; +5% keeps projection width ≥ W.
+    # Cap only the OUTER free end — an inner cap crowds the first turn (space fail).
+    add_ribbon_path(cell, metal, layout, pts, width * 1.05)
+    x, y = pts.last
+    hw = width * 0.55
+    add_box_um(cell, metal, layout, x - hw, y - hw, x + hw, y + hw)
   else
     add_ribbon_boxes(cell, metal, layout, pts, width)
   end
@@ -221,14 +221,16 @@ end
 # Underpass: from inner point under the spiral to a clear pad outside (left).
 # Exactly 2 vias. M2 runs in a channel BELOW ymin so it does not need to
 # weave between turns — clear of M1 except at the two via pads.
-def add_inner_exit_underpass(cell, m1, m2, via, m2c, layout, inner_pt, spiral_pts, width, via_w, via_e)
+def add_inner_exit_underpass(cell, m1, m2, via, m2c, layout, inner_pt, spiral_pts, width, via_w, via_e, path_metal: false)
   x0, y0 = inner_pt
   xmin, ymin, xmax, ymax = bbox_of(spiral_pts)
   # Outside pad to the left of spiral, below the body
   y_chan = ymin - (width + 8.0)
   x_pad = xmin - 15.0
-  # Via1 at inner; short M1 stub already part of spiral. Via2 at outside.
-  add_via(cell, via, m1, m2, layout, x0, y0, via_w, via_e)
+  # Via1 at inner; Path half-width can exceed default via pad — cover tip
+  # Match Path half-width exactly — extra margin crowds turn-1 (space fail)
+  path_hw = path_metal ? width * 1.05 / 2.0 : nil
+  add_via(cell, via, m1, m2, layout, x0, y0, via_w, via_e, metal_hw: path_hw)
   # M2: inner → down to channel → left to pad → up not needed
   m2_pts = [[x0, y0], [x0, y_chan], [x_pad, y_chan]]
   add_ribbon_boxes(cell, m2, layout, m2_pts, width)
@@ -239,9 +241,9 @@ def add_inner_exit_underpass(cell, m1, m2, via, m2c, layout, inner_pt, spiral_pt
   [x_pad - 12.0, y_chan]
 end
 
-# Path ribbons for circle/octagon: extra pitch for +2% path width + curvature
+# Path ribbons for circle/octagon: extra pitch for +5% path width + curvature
 p = pitch(W, SP)
-p *= 1.15 if curved_geom?(SHAPE)
+p *= 1.20 if curved_geom?(SHAPE)
 USE_PATH = curved_geom?(SHAPE)
 geom = case SHAPE
        when "figure8" then "figure8"
@@ -279,7 +281,7 @@ elsif PORTS <= 2
   core = make_core(geom, RIN, TURNS, p)  # inner → outer
   pts = add_outer_lead(core, 15.0)
   draw_series(top, m1, m1c, layout, pts, W, use_path: USE_PATH)
-  p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E)
+  p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E, path_metal: USE_PATH)
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P1")
   add_label(top, m1t, layout, p2[0], p2[1], "P2")
 
@@ -287,7 +289,7 @@ elsif PORTS == 3
   core = make_core(geom, RIN, TURNS, p)
   pts = add_outer_lead(core, 15.0)
   draw_series(top, m1, m1c, layout, pts, W, use_path: USE_PATH)
-  p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E)
+  p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E, path_metal: USE_PATH)
   tap = [(pts[-2][0] + pts[-1][0]) / 2.0, (pts[-2][1] + pts[-1][1]) / 2.0]
   xmin, ymin, _, _ = bbox_of(core)
   ct_pad = [tap[0], ymin - 14.0]
@@ -304,7 +306,7 @@ else
   core = make_core(geom, RIN, TURNS, p)
   pri = add_outer_lead(core, 15.0)
   draw_series(top, m1, m1c, layout, pri, W, use_path: USE_PATH)
-  p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E)
+  p2 = add_inner_exit_underpass(top, m1, m2, via, m2c, layout, core.first, core, W, VIA_W, VIA_E, path_metal: USE_PATH)
   sec_core = make_core(geom, RIN, TURNS, p).map { |x, y| [x, y - (RIN + TURNS * p + 25)] }
   sec = add_outer_lead(sec_core, 15.0)
   draw_series(top, m2, m2c, layout, sec, W, use_path: USE_PATH)

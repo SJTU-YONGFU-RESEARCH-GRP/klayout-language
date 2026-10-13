@@ -75,6 +75,10 @@ cd pex
 ./run_kpex.sh --bad
 ./run_kpex.sh --plate               # also C_PLATE (li1 → substrate)
 
+./view_pex.sh --cc                  # CC_GOOD report + kpex_demo.gds
+./view_pex.sh --cc-bad
+./view_pex.sh --cc-demo
+
 # outputs: cc_good.txt / cc_bad.txt / cc_*_extracted.cir / kpex_out/
 ```
 
