@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Save Layout Screenshot (menu registration)</description>
+ <version>1.0</version>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc>Registers the Screenshot menu and Save Layout Screenshot action at startup.</doc>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name>save_screenshot</group-name>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+# Registers: Screenshot → Save Layout Screenshot (Ctrl+Shift+S)
+import importlib
+import save_screenshot as _ss
+
+importlib.reload(_ss)
+_ss.register_menu()
+ </text>
+</klayout-macro>
