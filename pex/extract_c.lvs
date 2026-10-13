@@ -1,0 +1,75 @@
+# KLayout PEX — M1/M2 overlap capacitor extraction (device extractor)
+#
+# Built-in klayout.pex has R only. Capacitance here uses the LVS
+# capacitor() extractor: C = overlap_area × area_cap (F/µm²).
+#
+# Layers: M1 31/0  M2 32/0
+# Run: ./run_pex.sh  (or klayout -b -rd ... -r extract_c.lvs)
+
+AREA_CAP = ($area_cap || 1.0e-15).to_f   # F / µm²
+C_LIMIT  = ($c_limit || 1.0e-15).to_f    # PASS if C >= limit
+CELL     = ($cell || "C_GOOD").to_s
+REPORT   = ($report || "c_extract.txt").to_s
+SPICE    = ($spice || "c_extracted.cir").to_s
+
+if $input
+  source($input, CELL)
+end
+
+target_netlist(SPICE, write_spice, "Extracted by KLayout PEX C demo")
+
+metal1 = input(31, 0)
+metal2 = input(32, 0)
+
+overlap = metal1 & metal2
+ov_area = overlap.data.area * dbu * dbu   # µm²
+
+extract_devices(capacitor("CAP", AREA_CAP), {
+  "P1" => metal1,
+  "P2" => metal2
+})
+
+total_c = 0.0
+total_a = 0.0
+total_p = 0.0
+n_dev = 0
+netlist.each_circuit do |cir|
+  cir.each_device do |d|
+    n_dev += 1
+    total_c += d.parameter("C")
+    total_a += d.parameter("A")
+    total_p += d.parameter("P")
+  end
+end
+
+ok = total_c >= C_LIMIT
+status = ok ? "PASS" : "FAIL"
+
+lines = []
+lines << "KLayout PEX — M1/M2 capacitor extraction"
+lines << "  cell:          #{CELL}"
+lines << "  gds:           #{$input}"
+lines << "  area_cap:      #{AREA_CAP} F/um^2"
+lines << "  c_limit:       #{C_LIMIT} F  (PASS if C >= limit)"
+lines << "  overlap_area:  #{sprintf('%.4f', ov_area)} um^2  (boolean M1 & M2)"
+lines << "  expected_C:    #{sprintf('%.6e', ov_area * AREA_CAP)} F"
+lines << "  extracted_C:   #{sprintf('%.6e', total_c)} F  (#{n_dev} device(s))"
+lines << "  extracted_A:   #{sprintf('%.4f', total_a)} um^2"
+lines << "  extracted_P:   #{sprintf('%.4f', total_p)} um"
+lines << "PEX #{status} — #{CELL}  C=#{sprintf('%.4e', total_c)} F  (limit #{C_LIMIT})"
+
+text = lines.join("\n") + "\n"
+File.open(REPORT, "w") { |f| f.write(text) }
+puts text
+
+# Ensure a readable SPICE even if writer skipped floating devices
+File.open(SPICE, "w") do |f|
+  f.puts "* Extracted by KLayout PEX C demo (capacitor device extractor)"
+  f.puts "* cell=#{CELL}  area_cap=#{AREA_CAP} F/um^2  C=#{sprintf('%.6e', total_c)}"
+  f.puts ".SUBCKT #{CELL} A B"
+  f.puts sprintf("C1 A B %.6g", total_c)
+  f.puts ".ENDS"
+  f.puts ""
+end
+puts "Wrote #{SPICE}"
+puts "Wrote #{REPORT}"

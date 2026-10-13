@@ -1,16 +1,31 @@
-# M1 Resistor PEX Demo (KLayout)
+# M1 Resistor + Parallel-Plate Capacitor PEX Demo (KLayout)
 
-Minimal **parasitic R extraction** with the built-in `RNetExtractor` (square counting) — same GOOD pass / BAD fail pattern as [`../drc/`](../drc/) and [`../lvs/`](../lvs/).
+Educational **R** and **C** extraction — same GOOD pass / BAD fail pattern as [`../drc/`](../drc/) and [`../lvs/`](../lvs/).
 
-![R_DEMO — GOOD (top) vs BAD (bottom)](../screenshots/pex_r_demo.png)
+| What | API | Formula |
+|------|-----|---------|
+| **R** | Built-in `RNetExtractor` (square counting) | `R ≈ (L/W) × sheet_r` |
+| **C** | LVS `capacitor()` device extractor | `C = A_overlap × area_cap` |
 
-| Cell | Layout | Squares | Expected R (@ 0.08 Ω/□) | Result |
-|------|--------|---------|-------------------------|--------|
-| `R_GOOD` | L=2.0 µm, W=1.0 µm | 2 | **0.16 Ω** | **PASS** (R < 1.0) |
-| `R_BAD` | L=16.0 µm, W=0.20 µm | 80 | **6.40 Ω** | **FAIL** (R ≥ 1.0) |
-| `R_DEMO` | Both (for viewing) | — | — | — |
+> The built-in `klayout.pex` module is **R-only**. Full parasitic C (sidewall / fringe / 2.5D) needs [KLayout-PEX (`kpex`)](https://iic-jku.github.io/klayout-pex-website/doc/doc.html). This demo teaches the **overlap-area capacitor** extractor that ships with KLayout LVS.
 
-Sheet resistance is an educational constant (`0.08` ohm/square), not a foundry deck.
+![PEX R DEMO](../screenshots/pex_r_demo.png)
+
+![PEX C DEMO](../screenshots/pex_c_demo.png)
+
+### Resistance
+
+| Cell | Layout | Squares | R (@ 0.08 Ω/□) | Result |
+|------|--------|---------|----------------|--------|
+| `R_GOOD` | L=2.0, W=1.0 µm | 2 | **0.16 Ω** | **PASS** (R < 1.0) |
+| `R_BAD` | L=16.0, W=0.20 µm | 80 | **6.40 Ω** | **FAIL** |
+
+### Capacitance
+
+| Cell | Overlap | C (@ 1e-15 F/µm²) | Result |
+|------|---------|-------------------|--------|
+| `C_GOOD` | 3×3 = 9 µm² | **9.0 fF** | **PASS** (C ≥ 1 fF) |
+| `C_BAD` | 0.5×0.5 = 0.25 µm² | **0.25 fF** | **FAIL** |
 
 Sibling demos: [`../drc/`](../drc/) · [`../lvs/`](../lvs/).
 
@@ -20,28 +35,32 @@ Sibling demos: [`../drc/`](../drc/) · [`../lvs/`](../lvs/).
 
 ```bash
 cd pex
-./run_pex.sh              # GOOD → PASS, BAD → FAIL
+./run_pex.sh              # R + C, GOOD/BAD
+./run_pex.sh --r          # resistance only
+./run_pex.sh --c          # capacitance only
 ./run_pex.sh --good
 ./run_pex.sh --bad
 
-./view_pex.sh             # GUI + print last report
-./view_pex.sh --bad
+./view_pex.sh             # R_GOOD report + GDS
+./view_pex.sh --c
+./view_pex.sh --c-bad
 ./view_pex.sh --demo
 
 ./run_clean.sh
 ```
 
-Requires [KLayout](https://www.klayout.de/) **0.30.2+** on `PATH` (`../scripts/install-klayout.sh`) — needs the built-in `pex` / `RNetExtractor` API.
+Requires KLayout **0.30.2+** for `RNetExtractor` (`../scripts/install-klayout.sh`).
 
 ```bash
-klayout -b \
-  -rd input=r_demo.gds \
-  -rd cell=R_GOOD \
-  -rd report=r_good.txt \
-  -rd spice=r_good_extracted.cir \
-  -rd sheet_r=0.08 \
-  -rd r_limit=1.0 \
-  -r extract_r.rb
+# R
+klayout -b -rd input=pex_demo.gds -rd cell=R_GOOD \
+  -rd report=r_good.txt -rd spice=r_good_extracted.cir \
+  -rd sheet_r=0.08 -rd r_limit=1.0 -r extract_r.rb
+
+# C
+klayout -b -rd input=pex_demo.gds -rd cell=C_GOOD \
+  -rd report=c_good.txt -rd spice=c_good_extracted.cir \
+  -rd area_cap=1e-15 -rd c_limit=1e-15 -r extract_c.lvs
 ```
 
 ---
@@ -50,67 +69,63 @@ klayout -b \
 
 | File | Role |
 |------|------|
-| `generate_layout.rb` | Builds `r_demo.gds` (GOOD + BAD + DEMO) |
-| `r_demo.gds` | Test layout |
+| `generate_layout.rb` | Builds `pex_demo.gds` (R_* + C_* + demos) |
 | `extract_r.rb` | `RNetExtractor` + PASS/FAIL vs `r_limit` |
-| `run_pex.sh` | Generate + run GOOD/BAD |
+| `extract_c.lvs` | `capacitor()` + PASS/FAIL vs `c_limit` |
+| `run_pex.sh` | Generate + run R/C GOOD/BAD |
 | `view_pex.sh` | Open GDS + show report |
 | `run_clean.sh` | Delete reports / spice (`--gds` removes GDS) |
 
-Generated (gitignored): `r_{good,bad}.{txt,log}`, `r_*_extracted.cir`
+Generated (gitignored): `r_*.{txt,log,cir}`, `c_*.{txt,log,cir}`, `pex_demo.gds`
 
 ---
 
 ## Layers
 
-| GDS | Name | Screenshot color | Role |
-|-----|------|------------------|------|
-| 31/0 | M1 | blue | resistor + pads |
-| 90/0 | labels | purple | A / B / titles |
+| GDS | Name | Color | Role |
+|-----|------|-------|------|
+| 31/0 | M1 | blue | resistor metal / capacitor bottom plate |
+| 32/0 | M2 | green | capacitor top plate |
+| 90/0 | labels | purple | A/B / titles |
 | 100/0 | marker | magenta | BAD highlight (screenshots) |
-| 101/0 | dim | black | rulers (screenshots) |
-| 102/0 | dimtxt | purple | dimension text |
 
 ---
 
-## How `extract_r.rb` works
+## How extraction works
 
-### Tech stack
+### R — `RNetExtractor`
 
 ```ruby
 tech = RExtractorTech.new
 cond = RExtractorTechConductor.new
 cond.layer = 31
-cond.resistance = 0.08          # ohm / square
+cond.resistance = 0.08
 cond.algorithm = RExtractorTechConductor::SquareCounting
 tech.add_conductor(cond)
-```
 
-### Geometry + ports
-
-Pads stay separate boxes in GDS; the extractor merges the M1 net, then uses the **leftmost / rightmost** polygons as polygon ports A and B:
-
-```ruby
-geo = { 31 => merged_region }
-polygon_ports = { 31 => [pad_a, pad_b] }
 network = RNetExtractor.new(dbu).extract(tech, geo, {}, polygon_ports)
-network.simplify
+# PASS if R < r_limit
 ```
 
-Expected: `R ≈ (L / W) × sheet_r`.
-
-### PASS / FAIL
+### C — `capacitor()` (LVS device extractor)
 
 ```ruby
-ok = r_total < r_limit   # default limit = 1.0 ohm
-puts ok ? "PEX PASS — ..." : "PEX FAIL — ..."
+metal1 = input(31, 0)
+metal2 = input(32, 0)
+extract_devices(capacitor("CAP", 1e-15), { "P1" => metal1, "P2" => metal2 })
+# C = overlap_area × 1e-15 F/µm²
+# PASS if C >= c_limit
 ```
 
-Also writes a tiny SPICE subcircuit:
+SPICE snippets:
 
 ```spice
 .SUBCKT R_GOOD A B
 R1 A B 0.16
+.ENDS
+
+.SUBCKT C_GOOD A B
+C1 A B 9e-15
 .ENDS
 ```
 
@@ -118,14 +133,19 @@ R1 A B 0.16
 
 ## Good vs bad
 
-| GOOD (`R_GOOD`) | BAD (`R_BAD`) |
-|:---------------:|:-------------:|
-| ![GOOD](../screenshots/pex_r_good.png) | ![BAD](../screenshots/pex_r_bad.png) |
-| Wide short wire → 0.16 Ω | Skinny long wire → 6.40 Ω |
+### Resistance
 
-| GOOD zoom + L/W rulers | BAD zoom + R highlight |
-|:----------------------:|:----------------------:|
-| ![GOOD zoom](../screenshots/pex_case_good_lw.png) | ![BAD zoom](../screenshots/pex_case_bad_r.png) |
+| GOOD | BAD |
+|:----:|:---:|
+| ![R GOOD](../screenshots/pex_r_good.png) | ![R BAD](../screenshots/pex_r_bad.png) |
+| ![R zoom](../screenshots/pex_case_good_lw.png) | ![R zoom](../screenshots/pex_case_bad_r.png) |
+
+### Capacitance
+
+| GOOD (full overlap) | BAD (misaligned) |
+|:-------------------:|:----------------:|
+| ![C GOOD](../screenshots/pex_c_good.png) | ![C BAD](../screenshots/pex_c_bad.png) |
+| ![C zoom](../screenshots/pex_case_c_good.png) | ![C zoom](../screenshots/pex_case_c_bad.png) |
 
 ---
 
@@ -137,17 +157,15 @@ R1 A B 0.16
 
 | File | Content |
 |------|---------|
-| [`../screenshots/pex_r_demo.png`](../screenshots/pex_r_demo.png) | GOOD + BAD |
-| [`../screenshots/pex_r_good.png`](../screenshots/pex_r_good.png) | Low-R resistor |
-| [`../screenshots/pex_r_bad.png`](../screenshots/pex_r_bad.png) | High-R resistor |
-| [`../screenshots/pex_case_good_lw.png`](../screenshots/pex_case_good_lw.png) | Zoom L/W rulers |
-| [`../screenshots/pex_case_bad_r.png`](../screenshots/pex_case_bad_r.png) | Zoom + high-R mark |
+| `pex_r_demo.png` / `pex_c_demo.png` | R / C overviews |
+| `pex_r_*.png` / `pex_c_*.png` | Cell views |
+| `pex_case_*.png` | Zoom + rulers / markers |
 
 ---
 
 ## See also
 
-- [`../docs/PEX.md`](../docs/PEX.md) — built-in `RExtractor` / `RNetExtractor` reference  
-- [`../drc/`](../drc/) — M1 / Contact DRC  
-- [`../lvs/`](../lvs/) — NMOS LVS  
-- [KLayout-PEX (`kpex`)](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) — separate full-flow tool (not used here)
+- [`../docs/PEX.md`](../docs/PEX.md) — `RExtractor` / `RNetExtractor` reference  
+- [`../docs/LVS.md`](../docs/LVS.md) — `capacitor` / `capacitor_with_bulk`  
+- [`../drc/`](../drc/) · [`../lvs/`](../lvs/)  
+- [KLayout-PEX](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) — full parasitic C engine  

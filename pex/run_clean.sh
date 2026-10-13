@@ -3,7 +3,7 @@
 #
 # Usage:
 #   ./run_clean.sh           # clear reports / spice (keep GDS)
-#   ./run_clean.sh --gds     # also remove r_demo.gds
+#   ./run_clean.sh --gds     # also remove GDS
 #   ./run_clean.sh --dry-run
 
 set -euo pipefail
@@ -43,14 +43,20 @@ for f in \
   "${ROOT}"/r_*.txt \
   "${ROOT}"/r_*_extracted.cir \
   "${ROOT}"/r_*.log \
+  "${ROOT}"/c_*.txt \
+  "${ROOT}"/c_*_extracted.cir \
+  "${ROOT}"/c_*.log \
   "${ROOT}"/r_extract.txt \
-  "${ROOT}"/r_extracted.cir
+  "${ROOT}"/r_extracted.cir \
+  "${ROOT}"/c_extract.txt \
+  "${ROOT}"/c_extracted.cir
 do
   remove_path "$f"
 done
 shopt -u nullglob
 
 if [[ "$REMOVE_GDS" -eq 1 ]]; then
+  remove_path "${ROOT}/pex_demo.gds"
   remove_path "${ROOT}/r_demo.gds"
 fi
 

@@ -14,7 +14,8 @@ include RBA
 SHEET_R = ($sheet_r || 0.08).to_f
 R_LIMIT = ($r_limit || 1.0).to_f
 CELL    = ($cell || "R_GOOD").to_s
-GDS     = ($input || File.join(__dir__, "r_demo.gds")).to_s
+GDS     = ($input || File.join(__dir__, "pex_demo.gds")).to_s
+GDS     = File.join(__dir__, "r_demo.gds") unless File.file?(GDS)
 REPORT  = ($report || File.join(__dir__, "r_extract.txt")).to_s
 SPICE   = ($spice || File.join(__dir__, "r_extracted.cir")).to_s
 

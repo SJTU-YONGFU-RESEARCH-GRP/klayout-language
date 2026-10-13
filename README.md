@@ -16,13 +16,15 @@ KLayout DRC / LVS / PEX language notes and runnable demos.
 |------|----------------|
 | [`drc/`](drc/) | M1 / Contact **width, space, enclosure** — GOOD pass / BAD fail (KLayout + Calibre) |
 | [`lvs/`](lvs/) | Single **NMOS** transistor LVS — GOOD pass / BAD (S–D short) fail |
-| [`pex/`](pex/) | M1 **resistor R extraction** — GOOD low R / BAD high R (`RNetExtractor`) |
+| [`pex/`](pex/) | **R** (`RNetExtractor`) + **C** (`capacitor()` overlap) — GOOD pass / BAD fail |
 
 ![DRC test layout](screenshots/drc_m1_contact_layout.png)
 
 ![LVS GOOD vs BAD NMOS](screenshots/lvs_nmos_demo.png)
 
-![PEX GOOD vs BAD resistor](screenshots/pex_r_demo.png)
+![PEX R GOOD vs BAD](screenshots/pex_r_demo.png)
+
+![PEX C GOOD vs BAD](screenshots/pex_c_demo.png)
 
 ```bash
 # DRC

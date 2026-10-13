@@ -15,6 +15,7 @@ Dir.mkdir(SHOT) unless File.directory?(SHOT)
 # High-contrast hues (0xRRGGBB)
 COLORS = {
   "31/0"  => [0x1E6AFF, "M1",   { transparent: true, dither: 1 }],   # blue outline+tint
+  "32/0"  => [0x27AE60, "M2",   { transparent: true, dither: 5 }],   # green (C plate)
   "30/0"  => [0xE63900, "CT",   { transparent: false, dither: 0 }],  # solid red-orange
   "90/0"  => [0x5B2C6F, "LABEL",{ transparent: false, dither: 0 }],  # purple
   "1/0"   => [0xE74C3C, "DIFF", { transparent: true, dither: 1 }],   # red
@@ -415,10 +416,11 @@ LVS_CASES.each do |c|
 end
 
 # ---------------------------------------------------------------------------
-# PEX — M1 resistor GOOD / BAD
+# PEX — R (M1 wire) + C (M1/M2 plates)
 # ---------------------------------------------------------------------------
 pex = File.join(REPO, "pex")
-pex_gds = File.join(pex, "r_demo.gds")
+pex_gds = File.join(pex, "pex_demo.gds")
+pex_gds = File.join(pex, "r_demo.gds") unless File.file?(pex_gds)
 
 if File.file?(pex_gds)
   capture(File.join(SHOT, "pex_r_demo.png"),
@@ -428,7 +430,6 @@ if File.file?(pex_gds)
   capture(File.join(SHOT, "pex_r_bad.png"),
           pex_gds, cell_name: "R_BAD", width: 1400, height: 600)
 
-  # GOOD: L=2.0 from x=0.5..2.5, W=1.0 at y=0; pads 0.5×0.5
   capture_zoom(
     File.join(SHOT, "pex_case_good_lw.png"),
     pex_gds,
@@ -443,7 +444,6 @@ if File.file?(pex_gds)
     width: 1200, height: 700, pad: 0.08
   )
 
-  # BAD: L=16 body x=0.4..16.4, W=0.20
   capture_zoom(
     File.join(SHOT, "pex_case_bad_r.png"),
     pex_gds,
@@ -456,6 +456,41 @@ if File.file?(pex_gds)
     ],
     markers: [[0.40, -0.02, 16.40, 0.22]],
     width: 1400, height: 650, pad: 0.10
+  )
+
+  # Capacitance
+  capture(File.join(SHOT, "pex_c_demo.png"),
+          pex_gds, cell_name: "C_DEMO", width: 1600, height: 900)
+  capture(File.join(SHOT, "pex_c_good.png"),
+          pex_gds, cell_name: "C_GOOD", width: 1000, height: 900)
+  capture(File.join(SHOT, "pex_c_bad.png"),
+          pex_gds, cell_name: "C_BAD", width: 1100, height: 900)
+
+  capture_zoom(
+    File.join(SHOT, "pex_case_c_good.png"),
+    pex_gds,
+    cell_name: "C_GOOD",
+    box: [-0.2, -0.5, 3.4, 3.5],
+    rulers: [
+      [0.0, 3.15, 3.0, 3.15, "overlap 3 x 3 um"],
+      [0.0, -0.25, 3.0, -0.25, "C = 9.0 fF"]
+    ],
+    markers: [],
+    width: 1100, height: 900, pad: 0.15
+  )
+
+  capture_zoom(
+    File.join(SHOT, "pex_case_c_bad.png"),
+    pex_gds,
+    cell_name: "C_BAD",
+    box: [-0.3, -0.6, 5.8, 5.8],
+    rulers: [
+      [2.5, 2.5, 3.0, 2.5, "0.5 um"],
+      [2.5, 2.5, 2.5, 3.0, "0.5 um"],
+      [2.5, 2.2, 3.0, 2.2, "C = 0.25 fF (FAIL)"]
+    ],
+    markers: [[2.5, 2.5, 3.0, 3.0]],
+    width: 1100, height: 900, pad: 0.20
   )
 else
   puts "SKIP PEX screenshots (missing #{pex_gds})"

@@ -43,6 +43,18 @@
    <categories>
    </categories>
   </category>
+  <category>
+   <name>M1.over_VIA.enclosure</name>
+   <description>M1 enclosure of VIA &lt; 0.2 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.over_VIA.enclosure</name>
+   <description>M2 enclosure of VIA &lt; 0.2 µm</description>
+   <categories>
+   </categories>
+  </category>
  </categories>
  <cells>
   <cell>
@@ -54,5 +66,533 @@
   </cell>
  </cells>
  <items>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-39,-10.366;-39,-10)|(-38.5,-9.134;-38.5,-9.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-39,-10;-39.366,-10)|(-38.5,-9.5;-38.134,-9.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-38.134,7.5;-38.5,7.5)|(-39.366,8;-39,8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-38.5,7.5;-38.5,7.134)|(-39,8;-39,8.366)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-21.5,7.134;-21.5,7.5)|(-21,8.366;-21,8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-21.5,7.5;-21.866,7.5)|(-21,8;-20.634,8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-20.634,-8;-21,-8)|(-21.866,-7.5;-21.5,-7.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-21,-8;-21,-8.366)|(-21.5,-7.5;-21.5,-7.134)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-37,-8.366;-37,-8)|(-36.5,-7.134;-36.5,-7.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-37,-8;-37.366,-8)|(-36.5,-7.5;-36.134,-7.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-36.134,5.5;-36.5,5.5)|(-37.366,6;-37,6)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-36.5,5.5;-36.5,5.134)|(-37,6;-37,6.366)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-23.5,5.134;-23.5,5.5)|(-23,6.366;-23,6)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-23.5,5.5;-23.866,5.5)|(-23,6;-22.634,6)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-22.634,-6;-23,-6)|(-23.866,-5.5;-23.5,-5.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-23,-6;-23,-6.366)|(-23.5,-5.5;-23.5,-5.134)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-18.634,-10;-19,-10)|(-19.866,-9.5;-19.5,-9.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-19.5,9.134;-19.5,9.5)|(-19,10.366;-19,10)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-19,-10;-19,-10.366)|(-19.5,-9.5;-19.5,-9.134)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-19.5,9.5;-19.866,9.5)|(-19,10;-18.634,10)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (19,-10.366;19,-10)|(19.5,-9.134;19.5,-9.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (19,-10;18.634,-10)|(19.5,-9.5;19.866,-9.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (19.866,9.5;19.5,9.5)|(18.634,10;19,10)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (19.5,9.5;19.5,9.134)|(19,10;19,10.366)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (39.366,-10;39,-10)|(38.134,-9.5;38.5,-9.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (38.5,7.134;38.5,7.5)|(39,8.366;39,8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (39,-10;39,-10.366)|(38.5,-9.5;38.5,-9.134)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (21.866,7.5;21.5,7.5)|(20.634,8;21,8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (38.5,7.5;38.134,7.5)|(39,8;39.366,8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (21,-8.366;21,-8)|(21.5,-7.134;21.5,-7.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (21.5,7.5;21.5,7.134)|(21,8;21,8.366)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (37.366,-8;37,-8)|(36.134,-7.5;36.5,-7.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (21,-8;20.634,-8)|(21.5,-7.5;21.866,-7.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (36.5,5.134;36.5,5.5)|(37,6.366;37,6)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (37,-8;37,-8.366)|(36.5,-7.5;36.5,-7.134)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (23.866,5.5;23.5,5.5)|(22.634,6;23,6)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (36.5,5.5;36.134,5.5)|(37,6;37.366,6)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (23,-6.366;23,-6)|(23.5,-5.134;23.5,-5.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (23.5,5.5;23.5,5.134)|(23,6;23,6.366)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (23,-6;22.634,-6)|(23.5,-5.5;23.866,-5.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M2.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-35,-21.366;-35,-21)|(-34.5,-20.134;-34.5,-20.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M2.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (-35,-21;-35.366,-21)|(-34.5,-20.5;-34.134,-20.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M2.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (35.366,-21;35,-21)|(34.134,-20.5;34.5,-20.5)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M2.min_width'</category>
+   <cell>IND_F8_2P</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (35,-21;35,-21.366)|(34.5,-20.5;34.5,-20.134)</value>
+   </values>
+  </item>
  </items>
 </report-database>

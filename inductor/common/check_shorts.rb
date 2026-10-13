@@ -192,13 +192,17 @@ if NPORTS <= 3 && labels["P1"] && labels["P2"]
   end
 end
 
-# Rule D: via count caps
-n_layers = (cfg["n_layers"] || 1).to_i
+# Rule D: via count caps (intentional underpass / CT only)
+shape = (cfg["shape"] || "square").to_s
 max_vias =
-  case NPORTS
-  when 2 then 0   # no decorative underpass
-  when 3 then 1   # CT only
-  else 0          # transformer isolation
+  if shape == "figure8"
+    2   # series bridge underpass
+  else
+    case NPORTS
+    when 2 then 2   # inner-exit underpass
+    when 3 then 3   # underpass (2) + CT (1)
+    else 2          # primary underpass; secondary isolated (no P↔S vias)
+    end
   end
 
 if via.count > max_vias

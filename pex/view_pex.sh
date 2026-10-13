@@ -1,27 +1,31 @@
 #!/usr/bin/env bash
-# Open PEX demo layout in the KLayout GUI (and print last extract report).
+# Open PEX demo layout in KLayout and print the last extract report.
 #
 # Usage:
-#   ./view_pex.sh            # run GOOD extract, open GDS
-#   ./view_pex.sh --bad
-#   ./view_pex.sh --demo     # open R_DEMO topcell
-#   ./view_pex.sh --no-pex   # open existing GDS only
+#   ./view_pex.sh              # R_GOOD report + GDS
+#   ./view_pex.sh --r-bad
+#   ./view_pex.sh --c          # C_GOOD
+#   ./view_pex.sh --c-bad
+#   ./view_pex.sh --demo       # PEX_DEMO topcell
+#   ./view_pex.sh --no-pex
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GDS="${ROOT}/r_demo.gds"
-TAG="good"
+GDS="${ROOT}/pex_demo.gds"
+TAG="r_good"
 RUN_PEX=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --bad) TAG="bad" ;;
-    --good) TAG="good" ;;
+    --good|--r|--r-good) TAG="r_good" ;;
+    --bad|--r-bad) TAG="r_bad" ;;
+    --c|--c-good) TAG="c_good" ;;
+    --c-bad) TAG="c_bad" ;;
     --demo) TAG="demo" ;;
     --no-pex) RUN_PEX=0 ;;
     -h|--help)
-      sed -n '2,9p' "$0"
+      sed -n '2,12p' "$0"
       exit 0
       ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
@@ -35,17 +39,26 @@ if ! command -v klayout >/dev/null 2>&1; then
 fi
 
 if [[ "$RUN_PEX" -eq 1 && "$TAG" != "demo" ]]; then
-  if [[ "$TAG" == "good" ]]; then
-    "${ROOT}/run_pex.sh" --pex-only --good || true
-  else
-    "${ROOT}/run_pex.sh" --pex-only --bad || true
-  fi
+  case "$TAG" in
+    r_good) "${ROOT}/run_pex.sh" --pex-only --r --good || true ;;
+    r_bad)  "${ROOT}/run_pex.sh" --pex-only --r --bad || true ;;
+    c_good) "${ROOT}/run_pex.sh" --pex-only --c --good || true ;;
+    c_bad)  "${ROOT}/run_pex.sh" --pex-only --c --bad || true ;;
+  esac
 fi
 
-[[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS}" >&2; exit 1; }
+[[ -f "$GDS" ]] || [[ -f "${ROOT}/r_demo.gds" ]] || { echo "ERROR: missing GDS" >&2; exit 1; }
+[[ -f "$GDS" ]] || GDS="${ROOT}/r_demo.gds"
 
-REPORT="${ROOT}/r_${TAG}.txt"
-if [[ -f "$REPORT" ]]; then
+case "$TAG" in
+  r_good) REPORT="${ROOT}/r_good.txt" ;;
+  r_bad)  REPORT="${ROOT}/r_bad.txt" ;;
+  c_good) REPORT="${ROOT}/c_good.txt" ;;
+  c_bad)  REPORT="${ROOT}/c_bad.txt" ;;
+  *)      REPORT="" ;;
+esac
+
+if [[ -n "$REPORT" && -f "$REPORT" ]]; then
   echo "==> Last report (${REPORT}):"
   sed 's/^/    /' "$REPORT" || true
 fi
