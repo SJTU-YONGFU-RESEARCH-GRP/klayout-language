@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<report-database>
+ <description>M1 / Contact DRC demo</description>
+ <original-file>/home/yongfu/proj/klayout-language/demo/m1_contact_demo.gds</original-file>
+ <generator>drc: script='/home/yongfu/proj/klayout-language/demo/m1_contact.drc'</generator>
+ <top-cell>M1_CT_DRC_DEMO</top-cell>
+ <tags>
+ </tags>
+ <categories>
+  <category>
+   <name>M1.min_width</name>
+   <description>Metal1 width &lt; 0.14 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M1.min_space</name>
+   <description>Metal1 spacing &lt; 0.14 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>CT.min_width</name>
+   <description>Contact width &lt; 0.16 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>CT.min_space</name>
+   <description>Contact spacing &lt; 0.18 µm</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M1.over_CT.enclosure</name>
+   <description>M1 enclosure of contact &lt; 0.055 µm</description>
+   <categories>
+   </categories>
+  </category>
+ </categories>
+ <cells>
+  <cell>
+   <name>M1_CT_DRC_DEMO</name>
+   <variant/>
+   <layout-name/>
+   <references>
+   </references>
+  </cell>
+ </cells>
+ <items>
+  <item>
+   <tags/>
+   <category>'M1.min_width'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8,19;8,20.5)|(8.1,20.5;8.1,19)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.min_space'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8.38,13;8.38,14.5)|(8.3,14.5;8.3,13)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'CT.min_width'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8,-1.8;8,-1.6)|(8.12,-1.6;8.12,-1.8)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'CT.min_space'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8.32,1.2;8.32,1.4)|(8.2,1.4;8.2,1.2)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.over_CT.enclosure'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8.47,7.17;8.47,7.43)/(8.5,7.2;8.5,7.4)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.over_CT.enclosure'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8.47,7.43;8.73,7.43)/(8.5,7.4;8.7,7.4)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.over_CT.enclosure'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8.73,7.43;8.73,7.17)/(8.7,7.4;8.7,7.2)</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M1.over_CT.enclosure'</category>
+   <cell>M1_CT_DRC_DEMO</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>edge-pair: (8.73,7.17;8.47,7.17)/(8.7,7.2;8.5,7.2)</value>
+   </values>
+  </item>
+ </items>
+</report-database>

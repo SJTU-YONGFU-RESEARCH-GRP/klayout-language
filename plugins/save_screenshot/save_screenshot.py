@@ -113,15 +113,19 @@ class SaveImageDialog(pya.QDialog):
         path_row.addWidget(browse)
         layout.addLayout(path_row)
 
-        buttons = pya.QDialogButtonBox(
-            pya.QDialogButtonBox.Ok | pya.QDialogButtonBox.Cancel, self
-        )
-        buttons.accepted(self.accept)
-        buttons.rejected(self.reject)
-        layout.addWidget(buttons)
+        btn_row = pya.QHBoxLayout()
+        save_btn = pya.QPushButton("Save", self)
+        cancel_btn = pya.QPushButton("Cancel", self)
+        save_btn.clicked(self.accept)
+        cancel_btn.clicked(self.reject)
+        btn_row.addWidget(save_btn)
+        btn_row.addWidget(cancel_btn)
+        layout.addLayout(btn_row)
 
-        self.mode_viewport.toggled(self._update_enabled)
+        self.mode_viewport.clicked(self._update_enabled)
+        self.mode_render.clicked(self._update_enabled)
         self._update_enabled()
+        self.setLayout(layout)
 
     def _update_enabled(self, *_args):
         custom = self.mode_render.isChecked()
@@ -161,7 +165,7 @@ class SaveImageDialog(pya.QDialog):
         return {"mode": "render", "path": path, "width": w, "height": h}
 
 
-def save_layout_screenshot():
+def save_layout_screenshot_impl():
     lv = _current_view()
     if lv is None:
         return
@@ -198,6 +202,16 @@ def save_layout_screenshot():
         )
 
 
+def _menu_trigger():
+    """Reload module on each click so deploy updates apply without restart."""
+    import importlib
+
+    import save_screenshot as mod
+
+    importlib.reload(mod)
+    mod.save_layout_screenshot_impl()
+
+
 def register_menu():
     """Create the Screenshot top-level menu and bind the save action."""
     global _action
@@ -216,5 +230,5 @@ def register_menu():
     _action = pya.Action()
     _action.title = ACTION_TITLE
     _action.shortcut = ACTION_SHORTCUT
-    _action.on_triggered = save_layout_screenshot
+    _action.on_triggered = _menu_trigger
     menu.insert_item(MENU_NAME + ".end", ACTION_NAME, _action)

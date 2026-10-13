@@ -1,0 +1,71 @@
+// =============================================================================
+// M1 / Contact DRC demo — Calibre SVRF (mirrors demo/m1_contact.drc)
+// =============================================================================
+// Layers (from generate_layout.rb):
+//   M1  GDS 31/0
+//   CT  GDS 30/0
+//
+// Rule values (microns):
+//   M1 min width        0.14
+//   M1 min spacing      0.14
+//   CT min width        0.16
+//   CT min spacing      0.18
+//   M1 over CT enc      0.055
+//
+// Run: ./run_calibre_drc.sh
+// =============================================================================
+
+// Override paths via calibre -E, e.g.:
+//   calibre -drc -hier -E GDS=/path/layout.gds -E RDB=/path/out.rdb rules.svrf
+
+LAYOUT PATH "$GDS"
+LAYOUT PRIMARY "M1_CT_DRC_DEMO"
+LAYOUT SYSTEM GDSII
+
+DRC MAXIMUM RESULTS ALL
+DRC SUMMARY REPORT "$REP"
+DRC RESULTS DATABASE "$RDB" ASCII
+DRC KEEP EMPTY NO
+
+PRECISION 1000
+RESOLUTION 1
+
+LAYER M1 31 0
+LAYER CT 30 0
+
+// ---------------------------------------------------------------------------
+// Metal 1
+// ---------------------------------------------------------------------------
+
+M1_MIN_WIDTH {
+  @ Metal1 width < 0.14 um
+  INT M1 < 0.14 ABUT < 90 SINGULAR
+}
+
+M1_MIN_SPACE {
+  @ Metal1 spacing < 0.14 um
+  EXT M1 M1 < 0.14 ABUT < 90 SINGULAR
+}
+
+// ---------------------------------------------------------------------------
+// Contact
+// ---------------------------------------------------------------------------
+
+CT_MIN_WIDTH {
+  @ Contact width < 0.16 um
+  INT CT < 0.16 ABUT < 90 SINGULAR
+}
+
+CT_MIN_SPACE {
+  @ Contact spacing < 0.18 um
+  EXT CT CT < 0.18 ABUT < 90 SINGULAR
+}
+
+// ---------------------------------------------------------------------------
+// Enclosure — M1 must surround CT by at least 0.055 um
+// ---------------------------------------------------------------------------
+
+M1_OVER_CT_ENCLOSURE {
+  @ M1 enclosure of contact < 0.055 um
+  ENC M1 CT < 0.055 OPPOSITE
+}
