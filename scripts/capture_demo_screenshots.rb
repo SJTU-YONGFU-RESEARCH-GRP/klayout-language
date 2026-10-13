@@ -1,4 +1,4 @@
-# Capture PNG screenshots for drc/ and lvs/ README images.
+# Capture PNG screenshots for drc/, lvs/, and pex/ README images.
 #
 #   ./scripts/run_capture_screenshots.sh
 #
@@ -412,6 +412,53 @@ LVS_CASES.each do |c|
     markers: c[:markers] || [],
     width: 1100, height: 800, pad: 0.06
   )
+end
+
+# ---------------------------------------------------------------------------
+# PEX — M1 resistor GOOD / BAD
+# ---------------------------------------------------------------------------
+pex = File.join(REPO, "pex")
+pex_gds = File.join(pex, "r_demo.gds")
+
+if File.file?(pex_gds)
+  capture(File.join(SHOT, "pex_r_demo.png"),
+          pex_gds, cell_name: "R_DEMO", width: 1400, height: 900)
+  capture(File.join(SHOT, "pex_r_good.png"),
+          pex_gds, cell_name: "R_GOOD", width: 1100, height: 700)
+  capture(File.join(SHOT, "pex_r_bad.png"),
+          pex_gds, cell_name: "R_BAD", width: 1400, height: 600)
+
+  # GOOD: L=2.0 from x=0.5..2.5, W=1.0 at y=0; pads 0.5×0.5
+  capture_zoom(
+    File.join(SHOT, "pex_case_good_lw.png"),
+    pex_gds,
+    cell_name: "R_GOOD",
+    box: [-0.1, -0.15, 3.2, 1.25],
+    rulers: [
+      [0.50, 1.10, 2.50, 1.10, "L = 2.0 um"],
+      [2.70, 0.00, 2.70, 1.00, "W = 1.0 um"],
+      [0.50, -0.08, 2.50, -0.08, "R = 0.16 ohm"]
+    ],
+    markers: [],
+    width: 1200, height: 700, pad: 0.08
+  )
+
+  # BAD: L=16 body x=0.4..16.4, W=0.20
+  capture_zoom(
+    File.join(SHOT, "pex_case_bad_r.png"),
+    pex_gds,
+    cell_name: "R_BAD",
+    box: [-0.2, -0.25, 17.0, 0.85],
+    rulers: [
+      [0.40, 0.55, 16.40, 0.55, "L = 16 um"],
+      [8.40, 0.00, 8.40, 0.20, "W = 0.20 um"],
+      [0.40, -0.15, 16.40, -0.15, "R = 6.40 ohm (FAIL)"]
+    ],
+    markers: [[0.40, -0.02, 16.40, 0.22]],
+    width: 1400, height: 650, pad: 0.10
+  )
+else
+  puts "SKIP PEX screenshots (missing #{pex_gds})"
 end
 
 puts "Done → #{SHOT}"

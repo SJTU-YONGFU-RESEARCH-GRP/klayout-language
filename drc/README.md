@@ -24,7 +24,7 @@ Side-by-side **KLayout** and **Calibre** DRC on the same Metal1 / Contact test l
 
 **Expected on BAD / DEMO:** KLayout → **8** markers (enclosure = 4 edge-pairs). Calibre on DEMO → **6** results (enclosure = 2).
 
-Sibling demo: [`../lvs/`](../lvs/) (NMOS transistor LVS).
+Sibling demos: [`../lvs/`](../lvs/) (NMOS LVS) · [`../pex/`](../pex/) (M1 R extraction).
 
 ---
 
@@ -215,4 +215,5 @@ cp calibre.env.example calibre.env   # already configured on this host if presen
 
 - [`../docs/DRC.md`](../docs/DRC.md) — KLayout DRC command reference  
 - [`../lvs/`](../lvs/) — NMOS LVS demo  
+- [`../pex/`](../pex/) — M1 resistor PEX  
 - [`../scripts/install-klayout.sh`](../scripts/install-klayout.sh)

@@ -19,6 +19,8 @@ fi
 "${ROOT}/drc/run_klayout_drc.sh" --drc-only >/dev/null
 "${ROOT}/lvs/run_lvs.sh" --gen-only
 "${ROOT}/lvs/run_lvs.sh" --lvs-only >/dev/null
+"${ROOT}/pex/run_pex.sh" --gen-only
+"${ROOT}/pex/run_pex.sh" --pex-only >/dev/null
 
 mkdir -p "${ROOT}/screenshots"
 

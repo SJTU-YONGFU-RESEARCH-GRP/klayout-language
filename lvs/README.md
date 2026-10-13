@@ -12,7 +12,7 @@ Minimal **Layout vs Schematic**: extract one NMOS with `mos4`, compare to SPICE.
 
 Device: **L = 0.18 µm**, **W = 0.50 µm** (matches `nmos.cir`).
 
-Sibling demo: [`../drc/`](../drc/) (M1 / Contact DRC).
+Sibling demos: [`../drc/`](../drc/) (M1 / Contact DRC) · [`../pex/`](../pex/) (M1 R extraction).
 
 ---
 
@@ -197,4 +197,5 @@ Same style as [`../drc/`](../drc/) — zoomed shots with dimension labels. BAD c
 
 - [`../docs/LVS.md`](../docs/LVS.md) — KLayout LVS reference  
 - [`../drc/`](../drc/) — M1 / Contact DRC (KLayout + Calibre)  
+- [`../pex/`](../pex/) — M1 resistor PEX  
 - [KLayout LVS introduction](https://www.klayout.de/doc-qt5/manual/lvs_intro.html)
