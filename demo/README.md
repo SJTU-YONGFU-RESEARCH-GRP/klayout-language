@@ -14,7 +14,7 @@ A minimal side-by-side demo of **Metal 1** and **Contact** design rules using **
 
 **Layers:** M1 = GDS **31/0**, Contact = GDS **30/0**, labels = **90/0**
 
-**Expected result:** 8 violations total, all from the intentionally bad rows (4 enclosure markers on one row count as 4 items in KLayout).
+**Expected result:** all intentionally bad rows fail. KLayout reports **8** markers (enclosure yields 4 edge-pairs); Calibre reports **5** rule results (enclosure is one polygon result).
 
 ---
 
@@ -32,10 +32,9 @@ A minimal side-by-side demo of **Metal 1** and **Contact** design rules using **
 | `run_calibre_drc.sh` | Calibre | Batch: generate GDS + run Calibre DRC → `.rdb` / `.rep` / `.log` |
 | `run_drc_in_calibredrv.tcl` | Calibre DESIGNrev | UI: read open layout (`$L file` / `topcell`), run DRC, no path env vars |
 | `view_calibre_drc.sh` | Calibre | Launch calibredrv Tcl DRC then open RVE |
-| `calibre.env` / `calibre.env.example` | Calibre | Site install + license only (`MGC_HOME`, `MGLS_LICENSE_FILE`) |
-| `m1_contact.calibre.rdb` | Calibre RVE | ASCII results database |
-| `m1_contact.calibre.rep` | Calibre | Text summary report |
-| `m1_contact.calibre.log` | Calibre | Full run log |
+| `calibre.env.example` | Calibre | Template for site install + license (`MGC_HOME`, `MGLS_LICENSE_FILE`) |
+
+Generated at run time (gitignored): `m1_contact.lyrdb`, `m1_contact.calibre.{rdb,rep,log}`, `.calibre_run/`, `calibredrc/`
 
 ---
 

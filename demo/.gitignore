@@ -1,5 +1,6 @@
 # Generated / run outputs
 .calibre_run/
+calibredrc/
 *.calibre.rdb
 *.calibre.rep
 *.calibre.log
