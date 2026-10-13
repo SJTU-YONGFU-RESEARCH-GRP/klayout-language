@@ -87,7 +87,8 @@ Layers (fixed for this flow):
 | 31/0 | M1 | Bottom spiral / primary |
 | 32/0 | M2 | Top spiral / secondary / underpass |
 | 30/0 | VIA | M1–M2 vias |
-| 90/0 | LABEL | Port texts: P1, P2, CT, S1, S2, … |
+| 31/1 | M1 TEXT | Port labels on M1 (`P1`, `P2`, …) |
+| 32/1 | M2 TEXT | Port labels on M2 (`CT`, `S1`, `S2`, …) |
 
 Generator must honor `width_um` / `space_um` exactly (default 1.0 / 1.0).
 
@@ -101,17 +102,16 @@ Rules (see `inductor/common/inductor.drc`): M1/M2 min width & space = config val
 
 Save log under `inductor/<N>/drc/`.
 
-### Step 5 — LVS
+### Step 5 — LVS (connectivity)
 
 ```bash
 ./inductor/common/run_lvs.sh inductor/<N>
 ```
 
-- Build/update SPICE from config ports (`inductor/<N>/lvs/inductor.cir`).
-- Extract connectivity; compare port nets (and coupled windings for 4-port).
-- Device model: treat as lumped `L` / `K` subcircuit pins matching labels.
-
-Save log / `.lvsdb` under `inductor/<N>/lvs/`.
+- Write documentary SPICE (`lvs/inductor.cir`) via `write_schematic.py`.
+- Run `check_connectivity.rb`: port labels on `31/1` / `32/1` must match DC topology
+  (2-port: P1↔P2 short; 4-port: P1↔P2, S1↔S2, primary ⟂ secondary).
+- Save `lvs/inductor.log`.
 
 ### Step 6 — openEMS
 

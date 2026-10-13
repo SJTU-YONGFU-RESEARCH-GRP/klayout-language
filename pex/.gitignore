@@ -1,0 +1,7 @@
+# Generated / run outputs
+r_demo.gds
+r_*.txt
+r_*_extracted.cir
+r_*.log
+r_extract.txt
+r_extracted.cir

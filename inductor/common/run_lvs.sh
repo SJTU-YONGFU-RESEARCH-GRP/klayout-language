@@ -15,16 +15,14 @@ PORTS=$(python3 -c "import yaml; print(yaml.safe_load(open('$CFG')).get('ports',
 CIR="$LVS_DIR/inductor.cir"
 python3 "$ROOT/inductor/common/write_schematic.py" --config "$CFG" --out "$CIR"
 
-LVSDB="$LVS_DIR/inductor.lvsdb"
 LOG="$LVS_DIR/inductor.log"
 
 klayout -b \
   -rd "input=$GDS" \
   -rd "cell=$CELL" \
   -rd "ports=$PORTS" \
-  -rd "schematic=$CIR" \
-  -rd "lvsdb=$LVSDB" \
-  -r "$ROOT/inductor/common/inductor.lvs" \
-  | tee "$LOG"
+  -rd "log=$LOG" \
+  -r "$ROOT/inductor/common/check_connectivity.rb" \
+  | tee -a "$LOG"
 
 grep -q "LVS PASS" "$LOG"

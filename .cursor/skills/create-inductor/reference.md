@@ -35,6 +35,14 @@ Often center-tapped secondary (3-port secondary view) or 4-port SE–DIFF. Docum
 
 Not a foundry PDK — educational stack for this repo:
 
+| GDS | Name | Role |
+|-----|------|------|
+| 31/0 | M1 | Bottom / primary metal |
+| 32/0 | M2 | Top / secondary / underpass |
+| 30/0 | VIA | M1–M2 |
+| 31/1 | M1 TEXT | Port labels |
+| 32/1 | M2 TEXT | Port labels |
+
 | Layer | Thickness (sim) | Conductivity |
 |-------|-----------------|--------------|
 | M1 | 0.5 µm | copper-like 5.8e7 S/m |
@@ -43,6 +51,8 @@ Not a foundry PDK — educational stack for this repo:
 | Substrate | below | lossy Si or optional PGS |
 
 Override in `config.yaml` → `em:` block.
+
+LVS uses `check_connectivity.rb` (DC port topology), not MOS-style device compare.
 
 ## DRC intent
 

@@ -46,7 +46,8 @@ Or invoke the Cursor skill **create-inductor**.
 | 31/0 | M1 |
 | 32/0 | M2 |
 | 30/0 | VIA |
-| 90/0 | LABEL (P1, P2, CT, S1, S2) |
+| 31/1 | M1 TEXT (P1, P2, …) |
+| 32/1 | M2 TEXT (CT, S1, S2, …) |
 
 ## Skill
 
