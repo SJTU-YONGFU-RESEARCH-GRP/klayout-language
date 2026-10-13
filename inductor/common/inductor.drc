@@ -1,0 +1,73 @@
+# KLayout DRC — on-chip inductor metals (demo stack)
+#
+# Layers: M1 31/0, M2 32/0, VIA 30/0
+# Defaults: width/space 1.0 µm (override with -rd width_um= -rd space_um=)
+
+WMIN = ($width_um || 1.0).to_f
+SMIN = ($space_um || 1.0).to_f
+VIA_MIN = ($via_size_um || 0.6).to_f
+VIA_SPACE = ($via_space_um || 0.6).to_f
+ENC = ($via_enc_um || 0.2).to_f
+
+cell_name = ($cell || "").to_s
+
+if $input
+  if cell_name.empty?
+    source($input)
+  else
+    source($input, cell_name)
+  end
+end
+
+report("Inductor DRC", $report || "inductor.lyrdb", cell_name.empty? ? nil : cell_name)
+if $input
+  def_output.rdb.original_file = $input
+end
+
+metal1 = input(31, 0)
+metal2 = input(32, 0)
+vias   = input(30, 0)
+
+total = 0
+
+mw1 = metal1.width(WMIN.um)
+mw1.output("M1.min_width", "M1 width < #{WMIN} µm")
+total += mw1.data.size
+
+ms1 = metal1.space(SMIN.um)
+ms1.output("M1.min_space", "M1 spacing < #{SMIN} µm")
+total += ms1.data.size
+
+mw2 = metal2.width(WMIN.um)
+mw2.output("M2.min_width", "M2 width < #{WMIN} µm")
+total += mw2.data.size
+
+ms2 = metal2.space(SMIN.um)
+ms2.output("M2.min_space", "M2 spacing < #{SMIN} µm")
+total += ms2.data.size
+
+vw = vias.width(VIA_MIN.um)
+vw.output("VIA.min_width", "VIA width < #{VIA_MIN} µm")
+total += vw.data.size
+
+vs = vias.space(VIA_SPACE.um)
+vs.output("VIA.min_space", "VIA spacing < #{VIA_SPACE} µm")
+total += vs.data.size
+
+# Enclosure only where vias exist
+if vias.data.size > 0
+  e1 = metal1.enclosing(vias, ENC.um)
+  e1.output("M1.over_VIA.enclosure", "M1 enclosure of VIA < #{ENC} µm")
+  total += e1.data.size
+
+  e2 = metal2.enclosing(vias, ENC.um)
+  e2.output("M2.over_VIA.enclosure", "M2 enclosure of VIA < #{ENC} µm")
+  total += e2.data.size
+end
+
+tag = cell_name.empty? ? "(top)" : cell_name
+if total == 0
+  puts "DRC PASS — #{tag} (0 violations)"
+else
+  puts "DRC FAIL — #{tag} (#{total} violations)"
+end

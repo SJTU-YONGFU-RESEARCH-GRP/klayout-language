@@ -317,15 +317,102 @@ capture(File.join(SHOT, "lvs_nmos_good.png"),
 capture(File.join(SHOT, "lvs_nmos_bad.png"),
         lvs_gds, cell_name: "NMOS_BAD", width: 1000, height: 700)
 
-capture_zoom(
-  File.join(SHOT, "lvs_case_sd_short.png"),
-  lvs_gds,
-  cell_name: "NMOS_BAD",
-  box: [-0.05, -0.28, 1.15, 0.60],
-  rulers: [[0.07, -0.20, 0.91, -0.20, "S-D short bridge"]],
-  markers: [[0.05, -0.18, 0.95, -0.02]],
-  width: 1200, height: 800, pad: 0.06
-)
+# Geometry from lvs/generate_layout.rb (µm)
+# L=0.18 W=0.50 SD=0.40 poly@0.40  S@0.12/0.17  D@0.70/0.17  G@0.41/0.52  B@1.28/0.17
+LVS_CASES = [
+  {
+    file: "lvs_case_channel_lw.png", cell: "NMOS_GOOD",
+    # channel = poly ∩ diff: x=0.40..0.58, y=0..0.50
+    box: [0.25, -0.05, 0.75, 0.60],
+    rulers: [
+      [0.40, 0.55, 0.58, 0.55, "L = 0.18 um"],
+      [0.62, 0.00, 0.62, 0.50, "W = 0.50 um"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_gate.png", cell: "NMOS_GOOD",
+    box: [0.30, 0.35, 0.70, 0.85],
+    rulers: [
+      [0.41, 0.78, 0.57, 0.78, "G contact"],
+      [0.40, 0.45, 0.58, 0.45, "poly L=0.18"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_source.png", cell: "NMOS_GOOD",
+    box: [-0.05, 0.00, 0.45, 0.55],
+    rulers: [
+      [0.12, 0.42, 0.28, 0.42, "S contact 0.16"],
+      [0.07, 0.12, 0.33, 0.12, "M1 pad"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_drain.png", cell: "NMOS_GOOD",
+    box: [0.50, 0.00, 1.00, 0.55],
+    rulers: [
+      [0.70, 0.42, 0.86, 0.42, "D contact 0.16"],
+      [0.65, 0.12, 0.91, 0.12, "M1 pad"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_bulk.png", cell: "NMOS_GOOD",
+    box: [1.15, 0.00, 1.60, 0.55],
+    rulers: [
+      [1.33, 0.42, 1.49, 0.42, "B contact"],
+      [1.28, 0.12, 1.54, 0.12, "PTIE tap"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_sd_separate.png", cell: "NMOS_GOOD",
+    # S and D pads with open gap under poly — no metal bridge
+    box: [-0.05, -0.05, 1.05, 0.55],
+    rulers: [
+      [0.33, -0.02, 0.65, -0.02, "S/D open (no short)"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_sd_short.png", cell: "NMOS_BAD",
+    box: [-0.08, -0.30, 1.10, 0.55],
+    rulers: [
+      [0.07, -0.22, 0.91, -0.22, "S-D short bridge"]
+    ],
+    markers: [[0.05, -0.18, 0.95, -0.02]]
+  },
+  {
+    file: "lvs_case_terminals_good.png", cell: "NMOS_GOOD",
+    box: [-0.15, -0.15, 1.70, 0.95],
+    rulers: [
+      [0.40, 0.58, 0.58, 0.58, "L=0.18"],
+      [0.00, 0.00, 0.00, 0.50, "W=0.50"]
+    ],
+    markers: []
+  },
+  {
+    file: "lvs_case_terminals_bad.png", cell: "NMOS_BAD",
+    box: [-0.15, -0.30, 1.70, 0.95],
+    rulers: [
+      [0.07, -0.22, 0.91, -0.22, "FAIL: S shorted to D"]
+    ],
+    markers: [[0.05, -0.18, 0.95, -0.02]]
+  }
+]
+
+LVS_CASES.each do |c|
+  capture_zoom(
+    File.join(SHOT, c[:file]),
+    lvs_gds,
+    cell_name: c[:cell],
+    box: c[:box],
+    rulers: c[:rulers],
+    markers: c[:markers] || [],
+    width: 1100, height: 800, pad: 0.06
+  )
+end
 
 puts "Done → #{SHOT}"
 Application.instance.exit(0)

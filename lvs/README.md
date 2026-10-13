@@ -61,14 +61,14 @@ Generated (gitignored): `nmos_{good,bad}.{lvsdb,l2ndb,log}`, `nmos_*_extracted.c
 
 ## Layers
 
-| GDS | Name | Role |
-|-----|------|------|
-| 1/0 | DIFF | n-active |
-| 2/0 | POLY | gate |
-| 3/0 | CONT | contacts |
-| 4/0 | METAL1 | routing |
-| 4/1 | labels | net names S / G / D / B |
-| 6/0 | PTIE | substrate tap (bulk) |
+| GDS | Name | Screenshot color | Role |
+|-----|------|------------------|------|
+| 1/0 | DIFF | red | n-active |
+| 2/0 | POLY | green | gate |
+| 3/0 | CONT | yellow | contacts |
+| 4/0 | METAL1 | blue | routing |
+| 4/1 | labels | purple | net names S / G / D / B |
+| 6/0 | PTIE | orange | substrate tap (bulk) |
 
 ---
 
@@ -136,9 +136,9 @@ M1 D G S B NMOS L=0.18U W=0.50U
 | ![GOOD NMOS](../screenshots/lvs_nmos_good.png) | ![BAD NMOS with S–D short](../screenshots/lvs_nmos_bad.png) |
 | Separate S / G / D / B | Metal strap shorts S–D |
 
-Zoom on the failing bridge:
-
-![S–D short zoom with ruler](../screenshots/lvs_case_sd_short.png)
+| GOOD terminals + L/W | BAD + short highlight |
+|:--------------------:|:---------------------:|
+| ![GOOD zoom](../screenshots/lvs_case_terminals_good.png) | ![BAD zoom](../screenshots/lvs_case_terminals_bad.png) |
 
 **GOOD** — four nets:
 
@@ -156,6 +156,28 @@ M$1 2 1 2 3 NMOS L=0.18U W=0.5U    # S/D shorted → FAIL
 
 ---
 
+## Per-feature zoom (rulers + markers)
+
+Same style as [`../drc/`](../drc/) — zoomed shots with dimension labels. BAD cases highlight the S–D metal bridge (magenta).
+
+### Channel L / W (matches schematic)
+
+![Channel L=0.18 W=0.50](../screenshots/lvs_case_channel_lw.png)
+
+### Terminals (GOOD)
+
+| Gate | Source | Drain | Bulk |
+|:----:|:------:|:-----:|:----:|
+| ![G](../screenshots/lvs_case_gate.png) | ![S](../screenshots/lvs_case_source.png) | ![D](../screenshots/lvs_case_drain.png) | ![B](../screenshots/lvs_case_bulk.png) |
+
+### S–D connectivity
+
+| GOOD — open (no bridge) | BAD — metal short |
+|:-----------------------:|:-----------------:|
+| ![S/D separate](../screenshots/lvs_case_sd_separate.png) | ![S/D short](../screenshots/lvs_case_sd_short.png) |
+
+---
+
 ## Screenshots
 
 ```bash
@@ -166,10 +188,8 @@ M$1 2 1 2 3 NMOS L=0.18U W=0.5U    # S/D shorted → FAIL
 |------|---------|
 | [`../screenshots/lvs_nmos_demo.png`](../screenshots/lvs_nmos_demo.png) | GOOD + BAD side by side |
 | [`../screenshots/lvs_nmos_good.png`](../screenshots/lvs_nmos_good.png) | Passing transistor |
-| [`../screenshots/lvs_nmos_bad.png`](../screenshots/lvs_nmos_bad.png) | Failing S–D short (metal bridge) |
-| [`../screenshots/lvs_case_sd_short.png`](../screenshots/lvs_case_sd_short.png) | Zoom on short + ruler |
-
-**Layers (screenshot colors):** DIFF red · POLY green · CONT yellow · METAL1 blue · PTIE orange · labels purple
+| [`../screenshots/lvs_nmos_bad.png`](../screenshots/lvs_nmos_bad.png) | Failing S–D short |
+| `lvs_case_*.png` | Per-feature zoom with rulers / markers (see above) |
 
 ---
 

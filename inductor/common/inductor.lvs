@@ -1,0 +1,121 @@
+# KLayout LVS-style connectivity checks for inductors / transformers.
+#
+# DC reality: a spiral shorts its two ends. Full SPICE L-device compare is a
+# poor fit here, so we assert labeled-port connectivity instead:
+#   2-port: P1 and P2 must share one net
+#   3-port: P1–CT–P2 must share one net
+#   4-port: P1–P2 one net, S1–S2 one net, primary ≠ secondary
+#
+# -rd input= -rd cell= -rd ports= -rd lvsdb=
+
+cell_name = ($cell || "").to_s
+nports = ($ports || "2").to_s.to_i
+
+if $input
+  if cell_name.empty?
+    source($input)
+  else
+    source($input, cell_name)
+  end
+end
+
+report_lvs($lvsdb || "inductor.lvsdb")
+
+metal1 = input(31, 0)
+metal2 = input(32, 0)
+vias   = input(30, 0)
+labels = labels(90, 0)
+
+connect(metal1, vias)
+connect(metal2, vias)
+connect(metal1, labels)
+connect(metal2, labels)
+
+# Build name → net id from text labels
+net_of = {}
+labels.each do |l|
+  t = l.text_string
+  # KLayout label layer iteration varies by version; use shapes on layer
+end
+
+# Prefer netlist API after connectivity
+nl = netlist
+ok = true
+msgs = []
+
+def find_net(nl, name)
+  nl.each_circuit do |c|
+    c.each_net do |net|
+      net.each_pin do |pin|
+        return net if pin.name == name
+      end
+      # also match named nets
+      return net if net.name == name
+    end
+  end
+  # fallback: iterate labels via circuit nets' labels if available
+  nil
+end
+
+# Label-based: collect nets that have given label text
+def nets_with_label(nl, text)
+  found = []
+  nl.each_circuit do |c|
+    c.each_net do |net|
+      begin
+        net.each_label do |lab|
+          found << net if lab.text_string == text || lab.to_s.include?(text)
+        end
+      rescue
+      end
+      found << net if net.name.to_s == text
+    end
+  end
+  found.uniq
+end
+
+def assert_same(nl, names, msgs)
+  nets = names.map { |n| nets_with_label(nl, n) }.map(&:first)
+  if nets.any?(&:nil?)
+    missing = names.zip(nets).select { |_n, net| net.nil? }.map(&:first)
+    msgs << "missing labels/nets: #{missing.join(',')}"
+    return false
+  end
+  ids = nets.map(&:cluster_id)
+  unless ids.uniq.size == 1
+    msgs << "#{names.join('-')} not DC-connected (got nets #{ids.inspect})"
+    return false
+  end
+  true
+end
+
+def assert_isolated(nl, a_names, b_names, msgs)
+  a = nets_with_label(nl, a_names.first).first
+  b = nets_with_label(nl, b_names.first).first
+  if a.nil? || b.nil?
+    msgs << "isolation check missing nets"
+    return false
+  end
+  if a.cluster_id == b.cluster_id
+    msgs << "primary shorted to secondary (unexpected DC path)"
+    return false
+  end
+  true
+end
+
+case nports
+when 2
+  ok &&= assert_same(nl, %w[P1 P2], msgs)
+when 3
+  ok &&= assert_same(nl, %w[P1 CT P2], msgs)
+else
+  ok &&= assert_same(nl, %w[P1 P2], msgs)
+  ok &&= assert_same(nl, %w[S1 S2], msgs)
+  ok &&= assert_isolated(nl, %w[P1 P2], %w[S1 S2], msgs)
+end
+
+if ok
+  puts "LVS PASS — #{cell_name} ports=#{nports} (connectivity)"
+else
+  puts "LVS FAIL — #{cell_name}: #{msgs.join('; ')}"
+end
