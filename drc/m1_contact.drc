@@ -4,7 +4,7 @@
 #   M1  31/0
 #   CT  30/0
 #
-# Run: ./run_demo.sh
+# Run: ./run_klayout_drc.sh
 
 M1_MIN_WIDTH   = 0.14
 M1_MIN_SPACE   = 0.14

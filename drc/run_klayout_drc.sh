@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Generate demo GDS and run M1/Contact DRC checks.
+# Generate M1/Contact demo GDS and run KLayout DRC.
 #
 # Usage:
-#   ./run_demo.sh              # regenerate GDS + run DRC
-#   ./run_demo.sh --drc-only   # skip GDS generation
-#   ./run_demo.sh --gen-only   # only write GDS
+#   ./run_klayout_drc.sh              # regenerate GDS + run DRC
+#   ./run_klayout_drc.sh --drc-only   # skip GDS generation
+#   ./run_klayout_drc.sh --gen-only   # only write GDS
 
 set -euo pipefail
 
@@ -15,17 +15,18 @@ GEN_RB="${ROOT}/generate_layout.rb"
 DRC_RB="${ROOT}/m1_contact.drc"
 
 MODE="all"
-if [[ $# -gt 0 ]]; then
+while [[ $# -gt 0 ]]; do
   case "$1" in
     --drc-only) MODE="drc" ;;
     --gen-only) MODE="gen" ;;
     -h|--help)
-      sed -n '2,6p' "$0"
+      sed -n '2,8p' "$0"
       exit 0
       ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
-fi
+  shift
+done
 
 if ! command -v klayout >/dev/null 2>&1; then
   echo "ERROR: klayout not found on PATH" >&2
@@ -49,22 +50,15 @@ if [[ "$MODE" == "all" || "$MODE" == "drc" ]]; then
     -rd "report=${LYRDB}" \
     -r "${DRC_RB}"
   echo "==> Report: ${LYRDB}"
-  if command -v python3 >/dev/null 2>&1; then
+  if command -v python3 >/dev/null 2>&1 && [[ -f "$LYRDB" ]]; then
     python3 - "$LYRDB" <<'PY'
 import sys, xml.etree.ElementTree as ET
-
-path = sys.argv[1]
-try:
-    root = ET.parse(path).getroot()
-except FileNotFoundError:
-    print("No violations file written.")
-    sys.exit(0)
-
+root = ET.parse(sys.argv[1]).getroot()
 items = root.findall(".//item")
 print(f"Total violations: {len(items)}")
 by_cat = {}
 for it in items:
-    cat = it.findtext("category") or "(unknown)"
+    cat = (it.findtext("category") or "(unknown)").strip("'")
     by_cat[cat] = by_cat.get(cat, 0) + 1
 for cat in sorted(by_cat):
     print(f"  {cat}: {by_cat[cat]}")

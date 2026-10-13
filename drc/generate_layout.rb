@@ -1,6 +1,7 @@
-# Generate m1_contact_demo.gds with passing and failing test structures.
+# Generate m1_contact_demo.gds — labeled GOOD/BAD rows for M1 + Contact DRC.
 #
-# Batch: klayout -b -r generate_layout.rb -rd output=m1_contact_demo.gds
+#   klayout -b -r generate_layout.rb -rd output=m1_contact_demo.gds
+#   ./run_klayout_drc.sh --gen-only
 
 include RBA
 
@@ -105,8 +106,7 @@ rows.each do |y, text, _kind, draw|
   add_label(cell, lbl, layout, 0.2, y + 0.35, text)
 end
 
-add_label(cell, lbl, layout, 0.2, 24.5, "M1/Contact DRC demo — green=pass rows, red=fail rows", 0.15)
+add_label(cell, lbl, layout, 0.2, 24.5, "M1/Contact DRC demo — GOOD vs BAD rows", 0.15)
 add_label(cell, lbl, layout, 0.2, 23.8, "Layers: M1=31/0  CT=30/0  Labels=90/0", 0.10)
-
 layout.write(OUTPUT)
 puts "Wrote #{OUTPUT}"

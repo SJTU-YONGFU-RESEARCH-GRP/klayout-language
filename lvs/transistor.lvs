@@ -78,8 +78,9 @@ align
 netlist.simplify
 ok = compare
 
+# Use puts so batch logs (run_lvs.sh) can detect PASS/FAIL
 if ok
-  info("LVS PASS — layout matches schematic")
+  puts "LVS PASS — layout matches schematic"
 else
-  warn("LVS FAIL — see LVS browser / report database")
+  puts "LVS FAIL — see LVS browser / report database"
 end

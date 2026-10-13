@@ -1,10 +1,9 @@
-# Generate nmos_demo.gds — good and bad NMOS layouts for KLayout LVS.
+# Generate nmos_demo.gds — NMOS_GOOD / NMOS_BAD / NMOS_DEMO for KLayout LVS.
 #
-# Batch: klayout -b -r generate_layout.rb -rd output=nmos_demo.gds
+#   klayout -b -r generate_layout.rb -rd output=nmos_demo.gds
+#   ./run_lvs.sh --gen-only
 #
-# Layers:
-#   1/0 DIFF (n-active)  2/0 POLY  3/0 CONT  4/0 METAL1  4/1 labels
-#   6/0 PTIE (p-substrate tap for bulk)
+# Layers: 1/0 DIFF  2/0 POLY  3/0 CONT  4/0 METAL1  4/1 labels  6/0 PTIE
 
 include RBA
 
@@ -83,12 +82,16 @@ def draw_nmos(cell, layout, layers, short_sd:)
   add_label(cell, ly_lbl, layout, bx + 0.05, by + CONT + 0.05, "B")
 
   if short_sd
-    # BAD: metal strap shorts S to D
+    # BAD: keep S/D pads, add an obvious metal bridge below them (S–D short)
+    bridge_y = sy - ENC - 0.12
+    bridge_h = 0.10
     x0 = sx - ENC
-    y0 = sy - ENC - 0.25
     w = (dx + CONT + ENC) - x0
-    add_box(cell, ly_m1, layout, x0, y0, w, 0.18)
-    add_label(cell, ly_lbl, layout, x0 + w * 0.4, y0 - 0.12, "SHORT")
+    add_box(cell, ly_m1, layout, x0, bridge_y, w, bridge_h)
+    # Vertical stubs so the bridge clearly touches each pad
+    add_box(cell, ly_m1, layout, sx - ENC, bridge_y, CONT + 2.0 * ENC, sy - ENC - bridge_y + 0.01)
+    add_box(cell, ly_m1, layout, dx - ENC, bridge_y, CONT + 2.0 * ENC, sy - ENC - bridge_y + 0.01)
+    add_label(cell, ly_lbl, layout, x0 + w * 0.35, bridge_y - 0.14, "SHORT")
   end
 end
 

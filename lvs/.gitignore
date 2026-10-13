@@ -1,5 +1,4 @@
-# Generated / run outputs
-nmos_demo.gds
+# Generated / run outputs (keep nmos_demo.gds for offline viewing)
 nmos_*.lvsdb
 nmos_*.l2ndb
 nmos_*_extracted.cir

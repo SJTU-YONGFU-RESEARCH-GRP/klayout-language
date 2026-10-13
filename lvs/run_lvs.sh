@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Generate NMOS demo GDS and run KLayout LVS (good and/or bad cell).
+# Generate NMOS demo GDS and run KLayout LVS (GOOD expect PASS, BAD expect FAIL).
 #
 # Usage:
-#   ./run_lvs.sh              # generate GDS + run GOOD (expect PASS) + BAD (expect FAIL)
+#   ./run_lvs.sh              # generate GDS + GOOD + BAD
 #   ./run_lvs.sh --good       # GOOD cell only
 #   ./run_lvs.sh --bad        # BAD cell only
 #   ./run_lvs.sh --gen-only   # only write GDS
@@ -47,6 +47,7 @@ if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
   klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
 fi
 
+# Returns 0=PASS, 1=FAIL, 2=error/unknown
 run_one() {
   local cell="$1"
   local tag="$2"
@@ -56,7 +57,7 @@ run_one() {
   local log="${ROOT}/nmos_${tag}.log"
 
   echo "==> LVS ${cell} → ${lvsdb}"
-  set +e
+  # Do not toggle set -e here — a non-zero return would abort the caller.
   klayout -b \
     -rd "input=${GDS}" \
     -rd "cell=${cell}" \
@@ -64,25 +65,19 @@ run_one() {
     -rd "lvsdb=${lvsdb}" \
     -rd "l2ndb=${l2ndb}" \
     -rd "extracted=${extracted}" \
-    -r "${LVS_RB}" >"${log}" 2>&1
-  local rc=$?
-  set -e
+    -r "${LVS_RB}" >"${log}" 2>&1 || true
 
-  # KLayout may exit 0 even on LVS mismatch; parse log / presence of result
   if grep -q "LVS PASS" "${log}"; then
     echo "    RESULT: PASS"
     return 0
-  elif grep -q "LVS FAIL" "${log}"; then
+  fi
+  if grep -q "LVS FAIL" "${log}"; then
     echo "    RESULT: FAIL (see ${lvsdb})"
     return 1
-  elif [[ "$rc" -ne 0 ]]; then
-    echo "    ERROR: klayout exited ${rc} (see ${log})" >&2
-    tail -20 "${log}" >&2 || true
-    return "$rc"
-  else
-    echo "    WARN: no PASS/FAIL marker in log — check ${log} / ${lvsdb}"
-    return 2
   fi
+  echo "    ERROR: no PASS/FAIL marker (see ${log})" >&2
+  tail -20 "${log}" >&2 || true
+  return 2
 }
 
 if [[ "$MODE" == "all" || "$MODE" == "lvs" ]]; then
@@ -90,24 +85,26 @@ if [[ "$MODE" == "all" || "$MODE" == "lvs" ]]; then
   [[ -f "$CIR" ]] || { echo "ERROR: missing ${CIR}" >&2; exit 1; }
 
   fail=0
+
   if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
-    if ! run_one "NMOS_GOOD" "good"; then
+    rc=0
+    run_one "NMOS_GOOD" "good" || rc=$?
+    if [[ "$rc" -ne 0 ]]; then
       echo "ERROR: expected GOOD cell to PASS" >&2
       fail=1
     fi
   fi
+
   if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
-    # BAD should fail compare — treat FAIL as success of the demo
-    if run_one "NMOS_BAD" "bad"; then
+    rc=0
+    run_one "NMOS_BAD" "bad" || rc=$?
+    if [[ "$rc" -eq 1 ]]; then
+      echo "    (expected FAIL — demo OK)"
+    elif [[ "$rc" -eq 0 ]]; then
       echo "ERROR: expected BAD cell to FAIL LVS" >&2
       fail=1
     else
-      rc=$?
-      if [[ "$rc" -eq 1 ]]; then
-        echo "    (expected FAIL — demo OK)"
-      else
-        fail=1
-      fi
+      fail=1
     fi
   fi
 

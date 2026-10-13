@@ -22,7 +22,7 @@ if ! command -v klayout >/dev/null 2>&1; then
 fi
 
 if [[ "$RUN_DRC" -eq 1 ]]; then
-  "${ROOT}/run_demo.sh" --drc-only
+  "${ROOT}/run_klayout_drc.sh" --drc-only
 fi
 
 [[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS}" >&2; exit 1; }
