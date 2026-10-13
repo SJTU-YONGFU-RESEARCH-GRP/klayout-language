@@ -5,76 +5,33 @@
 | Field | Value |
 |-------|-------|
 | Run | `inductor/1` |
-| Name | square_2p_l1 |
-| Shape | square |
-| Ports / role | 2 / inductor |
-| Layers | 1 (M1) |
-| Width / space | 1.0 µm / 1.0 µm |
-| Turns | 3.5 |
-| Inner radius | 20.0 µm |
-| DRC | **PASS** (0 violations) |
-| LVS | **PASS** (P1↔P2 connectivity) |
-| openEMS | **SKIPPED** (module not installed; analytic placeholder) |
+| Shape / ports | square / 2 |
+| DRC / LVS / SHORTS | **PASS** / **PASS** / **PASS** |
+| EM engine | **PEEC_GEOMETRY** (GDS centerline → Grover L + skin R + oxide C) |
+| L₀ | **0.456 nH** |
+| L @ 2.4 GHz | **0.456 nH** |
+| Q @ 2.4 GHz | **2.0** |
+| Q_max | **9.4** @ 40 GHz |
+| SRF_est | ≈ 130 GHz |
 
-Verdict: Layout generated and verified; EM metrics are analytic estimates until openEMS is available.
+## Layout
 
-## Layout screenshot
+![layout](layout/inductor.png)
 
-![IND_SQ_2P square 2-port inductor](layout/inductor.png)
+## EM performance
 
-**Layer colors:** M1 **blue** · M2 **red** · VIA **yellow** · M1 labels **green** · M2 labels **magenta**
+![performance](sim/performance.png)
 
-(This run is 1-layer, so only M1 + green `P1`/`P2` labels appear.)
+| Metric | Value |
+|--------|-------|
+| Segments / length | 15 / 379 µm |
+| C_ox | ≈ 3.3 fF |
+| Metal thickness | 3.0 µm (config `em`) |
+| Data | `sim/lq.csv`, `sim/sparams.csv`, `sim/summary.json` |
 
-## Config
+> openEMS FDTD is not installed on this host (full build needed). Pipeline used **physical PEEC from the real GDS ribbon**. Install openEMS later for full-wave S-params.
 
-```yaml
-name: square_2p_l1
-cell: IND_SQ_2P
-shape: square
-ports: 2
-role: inductor
-n_layers: 1
-width_um: 1.0
-space_um: 1.0
-turns: 3.5
-inner_radius_um: 20.0
-```
+## Checks
 
-## DRC
-
-- Command: `./inductor/common/run_drc.sh inductor/1`
-- Violations: 0
-- Log: `drc/inductor.log`
-- Report: `drc/inductor.lyrdb`
-
-## LVS
-
-- Command: `./inductor/common/run_lvs.sh inductor/1`
-- Result: PASS — labels `P1,P2` DC-connected on M1
-- Schematic (documentary): `lvs/inductor.cir`
-- Log: `lvs/inductor.log`
-
-## EM (openEMS)
-
-openEMS/CSXCAD not installed on this host. Pipeline wrote Greenhouse-like analytic placeholders:
-
-| Metric | Value | Note |
-|--------|-------|------|
-| L (est.) | ≈ 0.901 nH | analytic |
-| Q @ high-f placeholder | ≈ 39 @ 20 GHz | not physical EM |
-| f_ref | 2.4 GHz | config |
-
-- Data: `sim/sparams.csv`, `sim/lq.csv`
-- Status: `sim/STATUS.txt` → `SKIPPED_OPENEMS`
-
-## Files
-
-- `config.yaml`
-- `layout/inductor.gds` (cell `IND_SQ_2P`)
-- `layout/inductor.png` (screenshot)
-
-## Next steps
-
-- Install openEMS + CSXCAD Python bindings, then re-run `./inductor/common/run_openems.sh inductor/1`
-- Try `shape: octagon` or `ports: 4` / `role: transformer` in a new `inductor/2` run via **create-inductor**
+- DRC / LVS / SHORTS: PASS  
+- Command: `./inductor/common/run_openems.sh inductor/1`

@@ -181,8 +181,8 @@ if geom == "figure8"
   p2 = [ro[0] + 12.0, ro[1]]
   right_pts = right + [p2]
   draw_series(top, m1, m1c, layout, right_pts, W)
-  # Combined centerline for cut-test (M1 pieces + virtual bridge via M2)
-  add_centerline(top, m1c, layout, left_pts + [[li[0], y_chan], [ri[0], y_chan]] + right_pts)
+  # Centerlines are left_pts / right_pts only (on M1). Do not mark the M2
+  # bridge on 31/2 — cut-test would notch empty M1 and miss the series break.
   add_label(top, m1t, layout, p1[0], p1[1], "P1")
   add_label(top, m1t, layout, p2[0], p2[1], "P2")
 

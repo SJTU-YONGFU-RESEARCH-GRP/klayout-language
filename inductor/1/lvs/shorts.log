@@ -1,3 +1,2 @@
-SHORTS FAIL — IND_SQ_2P: parallel short path(s) survive cut-test: frac=0.35@(12000,2900) pieces=1, frac=0.50@(-14000,-12000) pieces=1, frac=0.65@(12900,14000) pieces=1
-detail M1_polys=1 vias=0 paths=1
-t-test: frac=0.35@(12000,2900) pieces=1, frac=0.50@(-14000,-12000) pieces=1, frac=0.65@(12900,14000) pieces=1
+SHORTS PASS — IND_SQ_2P (single series path / isolation OK)
+detail M1_polys=2 vias=2 centerlines=1

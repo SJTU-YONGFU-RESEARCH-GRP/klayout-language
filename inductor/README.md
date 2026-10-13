@@ -24,10 +24,12 @@ python3 inductor/common/generate_inductor.py \
 ./inductor/common/run_drc.sh inductor/1
 ./inductor/common/run_lvs.sh inductor/1
 ./inductor/common/run_screenshot.sh inductor/1   # layout/inductor.png
-./inductor/common/run_openems.sh inductor/1
+./inductor/common/run_openems.sh inductor/1   # PEEC (or openEMS) + plots
 ```
 
-Then inspect `inductor/1/RESULT.md` (includes screenshot).
+Then inspect `inductor/1/RESULT.md` (layout + `sim/performance.png`).
+
+**EM:** GDS → PEEC (Grover L + skin R) when openEMS is missing; outputs `sim/performance.png`.
 
 If openEMS is missing: `./scripts/install-openems.sh --deps --disable-gui`, then `source ~/.local/bin/openems-env`.
 

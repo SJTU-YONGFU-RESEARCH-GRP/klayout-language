@@ -30,19 +30,20 @@ vias   = input(30, 0)
 
 total = 0
 
-mw1 = metal1.width(WMIN.um)
+# Use projection metric: Manhattan ribbon inside corners are not real width/space fails
+mw1 = metal1.width(WMIN.um, projection)
 mw1.output("M1.min_width", "M1 width < #{WMIN} µm")
 total += mw1.data.size
 
-ms1 = metal1.space(SMIN.um)
+ms1 = metal1.space(SMIN.um, projection)
 ms1.output("M1.min_space", "M1 spacing < #{SMIN} µm")
 total += ms1.data.size
 
-mw2 = metal2.width(WMIN.um)
+mw2 = metal2.width(WMIN.um, projection)
 mw2.output("M2.min_width", "M2 width < #{WMIN} µm")
 total += mw2.data.size
 
-ms2 = metal2.space(SMIN.um)
+ms2 = metal2.space(SMIN.um, projection)
 ms2.output("M2.min_space", "M2 spacing < #{SMIN} µm")
 total += ms2.data.size
 

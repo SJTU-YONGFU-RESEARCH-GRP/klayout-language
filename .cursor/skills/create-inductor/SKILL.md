@@ -112,12 +112,14 @@ An inductor winding must be **one series ribbon** from port to port. Extra DC br
 |------|----------|
 | One M1 series path | 2-port / 3-port: a single continuous M1 path; no turn-to-turn metal bridges |
 | No decorative vias | Do **not** drop via+M1 pads that touch adjacent turns |
-| Underpass only if needed | M2 underpass only at an intentional crossover with **exactly** the vias required (usually 2); never a via forest |
-| Center-tap | Exactly **one** CT via on an **outer lead**, clear of the spiral body; M2 stub must not re-enter the turns |
-| Transformer (4-port) | **Zero** vias between primary (M1) and secondary (M2) — galvanic isolation |
-| Verify | `./inductor/common/run_shorts.sh inductor/<N>` (cut-test: after cutting mid-trace, P1–P2 must open) |
+| Ribbon geometry | Axis-aligned **boxes** (not fat Path corners) so pitch = W+S |
+| No lead-through | Never route a lead across outer turns (creates parallel shorts) |
+| Inner exit | Outer lead away from bbox; inner end exits via **M2 underpass** in a clear channel (2 vias) |
+| Center-tap | Exactly **one** CT via on an **outer lead**; stub away from the spiral |
+| Transformer (4-port) | No vias between primary and secondary |
+| Verify | `./inductor/common/run_shorts.sh` — layer-aware cut-test (`SHORTS PASS`) |
 
-❌ Forbidden: floating via pads, M2 stubs that cross the spiral with extra vias, overlapping paths, turn shorts.  
+❌ Forbidden: lead-through, decorative vias, M2 bridging cut notches, turn shorts.  
 ✅ Pass criterion: `SHORTS PASS` in `lvs/shorts.log`.
 
 Details: [reference.md](reference.md#avoiding-parallel-short-paths).
@@ -161,7 +163,7 @@ Writes `layout/inductor.png` with fixed high-contrast colors:
 | M1 labels (31/1) | green |
 | M2 labels (32/1) | magenta |
 
-### Step 7 — openEMS
+### Step 7 — Physical EM + plots
 
 ```bash
 ./inductor/common/run_openems.sh inductor/<N>
@@ -169,12 +171,13 @@ Writes `layout/inductor.png` with fixed high-contrast colors:
 
 Pipeline (`inductor/common/openems/`):
 
-1. Export metal polygons → CSXCAD geometry (µm → m).
-2. FDTD ports at labeled pads; broadband pulse.
-3. Record S-parameters → `sim/sparams.csv`.
-4. Extract series L and Q vs frequency → `sim/lq.csv`.
+1. Extract GDS centerline → `sim/geometry.json`.
+2. Prefer **openEMS FDTD** if installed; else **PEEC_GEOMETRY** (Grover self/mutual L, skin-effect R, oxide C from real ribbon).
+3. Write `sim/sparams.csv`, `sim/lq.csv`, `sim/summary.json`.
+4. Plot `sim/performance.png` (L, Q, \|S11\|/\|\S21\|, summary).
 
-If openEMS / CSXCAD missing, install notes are in [reference.md](reference.md#openems). Still write `RESULT.md` with DRC/LVS and mark EM as **SKIPPED** + reason.
+Embed **both** `layout/inductor.png` and `sim/performance.png` in `RESULT.md`.  
+openEMS install notes: [reference.md](reference.md#openems).
 
 ### Step 8 — Write `RESULT.md`
 

@@ -17,22 +17,25 @@ Inductance requires **one series path**. A turn-to-turn metal bridge (or via pad
 
 ### Cut-test (`check_shorts.rb`)
 
-1. Rebuild the design centerline from config.
-2. At ~35% / 50% / 65% along the path, cut a notch across the M1 trace.
-3. After each cut, **P1 and P2 must disconnect** on M1.
-4. If they stay connected → a parallel short exists → `SHORTS FAIL`.
+1. Read M1 centerline Path on layer **31/2** (must lie on real M1 metal).
+2. At ~35% / 50% / 65% along that path, notch across the M1 ribbon.
+3. Recompute nets with **layer-aware** connectivity (M1↔M2 only through VIA).
+4. After each cut, **P1 and P2 must disconnect**. If not → `SHORTS FAIL`.
 
 Also enforced:
 
-- ≤1 M1 polygon for 2p/3p (no via-pad islands)
-- Via count caps: 2p→0 (or 2 only for real underpass), 3p→1 (CT only), 4p→0
+- M1 island cap: 1 (no underpass) or 2 (winding + exit pad / figure-8 halves)
+- Via caps: 2p→2 (inner exit), 3p→3 (exit+CT), figure8→2, 4p→2 (primary exit only)
 - 4p: primary must not DC-connect to secondary
 
 ### Generator rules of thumb
 
-- Never add “decorative” M2/via under a 2-port spiral.
-- CT via only on the outer lead, stub pointing **away** from the spiral.
+- Draw **axis-aligned ribbon boxes** (not fat Path corners) so turn pitch = W+S.
+- **Never** route a lead through the spiral body (classic multi-path short).
+- Outer end: lead away from bbox; inner end: **M2 underpass** in a clear channel below.
+- CT via only on the outer lead, stub away from the spiral.
 - Stacked transformer: no vias between windings.
+- DRC width/space use **projection** metric (Manhattan inside corners OK).
 
 ## Ports and roles
 
