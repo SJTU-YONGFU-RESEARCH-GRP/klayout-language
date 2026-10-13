@@ -9,7 +9,13 @@
 | `circle` | Approximated N-gon spiral | Highest Q potential |
 | `figure8` | Two loops, opposing field | Lower substrate coupling |
 
-When adding a run, scan `inductor/*/config.yaml` and choose an unused `(shape, ports, role)` — never only change `turns`.
+When adding a run, **always** run `inductor/common/pick_next_config.py` (see SKILL Step 2).
+
+Shape rotation (mandatory):
+
+1. New `shape` ≠ previous run’s `shape`.
+2. Prefer never-used shapes, else least-recently-used among the rest.
+3. `(shape, ports, role)` must be unique — never only change `turns`.
 
 ## Avoiding parallel short paths
 

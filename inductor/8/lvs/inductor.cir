@@ -1,0 +1,5 @@
+* Auto schematic for IND_SQU_4P (coupler)
+.SUBCKT IND_SQU_4P P1 P2 S1 S2
+Rpri P1 P2 0.01
+Rsec S1 S2 0.01
+.ENDS

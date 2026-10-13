@@ -35,7 +35,7 @@ Copy this checklist and track it:
 ```
 create-inductor Progress:
 - [ ] 1. Allocate run folder inductor/<N>
-- [ ] 2. Write config.yaml (diversify + no multi-path shorts)
+- [ ] 2. Pick shape via pick_next_config.py (MUST differ from prev) + write config.yaml
 - [ ] 3. Generate GDS (+ port labels)
 - [ ] 4. Run DRC → record pass/fail
 - [ ] 5. Run LVS + SHORTS cut-test → record pass/fail
@@ -56,23 +56,32 @@ mkdir -p "$N"/{layout,drc,lvs,sim}
 
 If the user names a folder (e.g. `inductor/1`), use that and overwrite only with confirmation.
 
-### Step 2 — Write `config.yaml` (must diversify)
+### Step 2 — Write `config.yaml` (shape rotation + diversity)
 
-Use [templates/config.yaml](../../../inductor/common/templates/config.yaml) as the schema.
-Required keys: `name`, `shape`, `ports`, `n_layers`, `width_um`, `space_um`, `turns`, `inner_radius_um`, `role`.
+**Hard rule — shape must change every generation:**
 
+| Priority | Rule |
+|----------|------|
+| 1 | `shape` of run `N` **must ≠** `shape` of run `N-1` (previous highest folder) |
+| 2 | Prefer a shape **never used** yet (`square` → `octagon` → `circle` → `figure8`) |
+| 3 | If all shapes exist, pick the **least-recently-used** shape among those ≠ previous |
+| 4 | `(shape, ports, role)` must be unique — never only tweak `turns` / `inner_radius_um` |
+
+Do **not** hand-pick shape. Run the picker (required):
+
+```bash
+# from repo root — prints YAML and writes config
+python3 inductor/common/pick_next_config.py --root inductor \
+  --write inductor/<N>/config.yaml
+```
+
+Preview only: `python3 inductor/common/pick_next_config.py --root inductor`
+
+Schema: [templates/config.yaml](../../../inductor/common/templates/config.yaml).  
 `role` ∈ `inductor` | `transformer` | `coupler` | `balun`
 
-**Diversity rule (mandatory for every new run):**
-
-1. Read all existing `inductor/*/config.yaml` (skip `common/`).
-2. Collect used `(shape, ports, role)` combinations.
-3. Pick a config that is **not** a turn/radius tweak of an existing entry.
-4. At least one of `shape`, `ports`, or `role` must be new to the database.
-5. Prefer unused `shape` first (`square` → `octagon` → `circle` → `figure8`), then new port/role (3-port CT, 4-port transformer/coupler).
-
-❌ Forbidden: same `shape` + same `ports` + same `role`, only changing `turns` / `inner_radius_um`.  
-✅ Examples: square 2p exists → use `figure8` 2p, or `octagon` 3p, or `square` 4p transformer.
+❌ Forbidden: same shape as previous run; same `(shape, ports, role)` as any run.  
+✅ Example: prev=`octagon` → next must be `square` / `circle` / `figure8` (picker chooses LRU + free ports/role).
 
 Port mapping:
 
@@ -214,12 +223,13 @@ If any run is missing `sim/summary.json`, still include it (EM columns show —)
 ## Agent rules
 
 - All work products stay under `inductor/` (shared code in `inductor/common/`, runs in `inductor/<N>/`).
+- **Always** call `pick_next_config.py` before writing `config.yaml`; never reuse the previous run’s `shape`.
 - Do not invent DRC/LVS/SHORTS PASS without running the scripts (or recording SKIPPED).
 - Prefer regenerating GDS from `config.yaml` over hand-editing polygons.
 - If SHORTS FAIL: fix generator/config (remove vias/bridges); do not weaken the cut-test.
 - **Always** run `run_benchmark.sh` before declaring a create-inductor task done.
 - Match sibling demo style in `drc/` and `lvs/` (shell runners, KLayout `-b`).
-- After a successful run, tell the user: `RESULT.md`, `BENCHMARK.md`, PASS/FAIL, and peak Q / L.
+- After a successful run, tell the user: `RESULT.md`, `BENCHMARK.md`, PASS/FAIL, peak Q / L, and that shape ≠ previous.
 
 ## Quick commands
 
