@@ -1,27 +1,25 @@
 // =============================================================================
-// M1 / Contact DRC demo — Calibre SVRF (mirrors demo/m1_contact.drc)
+// M1 / Contact DRC demo — Calibre SVRF rules (mirrors demo/m1_contact.drc)
 // =============================================================================
 // Layers (from generate_layout.rb):
 //   M1  GDS 31/0
 //   CT  GDS 30/0
 //
-// Paths are set by run_calibre_drc.sh via environment variables GDS, RDB, REP.
+// This file contains RULES ONLY — no LAYOUT PATH / RDB paths.
+// Paths come from:
+//   • calibredrv Tcl:  run_drc_in_calibredrv.tcl  (uses open layout)
+//   • batch shell:     run_calibre_drc.sh          (writes a temp run deck)
+//   • Calibre Interactive: select layout + this rule file in the GUI
 // =============================================================================
-
-LAYOUT PATH "$GDS"
-LAYOUT PRIMARY "M1_CT_DRC_DEMO"
-LAYOUT SYSTEM GDSII
-
-DRC MAXIMUM RESULTS ALL
-DRC SUMMARY REPORT "$REP"
-DRC RESULTS DATABASE "$RDB" ASCII
-DRC KEEP EMPTY NO
 
 PRECISION 1000
 RESOLUTION 1
 
 LAYER M1 31 0
 LAYER CT 30 0
+
+DRC MAXIMUM RESULTS ALL
+DRC KEEP EMPTY NO
 
 // ---------------------------------------------------------------------------
 // Metal 1
@@ -34,7 +32,6 @@ M1_MIN_WIDTH {
 
 M1_MIN_SPACE {
   @ Metal1 spacing < 0.14 um
-  // Same-layer EXTERNAL takes one layer argument (not M1 M1)
   EXT M1 < 0.14 ABUT < 90 SINGULAR
 }
 
@@ -54,9 +51,13 @@ CT_MIN_SPACE {
 
 // ---------------------------------------------------------------------------
 // Enclosure — M1 must surround CT by at least 0.055 um
+// SIZE CT outward; any oversized contact not fully inside M1 is a violation.
+// (More robust on Calibre 2019 than ENC ... OPPOSITE for this demo.)
 // ---------------------------------------------------------------------------
+
+CT_GROWN = SIZE CT BY 0.055
 
 M1_OVER_CT_ENCLOSURE {
   @ M1 enclosure of contact < 0.055 um
-  ENC M1 CT < 0.055 OPPOSITE
+  CT_GROWN NOT INSIDE M1
 }

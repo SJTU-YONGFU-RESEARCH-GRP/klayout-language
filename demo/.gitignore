@@ -1,0 +1,11 @@
+# Generated / run outputs
+.calibre_run/
+*.calibre.rdb
+*.calibre.rep
+*.calibre.log
+m1_contact.lyrdb
+out.rdb
+out.rep
+
+# Site-local license paths (keep calibre.env.example)
+calibre.env

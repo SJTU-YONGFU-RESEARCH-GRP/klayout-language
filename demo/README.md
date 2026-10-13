@@ -29,8 +29,10 @@ A minimal side-by-side demo of **Metal 1** and **Contact** design rules using **
 | `view_klayout_drc.sh` | KLayout GUI | Open layout + report: `klayout gds -m lyrdb` |
 | `m1_contact.lyrdb` | KLayout | Report database (XML RDB with markers linked to the GDS) |
 | `m1_contact.calibre.svrf` | **Calibre DRC** | SVRF rule deck (same rules as KLayout) |
-| `run_calibre_drc.sh` | Calibre | Generate GDS + run Calibre DRC → `.rdb` / `.rep` / `.log` |
-| `calibre.env.example` | Calibre | Template for local setup — copy to `calibre.env` (auto-sourced by run script) |
+| `run_calibre_drc.sh` | Calibre | Batch: generate GDS + run Calibre DRC → `.rdb` / `.rep` / `.log` |
+| `run_drc_in_calibredrv.tcl` | Calibre DESIGNrev | UI: read open layout (`$L file` / `topcell`), run DRC, no path env vars |
+| `view_calibre_drc.sh` | Calibre | Launch calibredrv Tcl DRC then open RVE |
+| `calibre.env` / `calibre.env.example` | Calibre | Site install + license only (`MGC_HOME`, `MGLS_LICENSE_FILE`) |
 | `m1_contact.calibre.rdb` | Calibre RVE | ASCII results database |
 | `m1_contact.calibre.rep` | Calibre | Text summary report |
 | `m1_contact.calibre.log` | Calibre | Full run log |
@@ -73,26 +75,31 @@ klayout -b \
 
 ### 3. Run Calibre DRC
 
-Requires a licensed Calibre install. Setup is documented in `run_calibre_drc.sh` (see header or `./run_calibre_drc.sh --setup-help`).
+Requires a licensed Calibre install. This demo’s `calibre.env` already points at the site install + license file.
 
-**Recommended — local env file:**
+**UI-friendly (recommended)** — layout path comes from calibredrv, not from env vars:
 
 ```bash
-cp calibre.env.example calibre.env
-$EDITOR calibre.env                  # set MGC_HOME to your Calibre install
-./run_calibre_drc.sh
+./view_calibre_drc.sh                 # run DRC via DESIGNrev Tcl, then open RVE
+./view_calibre_drc.sh --no-gui        # headless (no RVE window)
 ```
 
-**Or export in your shell:**
+Inside an already-open DESIGNrev session:
+
+```tcl
+source /path/to/demo/run_drc_in_calibredrv.tcl
+run_m1_contact_drc
+```
+
+**Batch** (still no `$GDS`/`$RDB` in the rule file — the shell writes a tiny `INCLUDE` run deck):
 
 ```bash
-export MGC_HOME=/opt/mentor/calibre   # adjust to your site
-export PATH="$MGC_HOME/bin:$PATH"
 ./run_calibre_drc.sh              # generate GDS + run DRC
 ./run_calibre_drc.sh --drc-only   # DRC only
-./run_calibre_drc.sh --view       # run DRC + open Calibre RVE
+./run_calibre_drc.sh --view       # run DRC + open RVE
 ```
 
+`m1_contact.calibre.svrf` contains **rules only**. Layout / results paths are filled in by calibredrv or by the batch wrapper.
 ---
 
 ## Test structures in the GDS
@@ -130,18 +137,14 @@ metal1  = input(31, 0)
 contact = input(30, 0)
 ```
 
-**Calibre** (`m1_contact.calibre.svrf`) — declarative SVRF; paths passed via `-E` environment variables:
+**Calibre** (`m1_contact.calibre.svrf`) — rules only; layout/RDB paths come from calibredrv or a tiny generated run deck:
 
 ```svrf
-LAYOUT PATH "$GDS"
-LAYOUT PRIMARY "M1_CT_DRC_DEMO"
-LAYOUT SYSTEM GDSII
-
-DRC SUMMARY REPORT "$REP"
-DRC RESULTS DATABASE "$RDB" ASCII
-
 LAYER M1 31 0
 LAYER CT 30 0
+# LAYOUT PATH / RDB are NOT in this file —
+# calibredrv Tcl reads [$L file] / [$L topcell], or the batch
+# wrapper writes a temp run deck that INCLUDEs these rules.
 ```
 
 | Aspect | KLayout | Calibre |
