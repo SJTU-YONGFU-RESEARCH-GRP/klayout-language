@@ -1,0 +1,4 @@
+LVS PASS — IND_SQ_3P ports=3 (connectivity)
+labels=CT,P1,P2
+labels=CT,P1,P2
+LVS PASS — IND_SQ_3P ports=3 (connectivity)

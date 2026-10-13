@@ -38,8 +38,9 @@ create-inductor Progress:
 - [ ] 3. Generate GDS (+ port labels)
 - [ ] 4. Run DRC → record pass/fail
 - [ ] 5. Run LVS → record pass/fail
-- [ ] 6. openEMS sim → S-params, L, Q
-- [ ] 7. Write RESULT.md
+- [ ] 6. Screenshot → layout/inductor.png (blue/red/yellow/…)
+- [ ] 7. openEMS sim → S-params, L, Q
+- [ ] 8. Write RESULT.md (must embed screenshot)
 ```
 
 ### Step 1 — Allocate run folder
@@ -53,12 +54,23 @@ mkdir -p "$N"/{layout,drc,lvs,sim}
 
 If the user names a folder (e.g. `inductor/1`), use that and overwrite only with confirmation.
 
-### Step 2 — Write `config.yaml`
+### Step 2 — Write `config.yaml` (must diversify)
 
 Use [templates/config.yaml](../../../inductor/common/templates/config.yaml) as the schema.
 Required keys: `name`, `shape`, `ports`, `n_layers`, `width_um`, `space_um`, `turns`, `inner_radius_um`, `role`.
 
 `role` ∈ `inductor` | `transformer` | `coupler` | `balun`
+
+**Diversity rule (mandatory for every new run):**
+
+1. Read all existing `inductor/*/config.yaml` (skip `common/`).
+2. Collect used `(shape, ports, role)` combinations.
+3. Pick a config that is **not** a turn/radius tweak of an existing entry.
+4. At least one of `shape`, `ports`, or `role` must be new to the database.
+5. Prefer unused `shape` first (`square` → `octagon` → `circle` → `figure8`), then new port/role (3-port CT, 4-port transformer/coupler).
+
+❌ Forbidden: same `shape` + same `ports` + same `role`, only changing `turns` / `inner_radius_um`.  
+✅ Examples: square 2p exists → use `figure8` 2p, or `octagon` 3p, or `square` 4p transformer.
 
 Port mapping:
 
@@ -113,7 +125,23 @@ Save log under `inductor/<N>/drc/`.
   (2-port: P1↔P2 short; 4-port: P1↔P2, S1↔S2, primary ⟂ secondary).
 - Save `lvs/inductor.log`.
 
-### Step 6 — openEMS
+### Step 6 — Screenshot
+
+```bash
+./inductor/common/run_screenshot.sh inductor/<N>
+```
+
+Writes `layout/inductor.png` with fixed high-contrast colors:
+
+| Layer | Color |
+|-------|-------|
+| M1 (31/0) | blue |
+| M2 (32/0) | red |
+| VIA (30/0) | yellow |
+| M1 labels (31/1) | green |
+| M2 labels (32/1) | magenta |
+
+### Step 7 — openEMS
 
 ```bash
 ./inductor/common/run_openems.sh inductor/<N>
@@ -128,12 +156,12 @@ Pipeline (`inductor/common/openems/`):
 
 If openEMS / CSXCAD missing, install notes are in [reference.md](reference.md#openems). Still write `RESULT.md` with DRC/LVS and mark EM as **SKIPPED** + reason.
 
-### Step 7 — Write `RESULT.md`
+### Step 8 — Write `RESULT.md`
 
 Mandatory path: `inductor/<N>/RESULT.md`  
 Template: [result-template.md](result-template.md)
 
-Must include: config summary, DRC/LVS status, EM metrics (L, Q_max, f @ Q_max, key S-params), plots paths if any, next-step notes.
+Must include: **layout screenshot** (`![…](layout/inductor.png)`), config summary, DRC/LVS status, EM metrics (L, Q_max, f @ Q_max, key S-params), next-step notes.
 
 ## Agent rules
 
@@ -151,6 +179,7 @@ python3 inductor/common/generate_inductor.py \
   --config inductor/1/config.yaml --out inductor/1/layout/inductor.gds
 ./inductor/common/run_drc.sh inductor/1
 ./inductor/common/run_lvs.sh inductor/1
+./inductor/common/run_screenshot.sh inductor/1
 ./inductor/common/run_openems.sh inductor/1
-# then write inductor/1/RESULT.md
+# then write inductor/1/RESULT.md (embed layout/inductor.png)
 ```

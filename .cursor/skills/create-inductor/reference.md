@@ -9,6 +9,8 @@
 | `circle` | Approximated N-gon spiral | Highest Q potential |
 | `figure8` | Two loops, opposing field | Lower substrate coupling |
 
+When adding a run, scan `inductor/*/config.yaml` and choose an unused `(shape, ports, role)` — never only change `turns`.
+
 ## Ports and roles
 
 ### 2-port (`ports: 2`, `role: inductor`)
@@ -85,12 +87,18 @@ LVS checks port connectivity / shorts / opens; L/k values are estimates for docu
 
 Dependencies: `openEMS`, `CSXCAD`, Python bindings (`from openEMS import openEMS`).
 
-Typical install (site-dependent):
+Install (from repo root; wraps official [openEMS-Project](https://github.com/thliebig/openEMS-Project) build):
 
 ```bash
-# Debian/Ubuntu style packages or build from https://openems.de/
+./scripts/install-openems.sh --deps --disable-gui   # first time (sudo for OS packages)
+# or update an existing install:
+./scripts/install-openems.sh --update
+
+source ~/.local/bin/openems-env
 python3 -c "from openEMS import openEMS; print('ok')"
 ```
+
+Default prefix: `~/opt/openEMS` (venv at `~/opt/openEMS/venv`). See `./scripts/install-openems.sh --help`.
 
 Sim defaults:
 

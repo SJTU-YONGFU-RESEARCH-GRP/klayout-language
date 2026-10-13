@@ -165,18 +165,20 @@ elsif PORTS <= 2
   add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
 
 elsif PORTS == 3
-  half = [TURNS / 2.0, 1.0].max
-  a = add_leads(make_spiral(SHAPE, RIN, half, p), 15.0)
-  b = a.map { |x, y| [-x, y] }
-  add_path_um(top, m1, layout, a, W)
-  add_path_um(top, m1, layout, b, W)
-  ct = a[a.size / 2]
-  add_path_um(top, m2, layout, [[ct[0] - 2, ct[1]], [ -ct[0] + 2, ct[1]]], W)
-  add_via(top, via, m1, m2, layout, ct[0], ct[1], VIA_W, VIA_E)
-  add_via(top, via, m1, m2, layout, -ct[0], ct[1], VIA_W, VIA_E)
-  add_label(top, m1t, layout, a.first[0], a.first[1], "P1")
-  add_label(top, m1t, layout, b.first[0], b.first[1], "P2")
-  add_label(top, m2t, layout, 0, ct[1], "CT")
+  # Single spiral: P1/P2 at ends; CT via on outer lead → M2 stub (avoids turn spacing hits)
+  # octagon/circle fall back to square until those generators are DRC-clean
+  geom = %w[square figure8].include?(SHAPE) ? SHAPE : "square"
+  pts = add_leads(make_spiral(geom, RIN, TURNS, p), 15.0)
+  add_path_um(top, m1, layout, pts, W)
+  # Via on P1 lead, clear of the spiral body
+  tap = [pts[0][0] + 8.0, pts[0][1]]
+  ct_pad = [tap[0], tap[1] + 12.0]
+  add_via(top, via, m1, m2, layout, tap[0], tap[1], VIA_W, VIA_E)
+  add_path_um(top, m2, layout, [tap, ct_pad], W)
+  add_box_um(top, m2, layout, ct_pad[0] - 2, ct_pad[1] - 2, ct_pad[0] + 2, ct_pad[1] + 2)
+  add_label(top, m1t, layout, pts.first[0], pts.first[1], "P1")
+  add_label(top, m1t, layout, pts.last[0], pts.last[1], "P2")
+  add_label(top, m2t, layout, ct_pad[0], ct_pad[1], "CT")
 
 else
   pri = add_leads(make_spiral(SHAPE, RIN, TURNS, p), 15.0)

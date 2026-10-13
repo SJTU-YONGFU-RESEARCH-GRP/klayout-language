@@ -23,10 +23,15 @@ python3 inductor/common/generate_inductor.py \
 
 ./inductor/common/run_drc.sh inductor/1
 ./inductor/common/run_lvs.sh inductor/1
+./inductor/common/run_screenshot.sh inductor/1   # layout/inductor.png
 ./inductor/common/run_openems.sh inductor/1
 ```
 
-Then inspect `inductor/1/RESULT.md`.
+Then inspect `inductor/1/RESULT.md` (includes screenshot).
+
+If openEMS is missing: `./scripts/install-openems.sh --deps --disable-gui`, then `source ~/.local/bin/openems-env`.
+
+**Screenshot colors:** M1 blue · M2 red · VIA yellow · labels green / magenta.
 
 ## New run
 

@@ -17,6 +17,14 @@
 
 One-line verdict: …
 
+## Layout screenshot
+
+![inductor layout](layout/inductor.png)
+
+**Layer colors:** M1 **blue** · M2 **red** · VIA **yellow** · M1 labels **green** · M2 labels **magenta**
+
+Generate with: `./inductor/common/run_screenshot.sh inductor/<N>`
+
 ## Config
 
 ```yaml

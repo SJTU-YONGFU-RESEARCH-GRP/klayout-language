@@ -18,6 +18,14 @@
 
 Verdict: Layout generated and verified; EM metrics are analytic estimates until openEMS is available.
 
+## Layout screenshot
+
+![IND_SQ_2P square 2-port inductor](layout/inductor.png)
+
+**Layer colors:** M1 **blue** · M2 **red** · VIA **yellow** · M1 labels **green** · M2 labels **magenta**
+
+(This run is 1-layer, so only M1 + green `P1`/`P2` labels appear.)
+
 ## Config
 
 ```yaml
@@ -64,6 +72,7 @@ openEMS/CSXCAD not installed on this host. Pipeline wrote Greenhouse-like analyt
 
 - `config.yaml`
 - `layout/inductor.gds` (cell `IND_SQ_2P`)
+- `layout/inductor.png` (screenshot)
 
 ## Next steps
 

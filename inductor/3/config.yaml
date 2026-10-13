@@ -1,0 +1,21 @@
+name: square_3p_ct_l2
+cell: IND_SQ_3P
+shape: square
+ports: 3
+role: inductor
+n_layers: 2
+width_um: 1.0
+space_um: 1.0
+turns: 3.0
+inner_radius_um: 16.0
+via_size_um: 0.6
+via_enc_um: 0.2
+
+em:
+  f_start_hz: 1.0e8
+  f_stop_hz: 2.0e10
+  f_ref_hz: 2.4e9
+  metal_thickness_um: 0.5
+  via_height_um: 0.5
+  conductivity: 5.8e7
+  mesh_fraction_of_width: 0.25

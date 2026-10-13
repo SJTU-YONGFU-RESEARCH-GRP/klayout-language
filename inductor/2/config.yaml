@@ -1,0 +1,21 @@
+name: figure8_2p_l1
+cell: IND_F8_2P
+shape: figure8
+ports: 2
+role: inductor
+n_layers: 1
+width_um: 1.0
+space_um: 1.0
+turns: 2.5
+inner_radius_um: 12.0
+via_size_um: 0.6
+via_enc_um: 0.2
+
+em:
+  f_start_hz: 1.0e8
+  f_stop_hz: 2.0e10
+  f_ref_hz: 2.4e9
+  metal_thickness_um: 0.5
+  via_height_um: 0.5
+  conductivity: 5.8e7
+  mesh_fraction_of_width: 0.25
