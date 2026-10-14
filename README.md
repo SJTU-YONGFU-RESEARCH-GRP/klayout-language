@@ -7,6 +7,8 @@
 
 KLayout **DRC / LVS / PEX** language notes and runnable demos (GOOD pass / BAD fail), plus an on-chip **inductor** design flow (layout → DRC/LVS → EM).
 
+Demo flow is always **generate GDS → run check → view** (`./generate_layout.sh` then `./run_*.sh` then `./view_*.sh`).
+
 - **License**: CC BY 4.0 (see `LICENSE`)
 - **Entry points**: `drc/`, `lvs/`, `pex/`, `inductor/`, `scripts/`
 
@@ -32,16 +34,16 @@ KLayout **DRC / LVS / PEX** language notes and runnable demos (GOOD pass / BAD f
 | Area | What you get |
 |------|----------------|
 | **Docs** | Command-oriented notes for DRC, LVS, and built-in PEX APIs under [`docs/`](docs/) |
-| **DRC demo** | Metal1 / Contact width, space, enclosure — KLayout and optional Calibre |
-| **LVS demo** | Single NMOS (`mos4`) vs SPICE — PASS / FAIL (S–D short); optional Calibre |
-| **PEX demo** | Resistance (`RNetExtractor`), overlap C (LVS `capacitor`), coupling CC ([kpex](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) 2.5D); optional Calibre xRC |
+| **DRC demo** | `generate_layout.sh` → KLayout / Calibre DRC — M1 / Contact width, space, enclosure |
+| **LVS demo** | `generate_layout.sh` → KLayout / Calibre LVS — NMOS (`mos4`) vs SPICE (S–D short) |
+| **PEX demo** | `generate_layout.sh` / `generate_kpex_layout.sh` → R / C / CC (KLayout, Calibre xRC, kpex) |
 | **Inductor** | Generate GDS from YAML, DRC/LVS, screenshot, PEEC/openEMS, per-run `RESULT.md` and [`inductor/BENCHMARK.md`](inductor/BENCHMARK.md) |
 
 ## Requirements
 
 - [KLayout](https://www.klayout.de/) on `PATH` — **0.30.2+** for built-in `RNetExtractor` / PEX API (installer defaults to 0.30.12)
-- Bash and a normal Unix shell for the `run_*.sh` / `view_*.sh` scripts
-- **Optional — Calibre**: site `calibre.env` (see `drc/calibre.env.example`) for Calibre DRC / LVS / xRC scripts
+- Bash and a normal Unix shell for `generate_layout.sh`, `run_*.sh`, and `view_*.sh`
+- **Optional — Calibre**: site `calibre.env` (see `drc/calibre.env.example`) for Calibre DRC / LVS / xRC (same GDS as KLayout)
 - **Optional — kpex**: Python **≥ 3.12** and [`scripts/install_kpex.sh`](scripts/install_kpex.sh)
 - **Optional — openEMS**: [`scripts/install-openems.sh`](scripts/install-openems.sh) for FDTD in the inductor flow (PEEC fallback if openEMS is missing)
 
@@ -63,9 +65,13 @@ cd klayout-language
 
 ```bash
 cd drc
-./generate_layout.sh && ./run_klayout_drc.sh && ./view_klayout_drc.sh
-# optional Calibre (needs calibre.env):
+./generate_layout.sh          # write m1_contact_demo.gds
+./run_klayout_drc.sh          # KLayout check only
+./view_klayout_drc.sh
+
+# optional Calibre (same GDS; needs calibre.env):
 ./run_calibre_drc.sh
+./view_calibre_drc.sh
 ```
 
 Details: [`drc/README.md`](drc/README.md).
@@ -74,9 +80,13 @@ Details: [`drc/README.md`](drc/README.md).
 
 ```bash
 cd lvs
-./generate_layout.sh && ./run_lvs.sh && ./view_lvs.sh
-# optional Calibre (needs calibre.env like drc/):
+./generate_layout.sh          # write nmos_demo.gds
+./run_lvs.sh                  # KLayout check only
+./view_lvs.sh
+
+# optional Calibre (same GDS; needs calibre.env like drc/):
 ./run_calibre_lvs.sh
+./view_calibre_lvs.sh
 ```
 
 Details: [`lvs/README.md`](lvs/README.md).
@@ -85,14 +95,17 @@ Details: [`lvs/README.md`](lvs/README.md).
 
 ```bash
 cd pex
-./generate_layout.sh && ./run_pex.sh && ./view_pex.sh
+./generate_layout.sh          # write pex_demo.gds
+./run_pex.sh                  # KLayout R + C check only
+./view_pex.sh
 
-# optional Calibre xRC R + DEVICE CAP C (needs calibre.env like drc/)
+# optional Calibre xRC R + DEVICE CAP C (same GDS; needs calibre.env)
 ./run_calibre_pex.sh
 
 # coupling capacitance (kpex 2.5D, sky130A)
 ../scripts/install_kpex.sh    # once, Python >= 3.12
-./generate_kpex_layout.sh && ./run_kpex.sh
+./generate_kpex_layout.sh     # write kpex_demo.gds
+./run_kpex.sh
 ```
 
 Details: [`pex/README.md`](pex/README.md).
@@ -131,12 +144,12 @@ Regenerates images under [`screenshots/`](screenshots/) (Xvfb + colored layers +
 
 ## Demos
 
-| Demo | What it shows |
-|------|----------------|
-| [`drc/`](drc/) | M1 / Contact **width, space, enclosure** — GOOD pass / BAD fail (KLayout + Calibre) |
-| [`lvs/`](lvs/) | Single **NMOS** transistor LVS — GOOD pass / BAD (S–D short) fail (KLayout + Calibre) |
-| [`pex/`](pex/) | **R** + overlap **C** (KLayout **or** Calibre) + sidewall **CC** (kpex 2.5D) — GOOD pass / BAD fail |
-| [`inductor/`](inductor/) | On-chip inductor generate → DRC/LVS → EM → `RESULT.md` / `BENCHMARK.md` |
+| Demo | Flow | What it shows |
+|------|------|----------------|
+| [`drc/`](drc/) | `generate_layout.sh` → `run_klayout_drc.sh` / `run_calibre_drc.sh` | M1 / Contact **width, space, enclosure** |
+| [`lvs/`](lvs/) | `generate_layout.sh` → `run_lvs.sh` / `run_calibre_lvs.sh` | Single **NMOS** vs SPICE (S–D short) |
+| [`pex/`](pex/) | `generate_layout.sh` → `run_pex.sh` / `run_calibre_pex.sh`; `generate_kpex_layout.sh` → `run_kpex.sh` | **R** + overlap **C** + sidewall **CC** |
+| [`inductor/`](inductor/) | YAML → GDS → DRC/LVS → EM | On-chip inductor → `RESULT.md` / `BENCHMARK.md` |
 
 ![DRC test layout](screenshots/drc_m1_contact_layout.png)
 
@@ -154,8 +167,17 @@ Regenerates images under [`screenshots/`](screenshots/) (Xvfb + colored layers +
 klayout-language/
 ├── docs/                 # DRC / LVS / PEX language notes
 ├── drc/                  # M1–Contact DRC demo
+│   ├── generate_layout.sh    # write GDS only
+│   ├── run_klayout_drc.sh    # KLayout check only
+│   └── run_calibre_drc.sh    # Calibre check only
 ├── lvs/                  # NMOS LVS demo
+│   ├── generate_layout.sh
+│   ├── run_lvs.sh
+│   └── run_calibre_lvs.sh
 ├── pex/                  # R / C / CC PEX demos
+│   ├── generate_layout.sh / generate_kpex_layout.sh
+│   ├── run_pex.sh / run_kpex.sh / run_calibre_pex.sh
+│   └── …
 ├── inductor/             # Inductor runs + common tooling
 │   ├── common/           # generate, DRC, LVS, EM, benchmark scripts
 │   ├── BENCHMARK.md
