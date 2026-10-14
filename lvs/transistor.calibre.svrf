@@ -5,8 +5,7 @@
 //   DIFF   GDS 1/0   n-active
 //   POLY   GDS 2/0   gate poly
 //   CONT   GDS 3/0   contacts
-//   M1     GDS 4/0   metal1
-//   LABELS GDS 4/1   port text S / G / D / B
+//   M1     GDS 4/*   metal1 polygons (4/0) + port text S/G/D/B (4/1)
 //   PTIE   GDS 6/0   substrate tap (bulk)
 //
 // This file contains RULES ONLY — no LAYOUT / SOURCE / REPORT paths.
@@ -35,17 +34,16 @@ LVS RECOGNIZE GATES NONE
 // ---------------------------------------------------------------------------
 // Drawing layers
 // ---------------------------------------------------------------------------
-LAYER DIFF   1 0
-LAYER POLY   2 0
-LAYER CONT   3 0
-LAYER M1     4 0
-LAYER LABELS 4 1
-LAYER PTIE   6 0
+LAYER DIFF 1
+LAYER POLY 2
+LAYER CONT 3
+// Layer 4 includes datatype 0 (metal) and 1 (port labels) — text on M1
+LAYER M1   4
+LAYER PTIE 6
 
-TEXT LAYER LABELS
+TEXT LAYER M1
 TEXT DEPTH PRIMARY
-PORT LAYER TEXT LABELS
-ATTACH LABELS M1
+PORT LAYER TEXT M1
 
 // ---------------------------------------------------------------------------
 // Derived recognition layers (same idea as KLayout gate = diff & poly)
@@ -57,11 +55,6 @@ PSUB = EXTENT
 // ---------------------------------------------------------------------------
 // Connectivity
 // ---------------------------------------------------------------------------
-CONNECT M1
-CONNECT POLY
-CONNECT NSD
-CONNECT PTIE
-
 CONNECT M1 POLY NSD PTIE BY CONT
 CONNECT PTIE PSUB
 
@@ -76,6 +69,8 @@ DEVICE MN(NMOS) GATE POLY(G) NSD(S) NSD(D) PSUB(B)
   W = PERIMETER_COINCIDE(GATE, NSD) / 2
 ]
 
-// Match schematic L/W within 0.01 µm (same tolerance as transistor.lvs)
-TRACE PROPERTY MN(NMOS) L L 0.01 ABSOLUTE
-TRACE PROPERTY MN(NMOS) W W 0.01 ABSOLUTE
+// L/W are compared in meters (SPICE 0.18U → 1.8e-7). Absolute tol ≈ 0.01 µm.
+// A larger ABSOLUTE (e.g. 0.01) triggers "tolerances out of range" → overall INCORRECT
+// even when the cell topology is CORRECT.
+TRACE PROPERTY MN(NMOS) L L 1e-8 ABSOLUTE
+TRACE PROPERTY MN(NMOS) W W 1e-8 ABSOLUTE

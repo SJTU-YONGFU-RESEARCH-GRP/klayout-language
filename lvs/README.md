@@ -29,10 +29,13 @@ cd lvs
 
 # optional Calibre (needs calibre.env — see below)
 ./run_calibre_lvs.sh
+./view_calibre_lvs.sh             # summary (+ RVE if calibredrv present)
+./view_calibre_lvs.sh --bad
 ./run_calibre_lvs.sh --setup-help
 
 ./run_clean.sh
 ```
+
 
 Requires [KLayout](https://www.klayout.de/) on `PATH` (`../scripts/install-klayout.sh`).
 
@@ -59,6 +62,7 @@ klayout -b \
 | `run_lvs.sh` | Generate + run KLayout GOOD/BAD |
 | `run_calibre_lvs.sh` | Generate + run Calibre GOOD/BAD |
 | `view_lvs.sh` | `klayout gds -mn lvsdb` |
+| `view_calibre_lvs.sh` | Print Calibre report (+ optional RVE) |
 | `run_clean.sh` | Delete reports / extracted netlists (`--gds` removes GDS) |
 
 Generated (gitignored): `nmos_{good,bad}.{lvsdb,l2ndb,log}`, `nmos_*_extracted.cir`, `calibre_lvs_{good,bad}.{rep,log,txt,sp}`, `.calibre_lvs_run/`
@@ -201,22 +205,25 @@ Same style as [`../drc/`](../drc/) — zoomed shots with dimension labels. BAD c
 
 ## KLayout vs Calibre
 
+Verified on this host (Calibre **v2019.2**): `./run_calibre_lvs.sh` → **GOOD PASS** / **BAD FAIL**.
+
 | | KLayout | Calibre |
 |---|---------|---------|
 | Language | Ruby (`.lvs`) | SVRF (`.svrf`) |
 | Device | `extract_devices(mos4("NMOS"), …)` | `DEVICE MN(NMOS) GATE POLY(G) NSD(S) NSD(D) PSUB(B)` |
 | Bulk | empty `polygon_layer` + `connect_global(…, "SUBSTRATE")` | `PSUB = EXTENT` + `CONNECT PTIE PSUB` |
-| Ports | `labels(4, 1)` + `connect(metal1, m1_lbl)` | `TEXT LAYER LABELS` + `ATTACH LABELS M1` |
-| L/W | `tolerance("NMOS", "L"/"W", 0.01)` | `TRACE PROPERTY MN(NMOS) L/W … 0.01 ABSOLUTE` |
+| Ports | `labels(4, 1)` + `connect(metal1, m1_lbl)` | `LAYER M1 4` (all datatypes) + `TEXT`/`PORT LAYER TEXT M1` |
+| L/W | `tolerance("NMOS", "L"/"W", 0.01)` | `TRACE PROPERTY … 1e-8 ABSOLUTE` (meters) |
 | Compare | `schematic` + `compare` | `SOURCE PATH` / `SOURCE PRIMARY` in run deck |
-| Viewer | `klayout gds -mn *.lvsdb` | report text / Calibre RVE |
+| Viewer | `klayout gds -mn *.lvsdb` | `calibre_lvs_*.txt` / `.rep` |
 
 ### Calibre setup
 
 ```bash
 ln -sf ../drc/calibre.env calibre.env   # or: cp ../drc/calibre.env.example calibre.env
 ./run_calibre_lvs.sh              # GOOD → PASS, BAD → FAIL
-./run_calibre_lvs.sh --good
+./view_calibre_lvs.sh             # GOOD summary / RVE
+./view_calibre_lvs.sh --bad --no-gui
 ./run_calibre_lvs.sh --setup-help
 ```
 
@@ -224,6 +231,9 @@ Rules file has **no** layout/source paths — `run_calibre_lvs.sh` writes a temp
 
 ```svrf
 // transistor.calibre.svrf (excerpt)
+LAYER M1 4                    // polygons 4/0 + labels 4/1
+TEXT LAYER M1
+PORT LAYER TEXT M1
 GATE = DIFF AND POLY
 NSD  = DIFF NOT POLY
 PSUB = EXTENT
@@ -235,7 +245,16 @@ DEVICE MN(NMOS) GATE POLY(G) NSD(S) NSD(D) PSUB(B)
   L = (PERIMETER(GATE) - PERIMETER_COINCIDE(GATE, NSD)) / 2
   W = PERIMETER_COINCIDE(GATE, NSD) / 2
 ]
+TRACE PROPERTY MN(NMOS) L L 1e-8 ABSOLUTE
+TRACE PROPERTY MN(NMOS) W W 1e-8 ABSOLUTE
 ```
+
+**Extracted (Calibre `-spice`):**
+
+| Cell | Layout netlist | Compare |
+|------|----------------|---------|
+| GOOD | `M0 D G S B NMOS L=1.8e-07 W=5e-07` | **CORRECT** |
+| BAD | `M0 D G D B …` (S–D short; ports `D G B`) | **INCORRECT** |
 
 Reports: `calibre_lvs_{good,bad}.txt` (+ `.rep` / `.sp` / `.log`).
 

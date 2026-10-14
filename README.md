@@ -41,7 +41,7 @@ KLayout **DRC / LVS / PEX** language notes and runnable demos (GOOD pass / BAD f
 
 - [KLayout](https://www.klayout.de/) on `PATH` — **0.30.2+** for built-in `RNetExtractor` / PEX API (installer defaults to 0.30.12)
 - Bash and a normal Unix shell for the `run_*.sh` / `view_*.sh` scripts
-- **Optional — Calibre**: site `calibre.env` (see `drc/calibre.env.example`) for Calibre DRC / xRC scripts
+- **Optional — Calibre**: site `calibre.env` (see `drc/calibre.env.example`) for Calibre DRC / LVS / xRC scripts
 - **Optional — kpex**: Python **≥ 3.12** and [`scripts/install_kpex.sh`](scripts/install_kpex.sh)
 - **Optional — openEMS**: [`scripts/install-openems.sh`](scripts/install-openems.sh) for FDTD in the inductor flow (PEEC fallback if openEMS is missing)
 
