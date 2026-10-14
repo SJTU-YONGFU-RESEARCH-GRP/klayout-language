@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Remove generated KLayout LVS outputs from this directory.
+# Remove generated KLayout / Calibre LVS outputs from this directory.
 #
 # Usage:
 #   ./run_clean.sh           # clear reports / extracted netlists (keep GDS)
@@ -46,11 +46,14 @@ for f in \
   "${ROOT}"/nmos_*.log \
   "${ROOT}"/nmos.lvsdb \
   "${ROOT}"/nmos.l2ndb \
-  "${ROOT}"/nmos_extracted.cir
+  "${ROOT}"/nmos_extracted.cir \
+  "${ROOT}"/calibre_lvs_*
 do
   remove_path "$f"
 done
 shopt -u nullglob
+
+remove_path "${ROOT}/.calibre_lvs_run"
 
 if [[ "$REMOVE_GDS" -eq 1 ]]; then
   remove_path "${ROOT}/nmos_demo.gds"

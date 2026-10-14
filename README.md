@@ -33,7 +33,7 @@ KLayout **DRC / LVS / PEX** language notes and runnable demos (GOOD pass / BAD f
 |------|----------------|
 | **Docs** | Command-oriented notes for DRC, LVS, and built-in PEX APIs under [`docs/`](docs/) |
 | **DRC demo** | Metal1 / Contact width, space, enclosure — KLayout and optional Calibre |
-| **LVS demo** | Single NMOS (`mos4`) vs SPICE — PASS / FAIL (S–D short) |
+| **LVS demo** | Single NMOS (`mos4`) vs SPICE — PASS / FAIL (S–D short); optional Calibre |
 | **PEX demo** | Resistance (`RNetExtractor`), overlap C (LVS `capacitor`), coupling CC ([kpex](https://iic-jku.github.io/klayout-pex-website/doc/doc.html) 2.5D); optional Calibre xRC |
 | **Inductor** | Generate GDS from YAML, DRC/LVS, screenshot, PEEC/openEMS, per-run `RESULT.md` and [`inductor/BENCHMARK.md`](inductor/BENCHMARK.md) |
 
@@ -75,6 +75,8 @@ Details: [`drc/README.md`](drc/README.md).
 ```bash
 cd lvs
 ./run_lvs.sh && ./view_lvs.sh
+# optional Calibre (needs calibre.env like drc/):
+./run_calibre_lvs.sh
 ```
 
 Details: [`lvs/README.md`](lvs/README.md).
@@ -132,7 +134,7 @@ Regenerates images under [`screenshots/`](screenshots/) (Xvfb + colored layers +
 | Demo | What it shows |
 |------|----------------|
 | [`drc/`](drc/) | M1 / Contact **width, space, enclosure** — GOOD pass / BAD fail (KLayout + Calibre) |
-| [`lvs/`](lvs/) | Single **NMOS** transistor LVS — GOOD pass / BAD (S–D short) fail |
+| [`lvs/`](lvs/) | Single **NMOS** transistor LVS — GOOD pass / BAD (S–D short) fail (KLayout + Calibre) |
 | [`pex/`](pex/) | **R** + overlap **C** (KLayout **or** Calibre) + sidewall **CC** (kpex 2.5D) — GOOD pass / BAD fail |
 | [`inductor/`](inductor/) | On-chip inductor generate → DRC/LVS → EM → `RESULT.md` / `BENCHMARK.md` |
 

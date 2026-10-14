@@ -1,6 +1,6 @@
-# NMOS Transistor LVS Demo (KLayout)
+# NMOS Transistor LVS Demo (KLayout + Calibre)
 
-Minimal **Layout vs Schematic**: extract one NMOS with `mos4`, compare to SPICE.
+Side-by-side **KLayout** and optional **Calibre** LVS on the same NMOS layout — GOOD pass / BAD fail (S–D short). Same pattern as [`../drc/`](../drc/) and [`../pex/`](../pex/).
 
 ![NMOS_DEMO — GOOD (left) vs BAD S–D short (right)](../screenshots/lvs_nmos_demo.png)
 
@@ -20,12 +20,16 @@ Sibling demos: [`../drc/`](../drc/) (M1 / Contact DRC) · [`../pex/`](../pex/) (
 
 ```bash
 cd lvs
-./run_lvs.sh              # GOOD → PASS, BAD → FAIL
+./run_lvs.sh              # KLayout: GOOD → PASS, BAD → FAIL
 ./run_lvs.sh --good       # GOOD only
 ./run_lvs.sh --bad        # BAD only (expect FAIL)
 
 ./view_lvs.sh             # GUI + GOOD LVS DB
 ./view_lvs.sh --bad
+
+# optional Calibre (needs calibre.env — see below)
+./run_calibre_lvs.sh
+./run_calibre_lvs.sh --setup-help
 
 ./run_clean.sh
 ```
@@ -50,12 +54,14 @@ klayout -b \
 | `generate_layout.rb` | Builds `nmos_demo.gds` (GOOD + BAD + DEMO) |
 | `nmos_demo.gds` | Test layout |
 | `nmos.cir` | Reference SPICE (subcircuits match cell names) |
-| `transistor.lvs` | Extract + connect + `compare` |
-| `run_lvs.sh` | Generate + run GOOD/BAD |
+| `transistor.lvs` | KLayout extract + connect + `compare` |
+| `transistor.calibre.svrf` | Calibre SVRF rules (`DEVICE MN(NMOS)`) |
+| `run_lvs.sh` | Generate + run KLayout GOOD/BAD |
+| `run_calibre_lvs.sh` | Generate + run Calibre GOOD/BAD |
 | `view_lvs.sh` | `klayout gds -mn lvsdb` |
 | `run_clean.sh` | Delete reports / extracted netlists (`--gds` removes GDS) |
 
-Generated (gitignored): `nmos_{good,bad}.{lvsdb,l2ndb,log}`, `nmos_*_extracted.cir`
+Generated (gitignored): `nmos_{good,bad}.{lvsdb,l2ndb,log}`, `nmos_*_extracted.cir`, `calibre_lvs_{good,bad}.{rep,log,txt,sp}`, `.calibre_lvs_run/`
 
 ---
 
@@ -190,6 +196,48 @@ Same style as [`../drc/`](../drc/) — zoomed shots with dimension labels. BAD c
 | [`../screenshots/lvs_nmos_good.png`](../screenshots/lvs_nmos_good.png) | Passing transistor |
 | [`../screenshots/lvs_nmos_bad.png`](../screenshots/lvs_nmos_bad.png) | Failing S–D short |
 | `lvs_case_*.png` | Per-feature zoom with rulers / markers (see above) |
+
+---
+
+## KLayout vs Calibre
+
+| | KLayout | Calibre |
+|---|---------|---------|
+| Language | Ruby (`.lvs`) | SVRF (`.svrf`) |
+| Device | `extract_devices(mos4("NMOS"), …)` | `DEVICE MN(NMOS) GATE POLY(G) NSD(S) NSD(D) PSUB(B)` |
+| Bulk | empty `polygon_layer` + `connect_global(…, "SUBSTRATE")` | `PSUB = EXTENT` + `CONNECT PTIE PSUB` |
+| Ports | `labels(4, 1)` + `connect(metal1, m1_lbl)` | `TEXT LAYER LABELS` + `ATTACH LABELS M1` |
+| L/W | `tolerance("NMOS", "L"/"W", 0.01)` | `TRACE PROPERTY MN(NMOS) L/W … 0.01 ABSOLUTE` |
+| Compare | `schematic` + `compare` | `SOURCE PATH` / `SOURCE PRIMARY` in run deck |
+| Viewer | `klayout gds -mn *.lvsdb` | report text / Calibre RVE |
+
+### Calibre setup
+
+```bash
+ln -sf ../drc/calibre.env calibre.env   # or: cp ../drc/calibre.env.example calibre.env
+./run_calibre_lvs.sh              # GOOD → PASS, BAD → FAIL
+./run_calibre_lvs.sh --good
+./run_calibre_lvs.sh --setup-help
+```
+
+Rules file has **no** layout/source paths — `run_calibre_lvs.sh` writes a temp deck that `INCLUDE`s `transistor.calibre.svrf`.
+
+```svrf
+// transistor.calibre.svrf (excerpt)
+GATE = DIFF AND POLY
+NSD  = DIFF NOT POLY
+PSUB = EXTENT
+CONNECT M1 POLY NSD PTIE BY CONT
+CONNECT PTIE PSUB
+DEVICE MN(NMOS) GATE POLY(G) NSD(S) NSD(D) PSUB(B)
+[
+  PROPERTY L, W
+  L = (PERIMETER(GATE) - PERIMETER_COINCIDE(GATE, NSD)) / 2
+  W = PERIMETER_COINCIDE(GATE, NSD) / 2
+]
+```
+
+Reports: `calibre_lvs_{good,bad}.txt` (+ `.rep` / `.sp` / `.log`).
 
 ---
 

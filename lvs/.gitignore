@@ -6,3 +6,8 @@ nmos_*.log
 nmos.lvsdb
 nmos.l2ndb
 nmos_extracted.cir
+
+# Calibre LVS (site env + run outputs)
+calibre.env
+calibre_lvs_*
+.calibre_lvs_run/

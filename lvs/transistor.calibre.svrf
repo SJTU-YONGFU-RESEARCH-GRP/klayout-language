@@ -1,0 +1,81 @@
+// =============================================================================
+// Single NMOS LVS demo — Calibre SVRF rules (mirrors lvs/transistor.lvs)
+// =============================================================================
+// Layers (generate_layout.rb):
+//   DIFF   GDS 1/0   n-active
+//   POLY   GDS 2/0   gate poly
+//   CONT   GDS 3/0   contacts
+//   M1     GDS 4/0   metal1
+//   LABELS GDS 4/1   port text S / G / D / B
+//   PTIE   GDS 6/0   substrate tap (bulk)
+//
+// This file contains RULES ONLY — no LAYOUT / SOURCE / REPORT paths.
+// Paths come from run_calibre_lvs.sh (temp run deck that INCLUDEs this file).
+//
+// Flow:  calibre -lvs -hier <run.svrf>
+// Expect: NMOS_GOOD → CORRECT, NMOS_BAD (S–D metal short) → INCORRECT
+// =============================================================================
+
+PRECISION 1000
+RESOLUTION 1
+UNIT LENGTH U
+
+// LAYOUT/SOURCE SYSTEM are set in the run deck (run_calibre_lvs.sh).
+// Repeating them here triggers Calibre SPC1 "superfluous specification".
+LAYOUT CASE YES
+SOURCE CASE YES
+
+MASK RESULTS DATABASE NONE
+LVS REPORT MAXIMUM 50
+LVS IGNORE PORTS NO
+LVS FILTER UNUSED MOS NO
+LVS REDUCE PARALLEL MOS YES
+LVS RECOGNIZE GATES NONE
+
+// ---------------------------------------------------------------------------
+// Drawing layers
+// ---------------------------------------------------------------------------
+LAYER DIFF   1 0
+LAYER POLY   2 0
+LAYER CONT   3 0
+LAYER M1     4 0
+LAYER LABELS 4 1
+LAYER PTIE   6 0
+
+TEXT LAYER LABELS
+TEXT DEPTH PRIMARY
+PORT LAYER TEXT LABELS
+ATTACH LABELS M1
+
+// ---------------------------------------------------------------------------
+// Derived recognition layers (same idea as KLayout gate = diff & poly)
+// ---------------------------------------------------------------------------
+GATE = DIFF AND POLY
+NSD  = DIFF NOT POLY
+PSUB = EXTENT
+
+// ---------------------------------------------------------------------------
+// Connectivity
+// ---------------------------------------------------------------------------
+CONNECT M1
+CONNECT POLY
+CONNECT NSD
+CONNECT PTIE
+
+CONNECT M1 POLY NSD PTIE BY CONT
+CONNECT PTIE PSUB
+
+// ---------------------------------------------------------------------------
+// 4-terminal NMOS — model name NMOS matches nmos.cir
+// Pin order in DEVICE: G S D B  (SPICE instance order remains D G S B)
+// ---------------------------------------------------------------------------
+DEVICE MN(NMOS) GATE POLY(G) NSD(S) NSD(D) PSUB(B)
+[
+  PROPERTY L, W
+  L = (PERIMETER(GATE) - PERIMETER_COINCIDE(GATE, NSD)) / 2
+  W = PERIMETER_COINCIDE(GATE, NSD) / 2
+]
+
+// Match schematic L/W within 0.01 µm (same tolerance as transistor.lvs)
+TRACE PROPERTY MN(NMOS) L L 0.01 ABSOLUTE
+TRACE PROPERTY MN(NMOS) W W 0.01 ABSOLUTE
