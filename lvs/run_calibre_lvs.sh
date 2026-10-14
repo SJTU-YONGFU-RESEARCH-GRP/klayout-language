@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# Generate NMOS demo GDS (if needed) and run Calibre LVS:
+# Run Calibre LVS on nmos_demo.gds:
 #   GOOD (NMOS_GOOD) expect CORRECT / PASS
 #   BAD  (NMOS_BAD)  expect INCORRECT / FAIL (S–D metal short)
+# Does not generate GDS — run ./generate_layout.sh first.
 #
 # Usage:
-#   ./run_calibre_lvs.sh              # generate + GOOD + BAD
+#   ./run_calibre_lvs.sh              # GOOD + BAD
 #   ./run_calibre_lvs.sh --good
 #   ./run_calibre_lvs.sh --bad
-#   ./run_calibre_lvs.sh --lvs-only   # skip GDS generation
-#   ./run_calibre_lvs.sh --gen-only
+#   ./run_calibre_lvs.sh --lvs-only   # same as default (compat alias)
+#   ./run_calibre_lvs.sh --gen-only   # alias → ./generate_layout.sh
 #   ./run_calibre_lvs.sh --setup-help
 #
 # Env (same as drc/):
@@ -19,7 +20,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GDS="${ROOT}/nmos_demo.gds"
-GEN_RB="${ROOT}/generate_layout.rb"
+GEN_SH="${ROOT}/generate_layout.sh"
 RULES="${ROOT}/transistor.calibre.svrf"
 CIR="${ROOT}/nmos.cir"
 ENV_FILE="${ROOT}/calibre.env"
@@ -27,7 +28,6 @@ ENV_DRC="${ROOT}/../drc/calibre.env"
 ENV_EXAMPLE="${ROOT}/../drc/calibre.env.example"
 WORK="${ROOT}/.calibre_lvs_run"
 
-MODE="all"
 WHICH="both"
 SETUP_HELP=0
 
@@ -86,8 +86,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --good) WHICH="good" ;;
     --bad) WHICH="bad" ;;
-    --gen-only) MODE="gen" ;;
-    --lvs-only) MODE="lvs" ;;
+    --lvs-only) ;; # default is check-only
+    --gen-only)
+      exec "$GEN_SH"
+      ;;
     --setup-help) SETUP_HELP=1 ;;
     -h|--help)
       sed -n '2,20p' "$0"
@@ -105,26 +107,17 @@ fi
 
 load_calibre_env
 
-if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
-  if ! command -v klayout >/dev/null 2>&1; then
-    echo "ERROR: klayout not found (needed to generate ${GDS})" >&2
-    exit 1
-  fi
-  echo "==> Generating ${GDS}"
-  klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
-fi
-
-if [[ "$MODE" == "gen" ]]; then
-  exit 0
-fi
-
 CALIBRE_BIN="$(find_calibre)" || {
   echo "ERROR: calibre not found." >&2
   print_calibre_setup >&2
   exit 1
 }
 
-[[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS}" >&2; exit 1; }
+[[ -f "$GDS" ]] || {
+  echo "ERROR: missing ${GDS}" >&2
+  echo "Run:  ./generate_layout.sh" >&2
+  exit 1
+}
 [[ -f "$CIR" ]] || { echo "ERROR: missing ${CIR}" >&2; exit 1; }
 [[ -f "$RULES" ]] || { echo "ERROR: missing ${RULES}" >&2; exit 1; }
 

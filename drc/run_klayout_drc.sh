@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# Generate M1/Contact demo GDS and run KLayout DRC (GOOD expect PASS, BAD expect FAIL).
+# Run KLayout DRC on m1_contact_demo.gds (GOOD expect PASS, BAD expect FAIL).
+# Does not generate GDS — run ./generate_layout.sh first.
 #
 # Usage:
-#   ./run_klayout_drc.sh              # regenerate GDS + GOOD + BAD (+ DEMO report)
+#   ./run_klayout_drc.sh              # GOOD + BAD (+ DEMO report)
 #   ./run_klayout_drc.sh --good       # GOOD cell only
 #   ./run_klayout_drc.sh --bad        # BAD cell only
-#   ./run_klayout_drc.sh --demo       # DEMO topcell only (both)
-#   ./run_klayout_drc.sh --drc-only   # skip GDS generation
-#   ./run_klayout_drc.sh --gen-only   # only write GDS
+#   ./run_klayout_drc.sh --demo       # DEMO topcell only
+#   ./run_klayout_drc.sh --drc-only   # same as default (compat alias)
+#   ./run_klayout_drc.sh --gen-only   # alias → ./generate_layout.sh
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GDS="${ROOT}/m1_contact_demo.gds"
-GEN_RB="${ROOT}/generate_layout.rb"
 DRC_RB="${ROOT}/m1_contact.drc"
+GEN_SH="${ROOT}/generate_layout.sh"
 
-MODE="all"
 WHICH="both"
 
 while [[ $# -gt 0 ]]; do
@@ -24,10 +24,12 @@ while [[ $# -gt 0 ]]; do
     --good) WHICH="good" ;;
     --bad) WHICH="bad" ;;
     --demo) WHICH="demo" ;;
-    --drc-only) MODE="drc" ;;
-    --gen-only) MODE="gen" ;;
+    --drc-only) ;; # default is check-only
+    --gen-only)
+      exec "$GEN_SH"
+      ;;
     -h|--help)
-      sed -n '2,12p' "$0"
+      sed -n '2,13p' "$0"
       exit 0
       ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
@@ -41,12 +43,13 @@ if ! command -v klayout >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "==> KLayout: $(klayout -v 2>/dev/null | head -1 || true)"
+[[ -f "$GDS" ]] || {
+  echo "ERROR: missing ${GDS}" >&2
+  echo "Run:  ./generate_layout.sh" >&2
+  exit 1
+}
 
-if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
-  echo "==> Generating ${GDS}"
-  klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
-fi
+echo "==> KLayout: $(klayout -v 2>/dev/null | head -1 || true)"
 
 # Returns 0=PASS, 1=FAIL, 2=error/unknown
 run_one() {
@@ -65,7 +68,6 @@ run_one() {
   if grep -q "DRC PASS" "${log}"; then
     echo "    RESULT: PASS"
     grep -E '^(DRC |  )' "${log}" 2>/dev/null || true
-    # Also print category counts when FAIL path not taken
     if command -v python3 >/dev/null 2>&1 && [[ -f "$lyrdb" ]]; then
       python3 - "$lyrdb" <<'PY' || true
 import sys, xml.etree.ElementTree as ET
@@ -99,46 +101,42 @@ PY
   return 2
 }
 
-if [[ "$MODE" == "all" || "$MODE" == "drc" ]]; then
-  [[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS} (run without --drc-only first)" >&2; exit 1; }
+fail=0
 
-  fail=0
-
-  if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
-    rc=0
-    run_one "M1_CT_GOOD" "good" || rc=$?
-    if [[ "$rc" -ne 0 ]]; then
-      echo "ERROR: expected GOOD cell to PASS" >&2
-      fail=1
-    fi
+if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
+  rc=0
+  run_one "M1_CT_GOOD" "good" || rc=$?
+  if [[ "$rc" -ne 0 ]]; then
+    echo "ERROR: expected GOOD cell to PASS" >&2
+    fail=1
   fi
+fi
 
-  if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
-    rc=0
-    run_one "M1_CT_BAD" "bad" || rc=$?
-    if [[ "$rc" -eq 0 ]]; then
-      echo "ERROR: expected BAD cell to FAIL" >&2
-      fail=1
-    elif [[ "$rc" -eq 1 ]]; then
-      echo "    (expected FAIL — demo OK)"
-    else
-      fail=1
-    fi
+if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
+  rc=0
+  run_one "M1_CT_BAD" "bad" || rc=$?
+  if [[ "$rc" -eq 0 ]]; then
+    echo "ERROR: expected BAD cell to FAIL" >&2
+    fail=1
+  elif [[ "$rc" -eq 1 ]]; then
+    echo "    (expected FAIL — demo OK)"
+  else
+    fail=1
   fi
+fi
 
-  if [[ "$WHICH" == "demo" || "$WHICH" == "both" ]]; then
-    # DEMO report for view_klayout_drc.sh / screenshot markers
-    run_one "M1_CT_DRC_DEMO" "demo" || true
-    if [[ -f "${ROOT}/m1_contact_demo.lyrdb" ]]; then
-      cp -f "${ROOT}/m1_contact_demo.lyrdb" "${ROOT}/m1_contact.lyrdb"
-    fi
-  elif [[ "$WHICH" == "bad" && -f "${ROOT}/m1_contact_bad.lyrdb" ]]; then
-    cp -f "${ROOT}/m1_contact_bad.lyrdb" "${ROOT}/m1_contact.lyrdb"
+if [[ "$WHICH" == "demo" || "$WHICH" == "both" ]]; then
+  # DEMO report for view_klayout_drc.sh / screenshot markers
+  run_one "M1_CT_DRC_DEMO" "demo" || true
+  if [[ -f "${ROOT}/m1_contact_demo.lyrdb" ]]; then
+    cp -f "${ROOT}/m1_contact_demo.lyrdb" "${ROOT}/m1_contact.lyrdb"
   fi
+elif [[ "$WHICH" == "bad" && -f "${ROOT}/m1_contact_bad.lyrdb" ]]; then
+  cp -f "${ROOT}/m1_contact_bad.lyrdb" "${ROOT}/m1_contact.lyrdb"
+fi
 
-  if [[ "$fail" -ne 0 ]]; then
-    exit 1
-  fi
+if [[ "$fail" -ne 0 ]]; then
+  exit 1
 fi
 
 echo "==> Done."

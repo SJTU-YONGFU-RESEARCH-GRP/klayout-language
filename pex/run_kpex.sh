@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Generate sky130A CC layouts and run KLayout-PEX (2.5D) coupling extraction.
+# Run KLayout-PEX (2.5D) coupling extraction on kpex_demo.gds.
+# Does not generate GDS — run ./generate_kpex_layout.sh first.
 #
 # Usage:
-#   ./run_kpex.sh              # generate + CC_GOOD/BAD PASS/FAIL
+#   ./run_kpex.sh              # CC_GOOD/BAD PASS/FAIL
 #   ./run_kpex.sh --good
 #   ./run_kpex.sh --bad
 #   ./run_kpex.sh --plate      # also extract C_PLATE (substrate)
-#   ./run_kpex.sh --gen-only
-#   ./run_kpex.sh --pex-only
+#   ./run_kpex.sh --pex-only   # same as default (compat alias)
+#   ./run_kpex.sh --gen-only   # alias → ./generate_kpex_layout.sh
 #
 # Requires: klayout, kpex (./scripts/install_kpex.sh), Python>=3.12
 
@@ -15,7 +16,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GDS="${ROOT}/kpex_demo.gds"
-GEN_RB="${ROOT}/generate_kpex_layout.rb"
+GEN_SH="${ROOT}/generate_kpex_layout.sh"
 OUT_DIR="${ROOT}/kpex_out"
 export PATH="${HOME}/.local/bin:${PATH}"
 
@@ -23,7 +24,6 @@ export PATH="${HOME}/.local/bin:${PATH}"
 CC_LIMIT_FF="${CC_LIMIT_FF:-0.30}"
 PDK="${PDK:-sky130A}"
 
-MODE="all"
 WHICH="both"
 DO_PLATE=0
 
@@ -32,8 +32,10 @@ while [[ $# -gt 0 ]]; do
     --good) WHICH="good" ;;
     --bad) WHICH="bad" ;;
     --plate) DO_PLATE=1 ;;
-    --gen-only) MODE="gen" ;;
-    --pex-only) MODE="pex" ;;
+    --pex-only) ;; # default is check-only
+    --gen-only)
+      exec "$GEN_SH"
+      ;;
     -h|--help)
       sed -n '2,14p' "$0"
       exit 0
@@ -55,18 +57,15 @@ if ! command -v kpex >/dev/null 2>&1; then
   exit 1
 fi
 
+[[ -f "$GDS" ]] || {
+  echo "ERROR: missing ${GDS}" >&2
+  echo "Run:  ./generate_kpex_layout.sh" >&2
+  exit 1
+}
+
 echo "==> KLayout: $(klayout -v 2>/dev/null | head -1 || true)"
 echo "==> kpex:    $(kpex --version 2>&1 | head -1 || true)"
 echo "==> CC limit: ${CC_LIMIT_FF} fF  (PASS if C_AB >= limit)"
-
-if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
-  echo "==> Generating ${GDS}"
-  klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
-fi
-
-if [[ "$MODE" == "gen" ]]; then
-  exit 0
-fi
 
 # Parse C between nets A and B from kpex CSV (capacitance in fF).
 parse_cab_ff() {

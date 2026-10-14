@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # UI-friendly Calibre DRC: run rules against the layout via calibredrv Tcl.
 # Layout path / top cell come from DESIGNrev — no GDS/RDB/REP env vars needed.
+# Does not generate GDS — run ./generate_layout.sh first.
 #
 # Usage:
-#   ./view_calibre_drc.sh                 # generate GDS if needed, run DRC, open RVE
-#   ./view_calibre_drc.sh --drc-only      # skip GDS generation
+#   ./view_calibre_drc.sh                 # run DRC, open RVE
 #   ./view_calibre_drc.sh --no-gui        # headless calibredrv -shell (no RVE window)
 
 set -euo pipefail
@@ -14,13 +14,11 @@ GDS="${ROOT}/m1_contact_demo.gds"
 RDB="${ROOT}/m1_contact.calibre.rdb"
 TCL="${ROOT}/run_drc_in_calibredrv.tcl"
 ENV_FILE="${ROOT}/calibre.env"
-GEN_RB="${ROOT}/generate_layout.rb"
 
-GEN=1
 GUI=1
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --drc-only) GEN=0 ;;
+    --drc-only) ;; # compat no-op (never gens)
     --no-gui) GUI=0 ;;
     -h|--help)
       sed -n '2,10p' "$0"
@@ -37,18 +35,11 @@ if [[ -f "$ENV_FILE" ]]; then
   echo "==> Loaded ${ENV_FILE}"
 fi
 
-if [[ "$GEN" -eq 1 ]]; then
-  if ! command -v klayout >/dev/null 2>&1; then
-    echo "ERROR: klayout needed to generate ${GDS}" >&2
-    exit 1
-  fi
-  if [[ ! -f "$GDS" ]]; then
-    echo "==> Generating ${GDS}"
-    klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
-  fi
-fi
-
-[[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS}" >&2; exit 1; }
+[[ -f "$GDS" ]] || {
+  echo "ERROR: missing ${GDS}" >&2
+  echo "Run:  ./generate_layout.sh" >&2
+  exit 1
+}
 [[ -f "$TCL" ]] || { echo "ERROR: missing ${TCL}" >&2; exit 1; }
 
 CALDRV_BIN="${CALDRV:-}"

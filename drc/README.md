@@ -33,6 +33,8 @@ Sibling demos: [`../lvs/`](../lvs/) (NMOS LVS) · [`../pex/`](../pex/) (M1 R ext
 ```bash
 cd drc
 
+./generate_layout.sh           # write m1_contact_demo.gds only
+
 # KLayout — GOOD → PASS, BAD → FAIL
 ./run_klayout_drc.sh
 ./run_klayout_drc.sh --good
@@ -42,8 +44,8 @@ cd drc
 ./view_klayout_drc.sh --bad
 
 # Calibre (needs calibre.env — see below)
-./view_calibre_drc.sh          # UI: DESIGNrev → DRC → RVE
 ./run_calibre_drc.sh           # batch on M1_CT_DRC_DEMO
+./view_calibre_drc.sh          # UI: DESIGNrev → DRC → RVE
 
 ./run_clean.sh
 ```
@@ -64,13 +66,14 @@ klayout -b \
 
 | File | Role |
 |------|------|
-| `generate_layout.rb` | Builds `m1_contact_demo.gds` (GOOD + BAD + DEMO) |
+| `generate_layout.sh` | Write `m1_contact_demo.gds` only |
+| `generate_layout.rb` | Layout generator (called by `.sh`) |
 | `m1_contact_demo.gds` | Test layout |
 | `m1_contact.drc` | KLayout rule deck (`puts DRC PASS/FAIL`) |
-| `run_klayout_drc.sh` | Generate + run GOOD/BAD/DEMO |
+| `run_klayout_drc.sh` | KLayout DRC check only (GOOD/BAD/DEMO) |
 | `view_klayout_drc.sh` | `klayout gds -m lyrdb` |
 | `m1_contact.calibre.svrf` | Calibre rules only (no LAYOUT PATH) |
-| `run_calibre_drc.sh` | Batch Calibre (writes temp `INCLUDE` run deck) |
+| `run_calibre_drc.sh` | Calibre DRC check only |
 | `run_drc_in_calibredrv.tcl` | UI: paths from open layout (`$L file` / `topcell`) |
 | `view_calibre_drc.sh` | Launch calibredrv Tcl + RVE |
 | `calibre.env.example` | Site `MGC_HOME` / `MGLS_LICENSE_FILE` template |

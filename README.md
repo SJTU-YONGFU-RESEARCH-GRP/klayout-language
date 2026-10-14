@@ -63,7 +63,7 @@ cd klayout-language
 
 ```bash
 cd drc
-./run_klayout_drc.sh && ./view_klayout_drc.sh
+./generate_layout.sh && ./run_klayout_drc.sh && ./view_klayout_drc.sh
 # optional Calibre (needs calibre.env):
 ./run_calibre_drc.sh
 ```
@@ -74,7 +74,7 @@ Details: [`drc/README.md`](drc/README.md).
 
 ```bash
 cd lvs
-./run_lvs.sh && ./view_lvs.sh
+./generate_layout.sh && ./run_lvs.sh && ./view_lvs.sh
 # optional Calibre (needs calibre.env like drc/):
 ./run_calibre_lvs.sh
 ```
@@ -85,14 +85,14 @@ Details: [`lvs/README.md`](lvs/README.md).
 
 ```bash
 cd pex
-./run_pex.sh && ./view_pex.sh
+./generate_layout.sh && ./run_pex.sh && ./view_pex.sh
 
 # optional Calibre xRC R + DEVICE CAP C (needs calibre.env like drc/)
 ./run_calibre_pex.sh
 
 # coupling capacitance (kpex 2.5D, sky130A)
 ../scripts/install_kpex.sh    # once, Python >= 3.12
-./run_kpex.sh
+./generate_kpex_layout.sh && ./run_kpex.sh
 ```
 
 Details: [`pex/README.md`](pex/README.md).

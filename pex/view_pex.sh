@@ -58,7 +58,7 @@ fi
 case "$TAG" in
   cc_good|cc_bad|cc_demo)
     GDS="${ROOT}/kpex_demo.gds"
-    [[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS} (run ./run_kpex.sh --gen-only)" >&2; exit 1; }
+    [[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS} (run ./generate_kpex_layout.sh)" >&2; exit 1; }
     ;;
   *)
     [[ -f "$GDS" ]] || [[ -f "${ROOT}/r_demo.gds" ]] || { echo "ERROR: missing GDS" >&2; exit 1; }

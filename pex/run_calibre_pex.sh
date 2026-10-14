@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Generate pex_demo.gds (if needed) and run Calibre PEX:
+# Run Calibre PEX on pex_demo.gds:
 #   R — Calibre xRC (RESISTANCE SHEET)
 #   C — Calibre LVS DEVICE CAP (overlap area)
+# Does not generate GDS — run ./generate_layout.sh first.
 #
 # Usage:
-#   ./run_calibre_pex.sh              # generate + R/C GOOD/BAD
+#   ./run_calibre_pex.sh              # R/C GOOD/BAD
 #   ./run_calibre_pex.sh --r          # resistance only
 #   ./run_calibre_pex.sh --c          # capacitance only
 #   ./run_calibre_pex.sh --good
 #   ./run_calibre_pex.sh --bad
-#   ./run_calibre_pex.sh --pex-only   # skip GDS generation
-#   ./run_calibre_pex.sh --gen-only
+#   ./run_calibre_pex.sh --pex-only   # same as default (compat alias)
+#   ./run_calibre_pex.sh --gen-only   # alias → ./generate_layout.sh
 #   ./run_calibre_pex.sh --setup-help
 #
 # Env (same as drc/):
@@ -21,7 +22,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GDS="${ROOT}/pex_demo.gds"
-GEN_RB="${ROOT}/generate_layout.rb"
+GEN_SH="${ROOT}/generate_layout.sh"
 RULES_R="${ROOT}/m1_r.calibre.svrf"
 RULES_C="${ROOT}/m1_c.calibre.svrf"
 ENV_FILE="${ROOT}/calibre.env"
@@ -32,7 +33,6 @@ WORK="${ROOT}/.calibre_pex_run"
 R_LIMIT="${R_LIMIT:-1.0}"
 C_LIMIT_F="${C_LIMIT_F:-1e-15}"
 
-MODE="all"
 WHICH="both"
 KIND="both"   # r | c | both
 SETUP_HELP=0
@@ -94,8 +94,10 @@ while [[ $# -gt 0 ]]; do
     --bad) WHICH="bad" ;;
     --r|--res|--resistance) KIND="r" ;;
     --c|--cap|--capacitance) KIND="c" ;;
-    --gen-only) MODE="gen" ;;
-    --pex-only) MODE="pex" ;;
+    --pex-only) ;; # default is check-only
+    --gen-only)
+      exec "$GEN_SH"
+      ;;
     --setup-help) SETUP_HELP=1 ;;
     -h|--help)
       sed -n '2,22p' "$0"
@@ -113,26 +115,17 @@ fi
 
 load_calibre_env
 
-if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
-  if ! command -v klayout >/dev/null 2>&1; then
-    echo "ERROR: klayout not found (needed to generate ${GDS})" >&2
-    exit 1
-  fi
-  echo "==> Generating ${GDS}"
-  klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
-fi
-
-if [[ "$MODE" == "gen" ]]; then
-  exit 0
-fi
-
 CALIBRE_BIN="$(find_calibre)" || {
   echo "ERROR: calibre not found." >&2
   print_calibre_setup >&2
   exit 1
 }
 
-[[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS}" >&2; exit 1; }
+[[ -f "$GDS" ]] || {
+  echo "ERROR: missing ${GDS}" >&2
+  echo "Run:  ./generate_layout.sh" >&2
+  exit 1
+}
 
 echo "==> Calibre: $("$CALIBRE_BIN" -version 2>/dev/null | head -1 || echo "$CALIBRE_BIN")"
 echo "==> License: ${MGLS_LICENSE_FILE:-unset}"

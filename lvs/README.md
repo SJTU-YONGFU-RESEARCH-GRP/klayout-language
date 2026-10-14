@@ -20,6 +20,8 @@ Sibling demos: [`../drc/`](../drc/) (M1 / Contact DRC) · [`../pex/`](../pex/) (
 
 ```bash
 cd lvs
+./generate_layout.sh      # write nmos_demo.gds only
+
 ./run_lvs.sh              # KLayout: GOOD → PASS, BAD → FAIL
 ./run_lvs.sh --good       # GOOD only
 ./run_lvs.sh --bad        # BAD only (expect FAIL)
@@ -54,13 +56,14 @@ klayout -b \
 
 | File | Role |
 |------|------|
-| `generate_layout.rb` | Builds `nmos_demo.gds` (GOOD + BAD + DEMO) |
+| `generate_layout.sh` | Write `nmos_demo.gds` only |
+| `generate_layout.rb` | Layout generator (called by `.sh`) |
 | `nmos_demo.gds` | Test layout |
 | `nmos.cir` | Reference SPICE (subcircuits match cell names) |
 | `transistor.lvs` | KLayout extract + connect + `compare` |
 | `transistor.calibre.svrf` | Calibre SVRF rules (`DEVICE MN(NMOS)`) |
-| `run_lvs.sh` | Generate + run KLayout GOOD/BAD |
-| `run_calibre_lvs.sh` | Generate + run Calibre GOOD/BAD |
+| `run_lvs.sh` | KLayout LVS check only (GOOD/BAD) |
+| `run_calibre_lvs.sh` | Calibre LVS check only (GOOD/BAD) |
 | `view_lvs.sh` | `klayout gds -mn lvsdb` |
 | `view_calibre_lvs.sh` | Print Calibre report (+ optional RVE) |
 | `run_clean.sh` | Delete reports / extracted netlists (`--gds` removes GDS) |
@@ -221,6 +224,7 @@ Verified on this host (Calibre **v2019.2**): `./run_calibre_lvs.sh` → **GOOD P
 
 ```bash
 ln -sf ../drc/calibre.env calibre.env   # or: cp ../drc/calibre.env.example calibre.env
+./generate_layout.sh              # once (shared GDS with KLayout)
 ./run_calibre_lvs.sh              # GOOD → PASS, BAD → FAIL
 ./view_calibre_lvs.sh             # GOOD summary / RVE
 ./view_calibre_lvs.sh --bad --no-gui

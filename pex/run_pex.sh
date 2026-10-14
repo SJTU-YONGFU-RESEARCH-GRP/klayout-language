@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
-# Generate PEX demo GDS and run KLayout R + C extraction.
+# Run KLayout R + C extraction on pex_demo.gds.
+# Does not generate GDS — run ./generate_layout.sh first.
 #
 # Usage:
-#   ./run_pex.sh              # generate + R GOOD/BAD + C GOOD/BAD
+#   ./run_pex.sh              # R GOOD/BAD + C GOOD/BAD
 #   ./run_pex.sh --r          # resistance only
 #   ./run_pex.sh --c          # capacitance only
 #   ./run_pex.sh --good       # GOOD cells only
 #   ./run_pex.sh --bad        # BAD cells only
-#   ./run_pex.sh --gen-only
-#   ./run_pex.sh --pex-only
+#   ./run_pex.sh --pex-only   # same as default (compat alias)
+#   ./run_pex.sh --gen-only   # alias → ./generate_layout.sh
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GDS="${ROOT}/pex_demo.gds"
-GEN_RB="${ROOT}/generate_layout.rb"
 PEX_R="${ROOT}/extract_r.rb"
 PEX_C="${ROOT}/extract_c.lvs"
+GEN_SH="${ROOT}/generate_layout.sh"
 
 R_LIMIT="${R_LIMIT:-1.0}"
 SHEET_R="${SHEET_R:-0.08}"
 C_LIMIT="${C_LIMIT:-1e-15}"
 AREA_CAP="${AREA_CAP:-1e-15}"
 
-MODE="all"
 WHICH="both"
 KIND="both"   # r | c | both
 
@@ -33,8 +33,10 @@ while [[ $# -gt 0 ]]; do
     --bad) WHICH="bad" ;;
     --r|--res|--resistance) KIND="r" ;;
     --c|--cap|--capacitance) KIND="c" ;;
-    --gen-only) MODE="gen" ;;
-    --pex-only) MODE="pex" ;;
+    --pex-only) ;; # default is check-only
+    --gen-only)
+      exec "$GEN_SH"
+      ;;
     -h|--help)
       sed -n '2,14p' "$0"
       exit 0
@@ -50,12 +52,13 @@ if ! command -v klayout >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "==> KLayout: $(klayout -v 2>/dev/null | head -1 || true)"
+[[ -f "$GDS" ]] || {
+  echo "ERROR: missing ${GDS}" >&2
+  echo "Run:  ./generate_layout.sh" >&2
+  exit 1
+}
 
-if [[ "$MODE" == "all" || "$MODE" == "gen" ]]; then
-  echo "==> Generating ${GDS}"
-  klayout -b -rd "output=${GDS}" -r "${GEN_RB}"
-fi
+echo "==> KLayout: $(klayout -v 2>/dev/null | head -1 || true)"
 
 run_r() {
   local cell="$1"
@@ -121,41 +124,38 @@ run_c() {
   return 2
 }
 
-if [[ "$MODE" == "all" || "$MODE" == "pex" ]]; then
-  [[ -f "$GDS" ]] || { echo "ERROR: missing ${GDS}" >&2; exit 1; }
-  fail=0
+fail=0
 
-  if [[ "$KIND" == "both" || "$KIND" == "r" ]]; then
-    if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
-      rc=0; run_r "R_GOOD" "good" || rc=$?
-      [[ "$rc" -eq 0 ]] || { echo "ERROR: expected R_GOOD PASS" >&2; fail=1; }
-    fi
-    if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
-      rc=0; run_r "R_BAD" "bad" || rc=$?
-      if [[ "$rc" -eq 1 ]]; then
-        echo "    (expected R FAIL — demo OK)"
-      else
-        echo "ERROR: expected R_BAD FAIL" >&2; fail=1
-      fi
+if [[ "$KIND" == "both" || "$KIND" == "r" ]]; then
+  if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
+    rc=0; run_r "R_GOOD" "good" || rc=$?
+    [[ "$rc" -eq 0 ]] || { echo "ERROR: expected R_GOOD PASS" >&2; fail=1; }
+  fi
+  if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
+    rc=0; run_r "R_BAD" "bad" || rc=$?
+    if [[ "$rc" -eq 1 ]]; then
+      echo "    (expected R FAIL — demo OK)"
+    else
+      echo "ERROR: expected R_BAD FAIL" >&2; fail=1
     fi
   fi
-
-  if [[ "$KIND" == "both" || "$KIND" == "c" ]]; then
-    if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
-      rc=0; run_c "C_GOOD" "good" || rc=$?
-      [[ "$rc" -eq 0 ]] || { echo "ERROR: expected C_GOOD PASS" >&2; fail=1; }
-    fi
-    if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
-      rc=0; run_c "C_BAD" "bad" || rc=$?
-      if [[ "$rc" -eq 1 ]]; then
-        echo "    (expected C FAIL — demo OK)"
-      else
-        echo "ERROR: expected C_BAD FAIL" >&2; fail=1
-      fi
-    fi
-  fi
-
-  [[ "$fail" -eq 0 ]] || exit 1
 fi
+
+if [[ "$KIND" == "both" || "$KIND" == "c" ]]; then
+  if [[ "$WHICH" == "both" || "$WHICH" == "good" ]]; then
+    rc=0; run_c "C_GOOD" "good" || rc=$?
+    [[ "$rc" -eq 0 ]] || { echo "ERROR: expected C_GOOD PASS" >&2; fail=1; }
+  fi
+  if [[ "$WHICH" == "both" || "$WHICH" == "bad" ]]; then
+    rc=0; run_c "C_BAD" "bad" || rc=$?
+    if [[ "$rc" -eq 1 ]]; then
+      echo "    (expected C FAIL — demo OK)"
+    else
+      echo "ERROR: expected C_BAD FAIL" >&2; fail=1
+    fi
+  fi
+fi
+
+[[ "$fail" -eq 0 ]] || exit 1
 
 echo "==> Done."

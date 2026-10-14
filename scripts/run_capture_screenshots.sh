@@ -15,12 +15,12 @@ if ! command -v klayout >/dev/null 2>&1; then
 fi
 
 # Refresh layouts / reports used by the capture script
-"${ROOT}/drc/run_klayout_drc.sh" --gen-only
-"${ROOT}/drc/run_klayout_drc.sh" --drc-only >/dev/null
-"${ROOT}/lvs/run_lvs.sh" --gen-only
-"${ROOT}/lvs/run_lvs.sh" --lvs-only >/dev/null
-"${ROOT}/pex/run_pex.sh" --gen-only
-"${ROOT}/pex/run_pex.sh" --pex-only >/dev/null
+"${ROOT}/drc/generate_layout.sh"
+"${ROOT}/drc/run_klayout_drc.sh" >/dev/null
+"${ROOT}/lvs/generate_layout.sh"
+"${ROOT}/lvs/run_lvs.sh" >/dev/null
+"${ROOT}/pex/generate_layout.sh"
+"${ROOT}/pex/run_pex.sh" >/dev/null
 
 mkdir -p "${ROOT}/screenshots"
 

@@ -47,6 +47,8 @@ Sibling demos: [`../drc/`](../drc/) · [`../lvs/`](../lvs/).
 
 ```bash
 cd pex
+./generate_layout.sh      # write pex_demo.gds only
+
 ./run_pex.sh              # R + C, GOOD/BAD
 ./run_pex.sh --r          # resistance only
 ./run_pex.sh --c          # capacitance only
@@ -70,6 +72,7 @@ Requires KLayout **0.30.2+** for `RNetExtractor` (`../scripts/install-klayout.sh
 ../scripts/install_kpex.sh          # needs Python >= 3.12
 
 cd pex
+./generate_kpex_layout.sh           # write kpex_demo.gds only
 ./run_kpex.sh                       # CC_GOOD PASS + CC_BAD FAIL
 ./run_kpex.sh --good
 ./run_kpex.sh --bad
@@ -93,6 +96,7 @@ Same GDS / GOOD–BAD thresholds as the KLayout R/C demos. Uses the licensed Men
 ln -sf ../drc/calibre.env calibre.env   # or: cp ../drc/calibre.env.example calibre.env
 
 cd pex
+./generate_layout.sh              # once (shared GDS with KLayout)
 ./run_calibre_pex.sh              # R + C, GOOD/BAD
 ./run_calibre_pex.sh --r
 ./run_calibre_pex.sh --c
@@ -125,15 +129,17 @@ klayout -b -rd input=pex_demo.gds -rd cell=C_GOOD \
 
 | File | Role |
 |------|------|
-| `generate_layout.rb` | Builds `pex_demo.gds` (R_* + C_* + demos) |
-| `generate_kpex_layout.rb` | Builds `kpex_demo.gds` (CC_* + C_PLATE, sky130A li1) |
+| `generate_layout.sh` | Write `pex_demo.gds` only |
+| `generate_layout.rb` | Layout generator for R/C (called by `.sh`) |
+| `generate_kpex_layout.sh` | Write `kpex_demo.gds` only |
+| `generate_kpex_layout.rb` | Layout generator for CC (called by `.sh`) |
 | `extract_r.rb` | `RNetExtractor` + PASS/FAIL vs `r_limit` |
 | `extract_c.lvs` | `capacitor()` + PASS/FAIL vs `c_limit` |
 | `m1_r.calibre.svrf` | Calibre xRC resistance rules |
 | `m1_c.calibre.svrf` | Calibre `DEVICE CAP` overlap-C rules |
-| `run_pex.sh` | Generate + run KLayout R/C GOOD/BAD |
-| `run_calibre_pex.sh` | Generate + run Calibre R/C GOOD/BAD |
-| `run_kpex.sh` | Generate + run kpex 2.5D CC GOOD/BAD |
+| `run_pex.sh` | KLayout R/C check only |
+| `run_calibre_pex.sh` | Calibre R/C check only |
+| `run_kpex.sh` | kpex 2.5D CC check only |
 | `view_pex.sh` | Open GDS + show report |
 | `run_clean.sh` | Delete reports / spice / `kpex_out/` / `.calibre_pex_run/` |
 | `../scripts/install_kpex.sh` | `pip install --user klayout-pex` (Python ≥ 3.12) |
